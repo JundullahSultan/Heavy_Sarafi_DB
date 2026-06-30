@@ -313,3 +313,89 @@ body {
 .dark-toggle:active {
   transform: scale(0.95);
 }
+
+/* --- Header Roles formatting --- */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header-role-switcher {
+  margin-top: 0;
+  padding: 0.5rem;
+  display: flex;
+  background: var(--hover-bg);
+}
+
+.header-role-switcher h4 {
+  display: none;
+}
+
+/* --- Mobile Responsiveness overrides --- */
+@media (max-width: 768px) {
+  /* 1. This shrinks ALL text that uses 'rem' units by about 12.5% */
+  html {
+    font-size: 14px;
+  }
+
+  .app-layout {
+    flex-direction: column;
+  }
+
+  .main-content {
+    padding-bottom: 70px; /* Space for bottom nav */
+  }
+
+  /* 2. Compact the top header text further if needed */
+  .top-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem; /* Reduced gap slightly */
+    padding: 0.75rem 1rem; /* Slightly tighter padding */
+    background: var(--white);
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .user-info h2 {
+    font-size: 1.1rem; /* Drop the welcome text size explicitly */
+    margin-bottom: 0;
+  }
+
+  .branch-label {
+    font-size: 0.8rem;
+  }
+
+  .header-actions {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem; /* Tighter gap for mobile */
+  }
+
+  .header-role-switcher {
+    width: 100%;
+    justify-content: space-between;
+    background: var(--hover-bg);
+    padding: 3px; /* Slightly tighter */
+  }
+
+  .header-role-switcher button {
+    flex: 1;
+    text-align: center;
+    padding: 0.4rem 0;
+    font-size: 0.75rem; /* Ensures these stay tiny but readable */
+  }
+
+  /* Make sure the notification and dark mode toggle also scale nicely */
+  .notification {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+  }
+
+  .dark-toggle {
+    width: 34px;
+    height: 34px;
+    font-size: 1rem;
+  }
+}

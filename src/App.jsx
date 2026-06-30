@@ -100,39 +100,25 @@ function App() {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         navItems={navItems}
-        setRoleForDemo={handleSetRole}
+        // Removed setRoleForDemo from here
       />
 
       <main className="main-content">
         {/* --- Top Header (now visible) --- */}
-        <header className="top-header" style={{ display: "none" }}>
-          <div className="user-info">
-            <h2>
-              {t("welcome")},{" "}
-              {t(currentUserRole) ||
-                currentUserRole.charAt(0).toUpperCase() +
-                  currentUserRole.slice(1)}
-            </h2>
-            <span className="branch-label">{t("kabulBranch")}</span>
-          </div>
-
-          <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-            <div className="notification">
-              {t("pendingPayouts")}
-              <span className="badge">4</span>
+        <header className="top-header">
+          <div className="header-actions">
+            {/* Relocated DEMO_ONLY role switcher */}
+            <div className="demo-role-switcher header-role-switcher">
+              <button onClick={() => handleSetRole("owner")}>
+                {t("owner") || "Owner"}
+              </button>
+              <button onClick={() => handleSetRole("manager")}>
+                {t("manager") || "Manager"}
+              </button>
+              <button onClick={() => handleSetRole("employee")}>
+                {t("employee") || "Employee"}
+              </button>
             </div>
-
-            {/* Dark Mode Toggle */}
-            <button
-              className="dark-toggle"
-              onClick={toggleDarkMode}
-              aria-label="Toggle dark mode"
-              title={
-                isDarkMode ? "Switch to light mode" : "Switch to dark mode"
-              }
-            >
-              {isDarkMode ? "☀️" : "🌙"}
-            </button>
           </div>
         </header>
 

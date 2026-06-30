@@ -10,15 +10,11 @@ export default function SendHawalaList() {
   const [isImageZoomed, setIsImageZoomed] = useState(false);
   const [editingHawala, setEditingHawala] = useState(null);
 
-  // Read the current user's role from the shared auth utility
   const currentUserRole = getRole() || ROLES.EMPLOYEE;
 
-  // States for the Send Form
   const [searchQuery, setSearchQuery] = useState("");
   const [foundSender, setFoundSender] = useState(null);
   const [isNewSender, setIsNewSender] = useState(false);
-
-  // States for Funding Source (Provider)
   const [fundingSource, setFundingSource] = useState("sarafi");
   const [selectedKahataId, setSelectedKahataId] = useState("");
 
@@ -38,7 +34,7 @@ export default function SendHawalaList() {
   const [sentHawalas, setSentHawalas] = useState([
     {
       id: "SHW-5011",
-      date: "2026-06-29 09:00 AM", // Older than 15 mins for testing
+      date: "2026-06-29 09:00 AM",
       destinationBranch: "Herat Main",
       senderName: "Omar",
       senderFather: "Hassan",
@@ -59,7 +55,7 @@ export default function SendHawalaList() {
     },
     {
       id: "SHW-5012",
-      date: "2026-06-29 10:45 AM", // Older than 15 mins for testing
+      date: "2026-06-29 10:45 AM",
       destinationBranch: "Dubai Branch",
       senderName: "Zalmay",
       senderFather: "Tariq",
@@ -80,7 +76,7 @@ export default function SendHawalaList() {
     },
     {
       id: "SHW-5013",
-      date: getFormattedCurrentDate(), // Within 15 mins for testing
+      date: getFormattedCurrentDate(),
       destinationBranch: "Kabul Branch",
       senderName: "Ahmad",
       senderFather: "Mahmoud",
@@ -156,7 +152,6 @@ export default function SendHawalaList() {
   };
 
   const handleDeleteHawala = (id) => {
-    // MODIFIED: Added role check for logging purposes (optional but good practice)
     const isOverride =
       selectedHawala &&
       !isWithinEditWindow(selectedHawala.date) &&
@@ -195,11 +190,10 @@ export default function SendHawalaList() {
     alert(`Hawala ${editingHawala.id} ${t("hawalaUpdated")}`);
   };
 
-  // Role switching is handled globally in the Sidebar/App; read-only here.
-
   return (
     <div className="list-container">
-      <div className="list-header">
+      {/* Page header with a specific class for mobile styling */}
+      <div className="list-header send-hawala-header">
         <h2 className="section-title">{t("sentHawalasLog")}</h2>
         <div className="header-actions-group">
           <div className="search-bar">
@@ -217,7 +211,6 @@ export default function SendHawalaList() {
 
       <div className="table-wrapper">
         <table className="hawala-table">
-          {/* Table Head remains the same */}
           <thead>
             <tr>
               <th>{t("hawalaId")}</th>
@@ -236,15 +229,23 @@ export default function SendHawalaList() {
                 onClick={() => handleRowClick(hawala)}
                 className="clickable-row"
               >
-                <td className="fw-bold">{hawala.id}</td>
-                <td>{hawala.date.split(" ")[0]}</td>
-                <td>{hawala.destinationBranch}</td>
-                <td className="fw-bold">{hawala.senderName}</td>
-                <td>{hawala.receiverName}</td>
-                <td className="amount-col">
+                <td data-label={t("hawalaId")} className="fw-bold">
+                  {hawala.id}
+                </td>
+                <td data-label={t("dateSent")}>
+                  {hawala.date.split(" ")[0]}
+                </td>
+                <td data-label={t("destination")}>
+                  {hawala.destinationBranch}
+                </td>
+                <td data-label={t("senderCustomer")} className="fw-bold">
+                  {hawala.senderName}
+                </td>
+                <td data-label={t("receiver")}>{hawala.receiverName}</td>
+                <td data-label={t("amount")} className="amount-col">
                   {hawala.amount} {hawala.currency}
                 </td>
-                <td>
+                <td data-label={t("status")}>
                   <span
                     className={`status-badge ${
                       hawala.status.includes("Paid") ? "paid" : "pending"
@@ -259,10 +260,9 @@ export default function SendHawalaList() {
         </table>
       </div>
 
-      {/* --- MODAL 1: VIEW SENT HAWALA DETAILS --- */}
+      {/* --- MODAL 1: VIEW SENT HAWALA DETAILS (unchanged) --- */}
       {selectedHawala &&
         (() => {
-          // --- MODIFIED: Define access rights based on role ---
           const isManagerOrOwner =
             currentUserRole === ROLES.MANAGER ||
             currentUserRole === ROLES.OWNER;
@@ -276,7 +276,6 @@ export default function SendHawalaList() {
                 className="modal-content view-modal"
                 onClick={(e) => e.stopPropagation()}
               >
-                {/* Modal Header and Body remains the same */}
                 <div className="modal-header">
                   <h3>
                     {t("sentHawalaDetails")}: {selectedHawala.id}
@@ -381,7 +380,6 @@ export default function SendHawalaList() {
                   </div>
                 </div>
 
-                {/* --- MODIFIED: VIEW FOOTER WITH ROLE-BASED LOGIC --- */}
                 <div
                   className="modal-footer sticky-footer"
                   style={{ justifyContent: "space-between" }}
@@ -435,10 +433,9 @@ export default function SendHawalaList() {
           );
         })()}
 
-      {/* --- MODAL 2: DRAFT NEW HAWALA (No changes needed here) --- */}
+      {/* --- MODAL 2: DRAFT NEW HAWALA (unchanged) --- */}
       {isSendModalOpen && (
         <div className="modal-overlay" onClick={closeSendModal}>
-          {/* Content of this modal is unchanged */}
           <div
             className="modal-content draft-modal"
             onClick={(e) => e.stopPropagation()}
@@ -843,7 +840,7 @@ export default function SendHawalaList() {
         </div>
       )}
 
-      {/* --- MODAL 3: EDIT HAWALA DETAILS --- */}
+      {/* --- MODAL 3: EDIT HAWALA DETAILS (unchanged) --- */}
       {editingHawala && (
         <div className="modal-overlay" onClick={() => setEditingHawala(null)}>
           <div
@@ -872,7 +869,6 @@ export default function SendHawalaList() {
                   gap: "1.5rem",
                 }}
               >
-                {/* --- MODIFIED: Dynamic helper text for edit modal --- */}
                 {!isWithinEditWindow(editingHawala.date) &&
                 (currentUserRole === ROLES.MANAGER ||
                   currentUserRole === ROLES.OWNER) ? (
@@ -1025,7 +1021,7 @@ export default function SendHawalaList() {
         </div>
       )}
 
-      {/* --- Fullscreen Image Zoom Overlay --- */}
+      {/* --- Fullscreen Image Zoom Overlay (unchanged) --- */}
       {isImageZoomed && selectedHawala && (
         <div
           className="fullscreen-overlay"

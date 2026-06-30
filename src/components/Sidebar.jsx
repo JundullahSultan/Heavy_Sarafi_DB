@@ -1,14 +1,31 @@
 // src/components/Sidebar.jsx
 import React from "react";
 import { useLanguage } from "../context/LanguageContext";
+import {
+  LayoutDashboard,
+  ArrowDownToLine,
+  ArrowUpFromLine,
+  Users,
+  BookOpen,
+  UsersRound,
+  FileBarChart,
+  Settings,
+} from "lucide-react";
 import "./Sidebar.css";
 
-export default function Sidebar({
-  activeTab,
-  setActiveTab,
-  navItems,
-  setRoleForDemo,
-}) {
+// Map each tab to a specific icon
+const iconMap = {
+  Dashboard: <LayoutDashboard size={22} />,
+  "Receive Hawala": <ArrowDownToLine size={22} />,
+  "Send Hawala": <ArrowUpFromLine size={22} />,
+  Customers: <Users size={22} />,
+  Kahata: <BookOpen size={22} />,
+  "All Users": <UsersRound size={22} />,
+  Reports: <FileBarChart size={22} />,
+  Settings: <Settings size={22} />,
+};
+
+export default function Sidebar({ activeTab, setActiveTab, navItems }) {
   const { t } = useLanguage();
 
   const getTranslatedNavItem = (item) => {
@@ -27,7 +44,7 @@ export default function Sidebar({
 
   return (
     <nav className="sidebar">
-      {/* Brand area – now just a subtle visual mark (no text) */}
+      {/* Brand area */}
       <div className="brand" aria-hidden="true"></div>
 
       <ul className="nav-links">
@@ -40,24 +57,14 @@ export default function Sidebar({
                 e.preventDefault();
                 setActiveTab(item);
               }}
+              title={getTranslatedNavItem(item)}
             >
-              {getTranslatedNavItem(item)}
+              <span className="icon">{iconMap[item]}</span>
+              <span className="label">{getTranslatedNavItem(item)}</span>
             </a>
           </li>
         ))}
       </ul>
-
-      {/* DEMO_ONLY role switcher */}
-      <div className="demo-role-switcher">
-        <h4>{t("switchRoleDemo")}</h4>
-        <button onClick={() => setRoleForDemo("owner")}>{t("owner")}</button>
-        <button onClick={() => setRoleForDemo("manager")}>
-          {t("manager")}
-        </button>
-        <button onClick={() => setRoleForDemo("employee")}>
-          {t("employee")}
-        </button>
-      </div>
     </nav>
   );
 }

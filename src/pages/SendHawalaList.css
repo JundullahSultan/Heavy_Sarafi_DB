@@ -339,3 +339,204 @@
 .fullscreen-close-btn:hover {
   background: rgba(255, 255, 255, 0.3);
 }
+
+/* --- NATIVE APP MOBILE VIEW OVERRIDES (Inspired by admin-medicines) --- */
+@media (max-width: 768px) {
+  /* 1. Hide Title & Style Responsive Search (Matching admin-style.css) */
+  .page-title-wrapper h1,
+  .page-title {
+    display: none !important;
+  }
+
+  .page-header {
+    flex-direction: column;
+    padding: 0;
+    margin-bottom: 1rem;
+  }
+
+  .search-bar {
+    display: flex;
+    width: 100%;
+    background: var(--input-bg, #ffffff);
+    border: 1px solid var(--border-color);
+    border-radius: 12px; /* Modern rounded corners */
+    padding: 4px 8px;
+    gap: 8px;
+  }
+
+  .search-bar input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 10px;
+    outline: none;
+    box-shadow: none;
+  }
+
+  /* 2. Remove standard table structures */
+  .table-wrapper {
+    background: transparent;
+    box-shadow: none;
+    padding: 0;
+    border: none;
+  }
+
+  .hawala-table {
+    border: none;
+  }
+  .hawala-table thead {
+    display: none;
+  }
+
+  /* 3. The List Container (Matches #medicineList) */
+  .hawala-table tbody {
+    display: flex;
+    flex-direction: column;
+    gap: 12px; /* Precise gap from admin-medicines */
+  }
+
+  /* 4. The Card Body (Matches .swipe-content) */
+  .hawala-table tbody tr {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto auto auto;
+    /* Meticulous placement of table cells */
+    grid-template-areas:
+      "sender status"
+      "receiver receiver"
+      "amount dest"
+      "actions actions";
+
+    background: var(--surface-dark, #ffffff);
+    border: 1px solid var(--border-color, #e5e5e5);
+    border-radius: 12px;
+    padding: 16px;
+    transition:
+      transform 0.15s ease-out,
+      background 0.2s;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  }
+
+  /* Native app tap effect */
+  .hawala-table tbody tr:active {
+    transform: scale(0.98);
+    background: var(--hover-bg, #f7f7f8);
+  }
+
+  /* Clean all TD defaults */
+  .hawala-table tbody td {
+    display: flex;
+    align-items: center;
+    padding: 0;
+    border: none;
+    text-align: left;
+  }
+
+  /* Remove old pseudo-labels */
+  .hawala-table tbody td::before {
+    display: none;
+  }
+
+  /* --- 5. Data Mapping & Typography --- */
+
+  /* Hide ID to save space */
+  .hawala-table tbody td:nth-child(1) {
+    display: none;
+  }
+
+  /* Sender Name (Matches .card-info h4) */
+  .hawala-table tbody td:nth-child(2) {
+    grid-area: sender;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Receiver Name (Subtext) */
+  .hawala-table tbody td:nth-child(3) {
+    grid-area: receiver;
+    font-size: 0.85rem;
+    color: var(--text-light, #6b7280);
+    margin-bottom: 14px;
+  }
+  .hawala-table tbody td:nth-child(3)::before {
+    content: "To: ";
+    margin-right: 4px;
+    opacity: 0.8;
+  }
+
+  /* Amount (Prominent) */
+  .hawala-table tbody td:nth-child(4) {
+    grid-area: amount;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--primary-color);
+  }
+
+  /* Destination (Matches .card-badge structural style but subtle) */
+  .hawala-table tbody td:nth-child(5) {
+    grid-area: dest;
+    justify-content: flex-end;
+    font-size: 0.75rem;
+    color: var(--text-light);
+    background: var(--bg-color, #f0f0f0);
+    padding: 4px 10px;
+    border-radius: 8px;
+    align-self: center;
+    font-weight: 600;
+  }
+
+  /* Status Badge Placement */
+  .hawala-table tbody td:nth-child(6) {
+    grid-area: status;
+    justify-content: flex-end;
+    align-items: flex-start;
+  }
+
+  /* Actions (Bottom row) */
+  .hawala-table tbody td:nth-child(7) {
+    grid-area: actions;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--border-color); /* Dashed divider */
+    justify-content: flex-end;
+    gap: 10px;
+  }
+
+  /* --- 6. Beautiful Badges (Ported directly from admin-medicines) --- */
+  .hawala-table .badge {
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid transparent;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* Paid/Success */
+  .hawala-table .badge.paid,
+  .hawala-table .badge.completed {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+    border-color: rgba(16, 185, 129, 0.3);
+  }
+
+  /* Pending/Warning */
+  .hawala-table .badge.pending {
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
+    border-color: rgba(245, 158, 11, 0.3);
+  }
+
+  /* Cancelled/Danger */
+  .hawala-table .badge.cancelled {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.3);
+  }
+}
