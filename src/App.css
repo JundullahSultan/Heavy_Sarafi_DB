@@ -1,0 +1,315 @@
+/* --- Global Variables (Light Mode Default) --- */
+:root {
+  --primary-color: #10a37f;
+  --bg-color: #f7f7f8;
+  --sidebar-bg: var(--bg-color); /* 👈 now matches main page */
+  --sidebar-hover: #e5e5e5; /* soft hover for light mode */
+  --text-main: #1a1a1a;
+  --text-light: #6e6e6e;
+  --white: #ffffff;
+  --border-color: #e5e5e5;
+  --danger: #ef4444;
+  --success: #22c55e;
+  --hover-bg: #f0f0f0;
+  --input-bg: #ffffff;
+  --shadow-color: rgba(0, 0, 0, 0.05);
+  --warning-bg: #fffbeb;
+  --warning-border: #f59e0b;
+  --warning-text: #b45309;
+  --warning-label: #78350f;
+
+  /* Role colors */
+  --role-owner-bg: #fef2f2;
+  --role-owner-text: #b91c1c;
+  --role-owner-border: #fecaca;
+  --role-manager-bg: #fffbeb;
+  --role-manager-text: #b45309;
+  --role-manager-border: #fde68a;
+  --role-employee-bg: #f0fdfa;
+  --role-employee-text: #0f766e;
+  --role-employee-border: #ccfbf1;
+
+  /* Focus ring */
+  --focus-ring: 0 0 0 2px rgba(16, 163, 127, 0.2);
+
+  --role-badge-bg: #d1fae5;
+  --role-badge-text: #065f46;
+
+  /* Profit cards */
+  --profit-green-bg: #f0fdf4;
+  --profit-yellow-bg: #fffbeb;
+
+  /* Currency badges */
+  --currency-positive-bg: #d1fae5;
+  --currency-positive-text: #065f46;
+  --currency-negative-bg: #fee2e2;
+  --currency-negative-text: #991b1b;
+
+  /* Status badges (reuse if not already defined) */
+  --status-paid-bg: #d1fae5;
+  --status-paid-text: #065f46;
+  --status-pending-bg: #fef3c7;
+  --status-pending-text: #d97706;
+  --status-danger-bg: #fee2e2;
+  --status-danger-text: #991b1b;
+
+  /* Warning color (for summary card) */
+  --warning-color: #f59e0b;
+}
+
+/* --- Dark Mode Overrides --- */
+.dark-mode {
+  --bg-color: #343541;
+  --sidebar-bg: var(--bg-color); /* 👈 matches dark main page */
+  --sidebar-hover: #3e3e40; /* subtle hover for dark mode */
+  --text-main: #ececec;
+  --text-light: #acacbe;
+  --white: #2d2d2d;
+  --border-color: #4d4d4d;
+  --hover-bg: #3e3e40;
+  --input-bg: #40414f;
+  --shadow-color: rgba(0, 0, 0, 0.3);
+  --primary-color: #10a37f;
+}
+
+/* --- the rest of your CSS stays exactly as before --- */
+
+/* --- Base Reset --- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", system-ui, sans-serif;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  transition:
+    background-color 0.2s,
+    color 0.2s;
+}
+
+/* --- RTL Support (unchanged) --- */
+.rtl-app,
+.rtl-app * {
+  direction: rtl;
+  text-align: right;
+}
+
+.rtl-app .app-layout,
+.rtl-app .main-content,
+.rtl-app .top-header,
+.rtl-app .list-container,
+.rtl-app .list-header,
+.rtl-app .filters,
+.rtl-app .header-actions-group,
+.rtl-app .search-bar,
+.rtl-app .table-wrapper,
+.rtl-app .modal-content,
+.rtl-app .modal-body,
+.rtl-app .modal-footer,
+.rtl-app .transactions-header,
+.rtl-app .info-card,
+.rtl-app .payout-highlight-card {
+  direction: rtl;
+}
+
+/* --- Layout --- */
+.app-layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* --- Shared Buttons --- */
+.action-btn {
+  margin-top: auto;
+  width: 100%;
+  padding: 0.85rem;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition:
+    opacity 0.2s,
+    transform 0.1s,
+    background-color 0.2s;
+}
+
+.action-btn:hover {
+  opacity: 0.9;
+}
+
+.action-btn:active {
+  transform: translateY(1px);
+}
+
+.action-btn.secondary {
+  background-color: var(--hover-bg);
+  color: var(--text-main);
+}
+
+.action-btn.secondary:hover {
+  background-color: var(--border-color);
+}
+
+.action-btn.danger {
+  background-color: #fef2f2;
+  color: var(--danger);
+  border: 1px solid #fecaca;
+}
+
+.action-btn.danger:hover {
+  background-color: #fee2e2;
+}
+
+.action-btn.submit-btn {
+  background-color: var(--success);
+}
+
+.action-btn.submit-btn:hover {
+  opacity: 0.9;
+}
+
+.text-btn {
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.text-btn:hover {
+  text-decoration: underline;
+}
+
+.main-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  background-color: var(--bg-color);
+}
+
+/* --- Top Header --- */
+.top-header {
+  background-color: var(--white);
+  padding: 1rem 2rem;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition:
+    background-color 0.2s,
+    border-color 0.2s;
+}
+
+.user-info h2 {
+  font-size: 1.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.branch-label {
+  color: var(--text-light);
+  font-size: 0.875rem;
+}
+
+.notification {
+  position: relative;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  background: var(--hover-bg);
+  border-radius: 8px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background-color: var(--danger);
+  color: white;
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+
+.modal-content,
+.modal-body {
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.modal-content::-webkit-scrollbar,
+.modal-body::-webkit-scrollbar {
+  display: none;
+}
+
+/* --- Dark Mode Toggle Button --- */
+.dark-toggle {
+  background: var(--hover-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background 0.2s,
+    transform 0.1s;
+  color: var(--text-main);
+  --warning-bg: #1e1a0e;
+  --warning-border: #f59e0b;
+  --warning-text: #fbbf24;
+  --warning-label: #fbbf24;
+  --role-owner-bg: #3d1a1a;
+  --role-owner-text: #fca5a5;
+  --role-owner-border: #7f1d1d;
+  --role-manager-bg: #3d2a1a;
+  --role-manager-text: #fcd34d;
+  --role-manager-border: #78350f;
+  --role-employee-bg: #1a3d3d;
+  --role-employee-text: #6ee7b7;
+  --role-employee-border: #115e59;
+
+  --focus-ring: 0 0 0 2px rgba(16, 163, 127, 0.4);
+
+  --role-badge-bg: #0d2b1f;
+  --role-badge-text: #6ee7b7;
+
+  --profit-green-bg: #0d2b1f;
+  --profit-yellow-bg: #2d1f0d;
+
+  --currency-positive-bg: #0d2b1f;
+  --currency-positive-text: #6ee7b7;
+  --currency-negative-bg: #2d0d0d;
+  --currency-negative-text: #fca5a5;
+
+  --status-paid-bg: #0d2b1f;
+  --status-paid-text: #6ee7b7;
+  --status-pending-bg: #2d1f0d;
+  --status-pending-text: #fcd34d;
+  --status-danger-bg: #2d0d0d;
+  --status-danger-text: #fca5a5;
+
+  --warning-color: #f59e0b;
+}
+
+.dark-toggle:hover {
+  background: var(--border-color);
+  transform: scale(1.05);
+}
+
+.dark-toggle:active {
+  transform: scale(0.95);
+}

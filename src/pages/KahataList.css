@@ -1,0 +1,128 @@
+/* Inherits structural layout from previous CSS files */
+
+/* --- Specific Text Colors --- */
+.text-success {
+  color: var(--success) !important;
+}
+
+.text-danger {
+  color: var(--danger) !important;
+}
+
+.text-light {
+  color: var(--text-light);
+}
+
+.mt-2 {
+  margin-top: 0.5rem;
+}
+
+.mb-3 {
+  margin-bottom: 1rem;
+}
+
+.mb-4 {
+  margin-bottom: 1.5rem;
+}
+
+/* --- Kahata Badges --- */
+.badge-secondary {
+  background-color: var(--hover-bg);
+  color: var(--text-light);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: inline-block;
+  margin-top: 0.25rem;
+}
+
+/* --- Modals Specifics --- */
+.ledger-modal {
+  max-width: 950px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.small-modal {
+  max-width: 500px;
+}
+
+.ledger-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 1.5rem;
+  background: var(--bg-color);
+}
+
+/* --- Ledger Summary Grid --- */
+.ledger-summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.highlight-card {
+  background-color: var(--hover-bg);
+  border-left-width: 4px;
+  border-left-style: solid;
+}
+
+.border-success {
+  border-left-color: var(--success);
+}
+
+.border-danger {
+  border-left-color: var(--danger);
+}
+
+/* --- Transactions Section --- */
+.transactions-section {
+  background-color: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.transactions-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.transactions-header h4 {
+  font-size: 1.1rem;
+  color: var(--text-main);
+  margin: 0;
+}
+
+textarea {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 1rem;
+  resize: vertical;
+}
+
+/* --- Warning Box (used in edit modal) --- */
+.warning-box {
+  background-color: var(--warning-bg);
+  border: 1px solid var(--warning-border);
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.warning-box label {
+  font-weight: bold;
+  color: var(--warning-text);
+}
+
+.warning-box .helper-text {
+  color: var(--warning-label);
+  font-size: 0.8rem;
+}

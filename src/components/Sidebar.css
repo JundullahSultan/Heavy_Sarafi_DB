@@ -1,0 +1,138 @@
+/* --- Sidebar --- */
+.sidebar {
+  width: 260px;
+  min-width: 260px;
+  background-color: var(--sidebar-bg);
+  color: var(--text-main);
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem 0.75rem;
+  height: 100%;
+  position: relative;
+  box-shadow: 4px 0 20px var(--shadow-color); /* keeps separation */
+  border-right: 1px solid var(--border-color); /* subtle divider */
+  transition:
+    background-color 0.2s,
+    border-color 0.2s;
+}
+
+/* --- Brand area (no text) --- */
+.brand {
+  height: 2.5rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 0.75rem;
+  position: relative;
+}
+
+.brand::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 40px;
+  height: 2px;
+  background: var(--primary-color);
+  border-radius: 4px;
+  opacity: 0.6;
+}
+
+.brand::before {
+  content: "✦";
+  font-size: 1.2rem;
+  color: var(--primary-color);
+  opacity: 0.5;
+}
+
+/* --- Nav Links --- */
+.nav-links {
+  list-style: none;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0;
+}
+
+.nav-links li a {
+  display: flex;
+  align-items: center;
+  padding: 0.7rem 1rem;
+  color: var(--text-light);
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  border-radius: 8px;
+  border-inline-start: 2px solid transparent;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.nav-links li a:hover {
+  background-color: var(--sidebar-hover);
+  color: var(--text-main);
+  transform: translateX(4px);
+}
+
+.nav-links li a.active {
+  background-color: rgba(16, 163, 127, 0.08);
+  color: var(--text-main);
+  border-inline-start: 2px solid var(--primary-color);
+  box-shadow: inset 0 0 12px rgba(16, 163, 127, 0.03);
+}
+
+.nav-links li a.active::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: -4px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  box-shadow: 0 0 12px var(--primary-color);
+  opacity: 0.7;
+}
+
+/* --- Demo Role Switcher (light version now) --- */
+.demo-role-switcher {
+  margin-top: auto;
+  padding: 1rem 0.75rem;
+  background: var(--hover-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.demo-role-switcher h4 {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text-light);
+  margin-bottom: 0.6rem;
+  opacity: 0.6;
+}
+
+.demo-role-switcher button {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-light);
+  padding: 0.25rem 0.75rem;
+  margin: 0 2px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.demo-role-switcher button:hover {
+  background: var(--sidebar-hover);
+  color: var(--text-main);
+  border-color: var(--primary-color);
+  transform: scale(1.02);
+}

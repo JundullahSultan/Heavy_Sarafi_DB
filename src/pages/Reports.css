@@ -1,0 +1,485 @@
+/* --- Container --- */
+.list-container {
+  padding: 2rem;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+/* --- Header --- */
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.section-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: -0.01em;
+  margin: 0 0 0.25rem 0;
+}
+
+.role-badge {
+  display: inline-block;
+  background: var(--role-badge-bg);
+  color: var(--role-badge-text);
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.2rem 0.8rem;
+  border-radius: 50px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* --- Filters (compact) --- */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-end;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.filter-group label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-light);
+  font-weight: 600;
+}
+
+.filter-group input,
+.filter-group select {
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--white);
+  color: var(--text-main);
+  font-size: 0.9rem;
+  min-width: 120px;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+.filter-group input:focus,
+.filter-group select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(16, 163, 127, 0.12);
+}
+
+.filter-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+/* --- Summary Cards --- */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.summary-card {
+  background: var(--white);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 2px 6px var(--shadow-color);
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+
+.summary-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px var(--shadow-color);
+}
+
+.summary-card .card-title {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-light);
+  margin: 0 0 0.5rem 0;
+  font-weight: 600;
+}
+
+.summary-card .card-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.summary-card .card-value.text-success {
+  color: var(--success);
+}
+.summary-card .card-value.text-danger {
+  color: var(--danger);
+}
+.summary-card .card-value.text-warning {
+  color: var(--warning-color);
+}
+
+/* --- Profitability Highlights (Owner) --- */
+.profit-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.profit-card {
+  background: var(--white);
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--border-color);
+  border-left-width: 4px;
+  box-shadow: 0 2px 6px var(--shadow-color);
+}
+
+.profit-card.green {
+  border-left-color: var(--success);
+  background: var(--profit-green-bg);
+}
+.profit-card.yellow {
+  border-left-color: var(--warning-color);
+  background: var(--profit-yellow-bg);
+}
+
+.profit-card .card-title {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-light);
+  margin: 0 0 0.5rem 0;
+  font-weight: 600;
+}
+
+.profit-card .card-value {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.currency-badge {
+  display: inline-block;
+  background: var(--hover-bg);
+  padding: 0.2rem 0.6rem;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.currency-badge.positive {
+  background: var(--currency-positive-bg);
+  color: var(--currency-positive-text);
+}
+.currency-badge.negative {
+  background: var(--currency-negative-bg);
+  color: var(--currency-negative-text);
+}
+
+.profit-card .footnote {
+  font-size: 0.75rem;
+  color: var(--text-light);
+  margin-top: 0.5rem;
+}
+
+/* --- Tables --- */
+.table-wrapper {
+  background: var(--white);
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  box-shadow: 0 4px 12px var(--shadow-color);
+}
+
+.hawala-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 600px;
+}
+
+.hawala-table th {
+  background: var(--hover-bg);
+  padding: 0.7rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-light);
+  border-bottom: 1px solid var(--border-color);
+  text-align: left;
+}
+
+.hawala-table td {
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: middle;
+  color: var(--text-main);
+  font-size: 0.9rem;
+}
+
+.hawala-table tr:last-child td {
+  border-bottom: none;
+}
+
+.hawala-table tbody tr:hover {
+  background: var(--hover-bg);
+}
+
+.text-light {
+  color: var(--text-light);
+}
+.fw-bold {
+  font-weight: 600;
+}
+.text-success {
+  color: var(--success);
+}
+.text-danger {
+  color: var(--danger);
+}
+
+/* --- Status Badge (reuse from other components) --- */
+.status-badge {
+  display: inline-block;
+  padding: 0.2rem 0.7rem;
+  border-radius: 50px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.status-badge.paid {
+  background: var(--status-paid-bg);
+  color: var(--status-paid-text);
+}
+.status-badge.pending {
+  background: var(--status-pending-bg);
+  color: var(--status-pending-text);
+}
+.status-badge.danger {
+  background: var(--status-danger-bg);
+  color: var(--status-danger-text);
+}
+
+/* --- Section Titles --- */
+.section-subtitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0 0 1rem 0;
+}
+
+/* --- Audit Footer --- */
+.audit-footer {
+  margin-top: 2.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-light);
+  font-size: 0.8rem;
+}
+
+/* --- No data state --- */
+.no-data {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-light);
+}
+
+/* --- Responsive --- */
+@media (max-width: 900px) {
+  .profit-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .list-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-group input,
+  .filter-group select {
+    min-width: unset;
+    width: 100%;
+  }
+
+  .filter-actions {
+    flex-wrap: wrap;
+  }
+
+  .summary-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* --- Print Styles --- */
+@media print {
+  .no-print,
+  .no-print * {
+    display: none !important;
+  }
+
+  /* Force light theme for everything */
+  html,
+  body,
+  #root,
+  .app-layout,
+  .main-content,
+  .list-container {
+    background: white !important;
+    color: black !important;
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .sidebar,
+  .top-header {
+    display: none !important;
+  }
+
+  .list-container {
+    padding: 1rem !important;
+  }
+
+  /* Override all CSS variables to light mode */
+  :root {
+    --bg-color: #ffffff !important;
+    --text-main: #000000 !important;
+    --text-light: #555555 !important;
+    --border-color: #cccccc !important;
+    --white: #ffffff !important;
+    --hover-bg: #f5f5f5 !important;
+    --shadow-color: rgba(0, 0, 0, 0.05) !important;
+    --success: #22c55e !important;
+    --danger: #ef4444 !important;
+    --warning-color: #f59e0b !important;
+
+    /* Badge colors – light backgrounds, dark text */
+    --status-paid-bg: #d1fae5 !important;
+    --status-paid-text: #065f46 !important;
+    --status-pending-bg: #fef3c7 !important;
+    --status-pending-text: #d97706 !important;
+    --status-danger-bg: #fee2e2 !important;
+    --status-danger-text: #991b1b !important;
+    --currency-positive-bg: #d1fae5 !important;
+    --currency-positive-text: #065f46 !important;
+    --currency-negative-bg: #fee2e2 !important;
+    --currency-negative-text: #991b1b !important;
+    --profit-green-bg: #f0fdf4 !important;
+    --profit-yellow-bg: #fffbeb !important;
+    --role-badge-bg: #e5e7eb !important;
+    --role-badge-text: #1f2937 !important;
+  }
+
+  /* Additional overrides for specific elements */
+  .summary-card,
+  .profit-card,
+  .table-wrapper {
+    background: white !important;
+    border: 1px solid #ccc !important;
+    box-shadow: none !important;
+  }
+
+  .hawala-table th {
+    background: #f5f5f5 !important;
+    color: #333 !important;
+  }
+
+  .hawala-table td {
+    color: #000 !important;
+  }
+
+  .role-badge {
+    background: #e5e7eb !important;
+    color: #1f2937 !important;
+  }
+
+  .status-badge {
+    border: 1px solid #999 !important;
+  }
+
+  /* Remove any dark backgrounds from dark‑mode elements */
+  .dark-mode,
+  .dark-mode * {
+    background-color: white !important;
+    color: black !important;
+    border-color: #ccc !important;
+  }
+
+  /* Ensure profit cards have clean backgrounds */
+  .profit-card.green,
+  .profit-card.yellow {
+    background: #f9fafb !important;
+  }
+  .profit-card.green {
+    border-left-color: #22c55e !important;
+  }
+  .profit-card.yellow {
+    border-left-color: #f59e0b !important;
+  }
+
+  /* Force all text to be black on white */
+  .text-light,
+  .text-success,
+  .text-danger,
+  .text-warning,
+  .fw-bold,
+  .card-value,
+  .section-title,
+  .section-subtitle,
+  .helper-text,
+  .audit-footer {
+    color: black !important;
+  }
+
+  /* Keep currency badges readable */
+  .currency-badge {
+    background: #f0f0f0 !important;
+    color: #222 !important;
+    border: 1px solid #aaa !important;
+  }
+  .currency-badge.positive {
+    background: #d1fae5 !important;
+    color: #065f46 !important;
+  }
+  .currency-badge.negative {
+    background: #fee2e2 !important;
+    color: #991b1b !important;
+  }
+
+  /* Keep the print colors exactly */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
