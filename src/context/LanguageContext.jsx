@@ -324,6 +324,8 @@ const translations = {
     phoneNumberPlaceholder: "07XX XXX XXX",
     homeAddressPlaceholder: "Province, District, Street",
     saveProfileAndId: "Save Profile & ID",
+    transactionDescriptionPlaceholder:
+      'e.g., "Sent to Kabul Branch for Mr. Ahmad"',
   },
   ps: {
     dashboard: "داشبورډ",
@@ -650,6 +652,7 @@ const translations = {
     homeAddressPlaceholder: "ولایت، ولسوالۍ، سړک",
     saveProfileAndId: "پروفایل او آی ډي خوندي کول",
     mobileNumberPlaceholder: "۰۷XX XXX XXX",
+    transactionDescriptionPlaceholder: "بېلګه: دلته نوټونه ولیکه",
   },
   da: {
     dashboard: "داشبورد",
@@ -967,6 +970,7 @@ const translations = {
     phoneNumberPlaceholder: "۰۷XX XXX XXX",
     homeAddressPlaceholder: "ولایت، ولسوالی/ناحیه، سرک",
     saveProfileAndId: "ذخیره پروفایل و شناسه",
+    transactionDescriptionPlaceholder: "مثال: یادداشت‌ها را اینجا بنویسید",
   },
 };
 

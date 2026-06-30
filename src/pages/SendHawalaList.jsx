@@ -232,9 +232,7 @@ export default function SendHawalaList() {
                 <td data-label={t("hawalaId")} className="fw-bold">
                   {hawala.id}
                 </td>
-                <td data-label={t("dateSent")}>
-                  {hawala.date.split(" ")[0]}
-                </td>
+                <td data-label={t("dateSent")}>{hawala.date.split(" ")[0]}</td>
                 <td data-label={t("destination")}>
                   {hawala.destinationBranch}
                 </td>
@@ -450,7 +448,7 @@ export default function SendHawalaList() {
 
             <form onSubmit={handleSendHawala}>
               <div
-                className="modal-body padded-body"
+                className="modal-body padded-body modal-body-split"
                 style={{
                   display: "grid",
                   gridTemplateColumns: "1fr 1fr",
@@ -715,6 +713,7 @@ export default function SendHawalaList() {
                               value="sarafi"
                               checked={fundingSource === "sarafi"}
                               onChange={() => setFundingSource("sarafi")}
+                              className="funding-source-group"
                               style={{
                                 width: "1.25rem",
                                 height: "1.25rem",
@@ -786,10 +785,6 @@ export default function SendHawalaList() {
                             onChange={(e) =>
                               setSelectedKahataId(e.target.value)
                             }
-                            style={{
-                              backgroundColor: "#fffbeb",
-                              borderColor: "#fcd34d",
-                            }}
                           >
                             <option value="">{t("chooseAccount")}</option>
                             <option value="KHT-8001">

@@ -41,6 +41,36 @@ export default function ReceivedHawalaList() {
       idImageUrl:
         "https://placehold.co/1000x600/e2e8f0/64748b?text=High+Res+Passport+Image",
     },
+    {
+      id: "HW-9022",
+      date: "2026-06-28 11:30 AM",
+      senderBranch: "Mazar Branch",
+      senderName: "Wali",
+      senderPhone: "0700987654",
+      receiverName: "Zalmay",
+      receiverFather: "Tariq",
+      receiverIdNum: "P-9921834",
+      amount: "1,200",
+      currency: "USD",
+      status: "Pending",
+      idImageUrl:
+        "https://placehold.co/1000x600/e2e8f0/64748b?text=High+Res+Passport+Image",
+    },
+    {
+      id: "HW-9022",
+      date: "2026-06-28 11:30 AM",
+      senderBranch: "Mazar Branch",
+      senderName: "Wali",
+      senderPhone: "0700987654",
+      receiverName: "Zalmay",
+      receiverFather: "Tariq",
+      receiverIdNum: "P-9921834",
+      amount: "1,200",
+      currency: "USD",
+      status: "Pending",
+      idImageUrl:
+        "https://placehold.co/1000x600/e2e8f0/64748b?text=High+Res+Passport+Image",
+    },
   ]);
 
   const handleRowClick = (hawala) => {
@@ -91,14 +121,18 @@ export default function ReceivedHawalaList() {
                 onClick={() => handleRowClick(hawala)}
                 className="clickable-row"
               >
-                <td className="fw-bold">{hawala.id}</td>
-                <td>{hawala.date.split(" ")[0]}</td>
-                <td>{hawala.senderBranch}</td>
-                <td className="fw-bold">{hawala.receiverName}</td>
-                <td className="amount-col">
+                <td data-label={t("hawalaId")} className="fw-bold">
+                  {hawala.id}
+                </td>
+                <td data-label={t("date")}>{hawala.date.split(" ")[0]}</td>
+                <td data-label={t("fromBranch")}>{hawala.senderBranch}</td>
+                <td data-label={t("receiverName")} className="fw-bold">
+                  {hawala.receiverName}
+                </td>
+                <td data-label={t("amount")} className="amount-col">
                   {hawala.amount} {hawala.currency}
                 </td>
-                <td>
+                <td data-label={t("status")}>
                   <span className="status-badge pending">{hawala.status}</span>
                 </td>
               </tr>

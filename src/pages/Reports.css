@@ -212,7 +212,6 @@
 .hawala-table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 600px;
 }
 
 .hawala-table th {

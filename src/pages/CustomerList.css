@@ -537,6 +537,10 @@
   .upload-area input[type="file"] {
     max-width: 100%;
   }
+
+  .hawala-table tbody tr {
+    background-color: var(--bg-color) !important;
+  }
 }
 
 @media (max-width: 600px) {
@@ -571,5 +575,122 @@
 
   .modal-body {
     padding: 1rem 1.25rem;
+  }
+
+  /* --- Mobile Table-to-Card Conversion --- */
+
+  /* 1. Remove table wrapper container styles to allow cards to float */
+  .table-wrapper {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+  }
+
+  /* 2. Reset the table and hide the header */
+  .data-table {
+    min-width: 0; /* Override the 700px min-width */
+  }
+
+  .data-table thead {
+    display: none; /* Hide column headers on mobile */
+  }
+
+  /* 3. Style the table body as a flex column to stack the rows */
+  .data-table tbody {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  /* 4. Transform each row into a stylized Grid card */
+  .data-table tbody tr {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    /* Map out where each piece of data should go */
+    grid-template-areas:
+      "name id"
+      "father phone"
+      "date tazkira";
+    gap: 0.75rem 1rem;
+    background: var(--white);
+    border-radius: 12px;
+    padding: 1.25rem;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 8px var(--shadow-color);
+  }
+
+  /* 5. Clean up the cells */
+  .data-table tbody td {
+    padding: 0;
+    border-bottom: none;
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem; /* Standardize base mobile font size */
+  }
+
+  /* --- Data Cell Mapping (Matching the JSX order) --- */
+
+  /* TD 1: Customer ID */
+  .data-table tbody td:nth-child(1) {
+    grid-area: id;
+    font-size: 0.75rem;
+    justify-content: flex-end;
+  }
+
+  /* TD 2: Full Name */
+  .data-table tbody td:nth-child(2) {
+    grid-area: name;
+    font-size: 1.15rem;
+    color: var(--text-main);
+  }
+
+  /* TD 3: Father's Name */
+  .data-table tbody td:nth-child(3) {
+    grid-area: father;
+    color: var(--text-light);
+  }
+
+  /* Add subtle icons using pseudo-elements so we don't break localization */
+  .data-table tbody td:nth-child(3)::before {
+    content: "👤";
+    margin-right: 6px;
+    opacity: 0.5;
+  }
+
+  /* TD 4: Phone Number */
+  .data-table tbody td:nth-child(4) {
+    grid-area: phone;
+    font-weight: 600;
+    justify-content: flex-end;
+  }
+
+  .data-table tbody td:nth-child(4)::before {
+    content: "📞";
+    margin-right: 6px;
+    opacity: 0.5;
+  }
+
+  /* TD 5: ID / Tazkira */
+  .data-table tbody td:nth-child(5) {
+    grid-area: tazkira;
+    font-size: 0.85rem;
+    justify-content: flex-end;
+    background: var(--bg-color);
+    padding: 4px 8px;
+    border-radius: 6px;
+  }
+
+  /* TD 6: Registered Date */
+  .data-table tbody td:nth-child(6) {
+    grid-area: date;
+    font-size: 0.75rem;
+    color: var(--text-light);
+  }
+
+  .data-table tbody td:nth-child(6)::before {
+    content: "📅";
+    margin-right: 6px;
+    opacity: 0.5;
   }
 }

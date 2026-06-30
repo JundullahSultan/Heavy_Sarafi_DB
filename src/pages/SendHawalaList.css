@@ -18,7 +18,12 @@
 
 .modal-body-split {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  /* This tells the grid to fit as many 350px columns as possible, 
+     otherwise expand to fill the space (1fr), dropping to 1 column on mobile */
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(min(100%, 350px), 1fr)
+  ) !important;
   gap: 2rem;
 }
 
@@ -538,5 +543,56 @@
     background: rgba(239, 68, 68, 0.15);
     color: #ef4444;
     border-color: rgba(239, 68, 68, 0.3);
+  }
+
+  .modal-body-split {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  /* Stack all interior form grids */
+  .form-grid-2,
+  .form-grid-3 {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  /* Stack the search input and button */
+  .dual-search {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .dual-search .action-btn {
+    width: 100%;
+  }
+
+  /* Stack the funding source radio buttons */
+  .funding-source-group {
+    flex-direction: column;
+    gap: 0.75rem !important;
+  }
+
+  /* Reduce modal padding for mobile */
+  .padded-body {
+    padding: 1rem;
+  }
+
+  /* Make sticky footer buttons full width and stacked */
+  .modal-footer {
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem;
+  }
+
+  .modal-footer .action-btn.auto-width {
+    width: 100%;
+    margin: 0;
+  }
+
+  /* Adjust the overriding warning text width */
+  .helper-text.warning-text {
+    width: 100% !important;
+    text-align: center;
   }
 }
