@@ -305,13 +305,13 @@
 }
 
 /* --- Responsive --- */
-@media (max-width: 900px) {
+@media screen and (max-width: 900px) {
   .profit-grid {
     grid-template-columns: 1fr;
   }
 }
 
-@media (max-width: 600px) {
+@media screen and (max-width: 600px) {
   .list-header {
     flex-direction: column;
     align-items: stretch;
@@ -370,8 +370,8 @@
     padding: 1rem !important;
   }
 
-  /* Override all CSS variables to light mode */
-  :root {
+  :root,
+  .dark-mode {
     --bg-color: #ffffff !important;
     --text-main: #000000 !important;
     --text-light: #555555 !important;
@@ -398,130 +398,140 @@
     --profit-yellow-bg: #fffbeb !important;
     --role-badge-bg: #e5e7eb !important;
     --role-badge-text: #1f2937 !important;
-  }
 
-  /* Additional overrides for specific elements */
-  .summary-card,
-  .profit-card,
-  .table-wrapper {
-    background: white !important;
-    border: 1px solid #ccc !important;
-    box-shadow: none !important;
-  }
+    /* Additional overrides for specific elements */
+    .summary-card,
+    .profit-card,
+    .table-wrapper {
+      background: white !important;
+      border: 1px solid #ccc !important;
+      box-shadow: none !important;
+    }
 
-  .table-wrapper {
-    background: #fff;
-    border-radius: 16px;
-    border: 1px solid #eee;
-    overflow: hidden;
-    box-shadow: 0 4px 12px var(--shadow-color);
-  }
+    .hawala-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
 
-  .hawala-table {
-    width: 100%;
-    border-collapse: collapse;
-  }
+    .hawala-table th {
+      background: #f5f5f5;
+      padding: 0.7rem 1rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #555;
+      border-bottom: 1px solid #eee;
+      text-align: left;
+    }
 
-  .hawala-table th {
-    background: #f5f5f5;
-    padding: 0.7rem 1rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: #555;
-    border-bottom: 1px solid #eee;
-    text-align: left;
-  }
+    .hawala-table td {
+      padding: 0.7rem 1rem;
+      border-bottom: 1px solid #eee;
+      vertical-align: middle;
+      color: var(--text-main);
+      font-size: 0.9rem;
+    }
 
-  .hawala-table td {
-    padding: 0.7rem 1rem;
-    border-bottom: 1px solid #eee;
-    vertical-align: middle;
-    color: var(--text-main);
-    font-size: 0.9rem;
-  }
+    .hawala-table tr:last-child td {
+      border-bottom: none;
+    }
 
-  .hawala-table tr:last-child td {
-    border-bottom: none;
-  }
+    .role-badge {
+      background: #e5e7eb !important;
+      color: #1f2937 !important;
+    }
 
-  .role-badge {
-    background: #e5e7eb !important;
-    color: #1f2937 !important;
-  }
+    .status-badge {
+      border: 1px solid #999 !important;
+    }
 
-  .status-badge {
-    border: 1px solid #999 !important;
-  }
+    /* Ensure profit cards have clean backgrounds */
+    .profit-card.green,
+    .profit-card.yellow {
+      background: #f9fafb !important;
+    }
+    .profit-card.green {
+      border-left-color: #22c55e !important;
+    }
+    .profit-card.yellow {
+      border-left-color: #f59e0b !important;
+    }
 
-  /* Remove any dark backgrounds from dark‑mode elements */
-  .dark-mode,
-  .dark-mode * {
-    background-color: white !important;
-    color: black !important;
-    border-color: #ccc !important;
-  }
+    .profit-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
 
-  /* Ensure profit cards have clean backgrounds */
-  .profit-card.green,
-  .profit-card.yellow {
-    background: #f9fafb !important;
-  }
-  .profit-card.green {
-    border-left-color: #22c55e !important;
-  }
-  .profit-card.yellow {
-    border-left-color: #f59e0b !important;
-  }
+    .profit-card * {
+      background: transparent !important;
+    }
 
-  .profit-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.25rem;
-    margin-bottom: 2rem;
-  }
+    .table-wrapper {
+      border: 1px solid #ccc !important;
+    }
 
-  .profit-card * {
-    background: transparent !important;
-  }
+    /* Force all text to be black on white */
+    .text-light,
+    .text-success,
+    .text-danger,
+    .text-warning,
+    .fw-bold,
+    .card-value,
+    .section-title,
+    .section-subtitle,
+    .helper-text,
+    .audit-footer {
+      color: black !important;
+    }
 
-  .table-wrapper {
-    border: 1px solid #ccc !important;
-  }
+    /* Keep currency badges readable */
+    .currency-badge {
+      background: #f0f0f0 !important;
+      color: #222 !important;
+      border: 1px solid #aaa !important;
+    }
+    .currency-badge.positive {
+      background: #d1fae5 !important;
+      color: #065f46 !important;
+    }
+    .currency-badge.negative {
+      background: #fee2e2 !important;
+      color: #991b1b !important;
+    }
 
-  /* Force all text to be black on white */
-  .text-light,
-  .text-success,
-  .text-danger,
-  .text-warning,
-  .fw-bold,
-  .card-value,
-  .section-title,
-  .section-subtitle,
-  .helper-text,
-  .audit-footer {
-    color: black !important;
-  }
+    /* Keep the print colors exactly */
+    * {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
 
-  /* Keep currency badges readable */
-  .currency-badge {
-    background: #f0f0f0 !important;
-    color: #222 !important;
-    border: 1px solid #aaa !important;
-  }
-  .currency-badge.positive {
-    background: #d1fae5 !important;
-    color: #065f46 !important;
-  }
-  .currency-badge.negative {
-    background: #fee2e2 !important;
-    color: #991b1b !important;
-  }
+    /* Force the table to behave like a standard desktop table */
+    table {
+      display: table !important;
+      width: 100% !important;
+    }
 
-  /* Keep the print colors exactly */
-  * {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
+    thead {
+      display: table-header-group !important; /* Forces headers to show and repeat on new pages */
+    }
+
+    tbody {
+      display: table-row-group !important;
+    }
+
+    tr {
+      display: table-row !important;
+      page-break-inside: avoid !important; /* Prevents rows from being cut in half */
+    }
+
+    th,
+    td {
+      display: table-cell !important;
+      color: #000000 !important; /* Guarantees text is visible */
+      border: 1px solid #ccc !important;
+    }
   }
 }

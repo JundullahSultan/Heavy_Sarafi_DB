@@ -580,7 +580,7 @@
 }
 
 /* --- Responsive --- */
-@media (max-width: 900px) {
+@media screen and (max-width: 900px) {
   .modal-body {
     grid-template-columns: 1fr;
     gap: 1.5rem;
@@ -593,7 +593,7 @@
 
 /* --- Mobile Responsiveness for Received Hawalas --- */
 /* Mobile responsiveness */
-@media (max-width: 768px) {
+@media screen and (max-width: 768px) {
   .list-container {
     padding: 1rem;
   }
@@ -712,7 +712,7 @@
   }
 }
 
-@media (max-width: 600px) {
+@media screen and (max-width: 600px) {
   .modal-content {
     max-height: 100vh;
     border-radius: 0;
@@ -794,7 +794,7 @@
 }
 
 /* --- Extra small devices: 360px and below --- */
-@media (max-width: 450px) {
+@media screen and (max-width: 450px) {
   .list-container {
     padding: 0.75rem;
     width: 100% !important;

@@ -334,7 +334,7 @@ body {
 }
 
 /* --- Mobile Responsiveness overrides --- */
-@media (max-width: 768px) {
+@media screen and (max-width: 768px) {
   /* 1. This shrinks ALL text that uses 'rem' units by about 12.5% */
   html {
     font-size: 14px;

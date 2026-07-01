@@ -524,7 +524,7 @@
 }
 
 /* --- Responsive --- */
-@media (max-width: 900px) {
+@media screen and (max-width: 900px) {
   .view-modal .modal-body {
     grid-template-columns: 1fr;
     gap: 1.5rem;
@@ -543,7 +543,7 @@
   }
 }
 
-@media (max-width: 600px) {
+@media screen and (max-width: 600px) {
   .list-header {
     flex-direction: column;
     align-items: stretch;
