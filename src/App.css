@@ -74,16 +74,25 @@
 
 /* --- the rest of your CSS stays exactly as before --- */
 
+/* --- Custom Fonts --- */
+@font-face {
+  font-family: "AfghanFont"; /* Name this whatever you like */
+  src: url("/fonts/ps_da.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap; /* Tells the browser to show fallback text until the font loads */
+}
+
 /* --- Base Reset --- */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Segoe UI", system-ui, sans-serif;
   -webkit-tap-highlight-color: transparent; /* Removes the ugly blue tap highlight */
 }
 
 body {
+  font-family: "Inter", sans-serif;
   background-color: var(--bg-color);
   color: var(--text-main);
   transition:
@@ -96,6 +105,8 @@ body {
 .rtl-app * {
   direction: rtl;
   text-align: right;
+  font-family:
+    "AfghanFont", sans-serif !important; /* Forces the Pashto/Dari font */
 }
 
 .rtl-app .app-layout,
