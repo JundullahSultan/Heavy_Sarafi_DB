@@ -152,11 +152,11 @@
 
 .profit-card.green {
   border-left-color: var(--success);
-  background: var(--profit-green-bg);
+  background: var(--bg-color);
 }
 .profit-card.yellow {
   border-left-color: var(--warning-color);
-  background: var(--profit-yellow-bg);
+  background: var(--bg-color);
 }
 
 .profit-card .card-title {
@@ -409,13 +409,41 @@
     box-shadow: none !important;
   }
 
+  .table-wrapper {
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid #eee;
+    overflow: hidden;
+    box-shadow: 0 4px 12px var(--shadow-color);
+  }
+
+  .hawala-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
   .hawala-table th {
-    background: #f5f5f5 !important;
-    color: #333 !important;
+    background: #f5f5f5;
+    padding: 0.7rem 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #555;
+    border-bottom: 1px solid #eee;
+    text-align: left;
   }
 
   .hawala-table td {
-    color: #000 !important;
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid #eee;
+    vertical-align: middle;
+    color: var(--text-main);
+    font-size: 0.9rem;
+  }
+
+  .hawala-table tr:last-child td {
+    border-bottom: none;
   }
 
   .role-badge {
@@ -445,6 +473,21 @@
   }
   .profit-card.yellow {
     border-left-color: #f59e0b !important;
+  }
+
+  .profit-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+  }
+
+  .profit-card * {
+    background: transparent !important;
+  }
+
+  .table-wrapper {
+    border: 1px solid #ccc !important;
   }
 
   /* Force all text to be black on white */

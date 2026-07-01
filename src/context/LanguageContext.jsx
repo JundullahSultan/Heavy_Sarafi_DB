@@ -326,6 +326,8 @@ const translations = {
     saveProfileAndId: "Save Profile & ID",
     transactionDescriptionPlaceholder:
       'e.g., "Sent to Kabul Branch for Mr. Ahmad"',
+    noBranchData: "No data found for this branch.",
+    noGlobalData: "No data found for the selected time period.",
   },
   ps: {
     dashboard: "داشبورډ",
@@ -653,6 +655,8 @@ const translations = {
     saveProfileAndId: "پروفایل او آی ډي خوندي کول",
     mobileNumberPlaceholder: "۰۷XX XXX XXX",
     transactionDescriptionPlaceholder: "بېلګه: دلته نوټونه ولیکه",
+    noBranchData: "د دې څانګې لپاره هیڅ معلومات شتون نلري.",
+    noGlobalData: "د دې شبکې لپاره هیڅ معلومات شتون نلري.",
   },
   da: {
     dashboard: "داشبورد",
@@ -970,7 +974,9 @@ const translations = {
     phoneNumberPlaceholder: "۰۷XX XXX XXX",
     homeAddressPlaceholder: "ولایت، ولسوالی/ناحیه، سرک",
     saveProfileAndId: "ذخیره پروفایل و شناسه",
-    transactionDescriptionPlaceholder: "مثال: یادداشت‌ها را اینجا بنویسید",
+    transactionDescriptionPlaceholder: "مثال: یادداشت‌ها را اینجا ",
+    noBranchData: "هیچ داده‌ای برای این شعبه یافت نشد.",
+    noGlobalData: "هیچ داده‌ای برای این بازه زمانی یافت نشد.",
   },
 };
 

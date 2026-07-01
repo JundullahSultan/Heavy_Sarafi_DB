@@ -95,7 +95,7 @@ export default function ReceivedHawalaList() {
   return (
     <div className="list-container">
       <div className="list-header">
-        <h2 className="section-title">{t("receivedHawalaQueue")}</h2>
+        {/* <h2 className="section-title">{t("receivedHawalaQueue")}</h2> */}
         <div className="search-bar">
           <input type="text" placeholder={t("searchByNameOrId")} />
           <button className="search-btn">{t("search")}</button>

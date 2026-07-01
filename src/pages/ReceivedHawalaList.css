@@ -630,6 +630,9 @@
   .table-wrapper {
     border-radius: 12px;
     overflow-x: hidden;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
   }
 
   .hawala-table {
@@ -717,7 +720,8 @@
   }
 
   .modal-overlay {
-    padding: 0;
+    padding: 0.7rem;
+    border: 1px solid var(--border-color);
   }
 
   .modal-header {

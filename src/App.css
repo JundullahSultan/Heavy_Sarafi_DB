@@ -80,6 +80,7 @@
   padding: 0;
   box-sizing: border-box;
   font-family: "Segoe UI", system-ui, sans-serif;
+  -webkit-tap-highlight-color: transparent; /* Removes the ugly blue tap highlight */
 }
 
 body {
