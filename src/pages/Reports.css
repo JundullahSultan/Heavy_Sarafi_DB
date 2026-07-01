@@ -304,10 +304,198 @@
   color: var(--text-light);
 }
 
-/* --- Responsive --- */
+/* =========================================
+   RESPONSIVE (SCREEN) STYLES
+========================================= */
+
 @media screen and (max-width: 900px) {
   .profit-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================
+   MOBILE TABLE CARDS — MODERN DESIGN
+   with visible .mobile-label spans
+========================================= */
+
+/* Hide mobile labels on desktop */
+.mobile-label {
+  display: none;
+}
+
+@media screen and (max-width: 768px) {
+  /* Show labels on mobile */
+  .hawala-table tr.responsive-table-row td .mobile-label {
+    display: inline;
+    font-weight: 600;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-light);
+    margin-right: 0.4rem;
+  }
+
+  /* Hide desktop table header */
+  .hawala-table thead {
+    display: none;
+  }
+
+  /* Make table a block container */
+  .hawala-table,
+  .hawala-table tbody {
+    display: block;
+    width: 100%;
+  }
+
+  /* ---------- CARD SHELL ---------- */
+  .hawala-table tr.responsive-table-row {
+    display: block;
+    background: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    margin-bottom: 1.25rem;
+    box-shadow:
+      inset 4px 0 0 var(--primary-color),
+      0 4px 16px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    position: relative;
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+
+  .hawala-table tr.responsive-table-row:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      inset 4px 0 0 var(--primary-color),
+      0 8px 28px rgba(0, 0, 0, 0.09);
+  }
+
+  /* ---------- CARD HEADER (ID / Branch) ---------- */
+  .hawala-table tr.responsive-table-row td:first-child,
+  .hawala-table tr.responsive-table-row td.cell-branch-name {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    background: linear-gradient(
+      135deg,
+      var(--hover-bg) 0%,
+      rgba(16, 163, 127, 0.03) 100%
+    );
+    border-bottom: 1px solid var(--border-color);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-main) !important;
+    position: relative;
+  }
+
+  /* Chevron indicator */
+  .hawala-table tr.responsive-table-row td:first-child::after,
+  .hawala-table tr.responsive-table-row td.cell-branch-name::after {
+    content: "›";
+    font-size: 1.5rem;
+    color: var(--text-light);
+    opacity: 0.3;
+    line-height: 1;
+    margin-left: 0.25rem;
+  }
+
+  /* ---------- DETAIL ROWS ---------- */
+  .hawala-table tr.responsive-table-row td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.85rem 1.25rem;
+    border-bottom: 1px solid rgba(128, 128, 128, 0.06);
+    font-size: 0.95rem;
+    line-height: 1.4;
+    color: var(--text-main);
+  }
+
+  /* Remove border from last cell */
+  .hawala-table tr.responsive-table-row td:last-child {
+    border-bottom: none;
+  }
+
+  /* ---------- STATUS FOOTER ---------- */
+  .hawala-table tr.responsive-table-row td:has(.status-badge) {
+    background: var(--bg-color);
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .hawala-table tr.responsive-table-row td:has(.status-badge) .status-badge {
+    font-size: 0.8rem;
+    padding: 0.4rem 1.2rem;
+    border-radius: 50px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+
+  /* ---------- AMOUNT & VALUE STYLING ---------- */
+  .hawala-table tr.responsive-table-row td .fw-bold {
+    font-size: 1.05rem;
+    font-weight: 700;
+  }
+
+  .hawala-table tr.responsive-table-row td .text-success {
+    font-weight: 600;
+  }
+
+  /* ---------- CURRENCY BADGES ---------- */
+  .hawala-table tr.responsive-table-row td:has(.currency-badge-group) {
+    align-items: flex-start;
+  }
+
+  .hawala-table tr.responsive-table-row td .currency-badge-group {
+    justify-content: flex-end;
+    gap: 0.3rem;
+  }
+
+  .hawala-table tr.responsive-table-row td .currency-badge {
+    font-size: 0.8rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 50px;
+  }
+
+  /* ---------- SUBTLE STRIPE PATTERN ---------- */
+  .hawala-table
+    tr.responsive-table-row
+    td:nth-child(even):not(:first-child):not(:has(.status-badge)) {
+    background: rgba(16, 163, 127, 0.015);
+  }
+
+  /* ---------- GRID LAYOUT FOR 6-COLUMN TABLES (Manager View) ---------- */
+  .hawala-table tr.responsive-table-row:has(> td:nth-child(6)) {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .hawala-table tr.responsive-table-row:has(> td:nth-child(6)) td:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .hawala-table
+    tr.responsive-table-row:has(> td:nth-child(6))
+    td:has(.status-badge) {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .hawala-table
+    tr.responsive-table-row:has(> td:nth-child(6))
+    td:not(:first-child):not(:has(.status-badge)) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+    padding: 0.75rem 1rem;
   }
 }
 
@@ -333,11 +521,14 @@
   }
 
   .summary-grid {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr; /* Stacked for very small screens */
   }
 }
 
-/* --- Print Styles --- */
+/* =========================================
+   PRINT STYLES
+========================================= */
+
 @media print {
   .no-print,
   .no-print * {
@@ -383,7 +574,6 @@
     --danger: #ef4444 !important;
     --warning-color: #f59e0b !important;
 
-    /* Badge colors – light backgrounds, dark text */
     --status-paid-bg: #d1fae5 !important;
     --status-paid-text: #065f46 !important;
     --status-pending-bg: #fef3c7 !important;
@@ -398,140 +588,135 @@
     --profit-yellow-bg: #fffbeb !important;
     --role-badge-bg: #e5e7eb !important;
     --role-badge-text: #1f2937 !important;
+  }
 
-    /* Additional overrides for specific elements */
-    .summary-card,
-    .profit-card,
-    .table-wrapper {
-      background: white !important;
-      border: 1px solid #ccc !important;
-      box-shadow: none !important;
-    }
+  /* Additional overrides for specific elements */
+  .summary-card,
+  .profit-card,
+  .table-wrapper {
+    background: white !important;
+    border: 1px solid #ccc !important;
+    box-shadow: none !important;
+  }
 
-    .hawala-table {
-      width: 100%;
-      border-collapse: collapse;
-    }
+  .hawala-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
 
-    .hawala-table th {
-      background: #f5f5f5;
-      padding: 0.7rem 1rem;
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      color: #555;
-      border-bottom: 1px solid #eee;
-      text-align: left;
-    }
+  .hawala-table th {
+    background: #f5f5f5 !important;
+    padding: 0.7rem 1rem !important;
+    font-size: 0.75rem !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
+    color: #555 !important;
+    border-bottom: 1px solid #eee !important;
+    text-align: left !important;
+  }
 
-    .hawala-table td {
-      padding: 0.7rem 1rem;
-      border-bottom: 1px solid #eee;
-      vertical-align: middle;
-      color: var(--text-main);
-      font-size: 0.9rem;
-    }
+  .hawala-table td {
+    padding: 0.7rem 1rem !important;
+    border-bottom: 1px solid #eee !important;
+    vertical-align: middle !important;
+    color: black !important;
+    font-size: 0.9rem !important;
+  }
 
-    .hawala-table tr:last-child td {
-      border-bottom: none;
-    }
+  .hawala-table tr:last-child td {
+    border-bottom: none !important;
+  }
 
-    .role-badge {
-      background: #e5e7eb !important;
-      color: #1f2937 !important;
-    }
+  .role-badge {
+    background: #e5e7eb !important;
+    color: #1f2937 !important;
+  }
 
-    .status-badge {
-      border: 1px solid #999 !important;
-    }
+  .status-badge {
+    border: 1px solid #999 !important;
+  }
 
-    /* Ensure profit cards have clean backgrounds */
-    .profit-card.green,
-    .profit-card.yellow {
-      background: #f9fafb !important;
-    }
-    .profit-card.green {
-      border-left-color: #22c55e !important;
-    }
-    .profit-card.yellow {
-      border-left-color: #f59e0b !important;
-    }
+  .profit-card.green,
+  .profit-card.yellow {
+    background: #f9fafb !important;
+  }
+  .profit-card.green {
+    border-left-color: #22c55e !important;
+  }
+  .profit-card.yellow {
+    border-left-color: #f59e0b !important;
+  }
 
-    .profit-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.25rem;
-      margin-bottom: 2rem;
-    }
+  .profit-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 1.25rem !important;
+    margin-bottom: 2rem !important;
+  }
 
-    .profit-card * {
-      background: transparent !important;
-    }
+  .profit-card * {
+    background: transparent !important;
+  }
 
-    .table-wrapper {
-      border: 1px solid #ccc !important;
-    }
+  .table-wrapper {
+    border: 1px solid #ccc !important;
+  }
 
-    /* Force all text to be black on white */
-    .text-light,
-    .text-success,
-    .text-danger,
-    .text-warning,
-    .fw-bold,
-    .card-value,
-    .section-title,
-    .section-subtitle,
-    .helper-text,
-    .audit-footer {
-      color: black !important;
-    }
+  .text-light,
+  .text-success,
+  .text-danger,
+  .text-warning,
+  .fw-bold,
+  .card-value,
+  .section-title,
+  .section-subtitle,
+  .helper-text,
+  .audit-footer {
+    color: black !important;
+  }
 
-    /* Keep currency badges readable */
-    .currency-badge {
-      background: #f0f0f0 !important;
-      color: #222 !important;
-      border: 1px solid #aaa !important;
-    }
-    .currency-badge.positive {
-      background: #d1fae5 !important;
-      color: #065f46 !important;
-    }
-    .currency-badge.negative {
-      background: #fee2e2 !important;
-      color: #991b1b !important;
-    }
+  .currency-badge {
+    background: #f0f0f0 !important;
+    color: #222 !important;
+    border: 1px solid #aaa !important;
+  }
+  .currency-badge.positive {
+    background: #d1fae5 !important;
+    color: #065f46 !important;
+  }
+  .currency-badge.negative {
+    background: #fee2e2 !important;
+    color: #991b1b !important;
+  }
 
-    /* Keep the print colors exactly */
-    * {
-      -webkit-print-color-adjust: exact !important;
-      print-color-adjust: exact !important;
-    }
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
 
-    /* Force the table to behave like a standard desktop table */
-    table {
-      display: table !important;
-      width: 100% !important;
-    }
+  /* Force standard desktop table layout for printing */
+  table {
+    display: table !important;
+    width: 100% !important;
+  }
 
-    thead {
-      display: table-header-group !important; /* Forces headers to show and repeat on new pages */
-    }
+  thead {
+    display: table-header-group !important;
+  }
 
-    tbody {
-      display: table-row-group !important;
-    }
+  tbody {
+    display: table-row-group !important;
+  }
 
-    tr {
-      display: table-row !important;
-      page-break-inside: avoid !important; /* Prevents rows from being cut in half */
-    }
+  tr {
+    display: table-row !important;
+    page-break-inside: avoid !important;
+  }
 
-    th,
-    td {
-      display: table-cell !important;
-      color: #000000 !important; /* Guarantees text is visible */
-      border: 1px solid #ccc !important;
-    }
+  th,
+  td {
+    display: table-cell !important;
+    border: 1px solid #ccc !important;
   }
 }

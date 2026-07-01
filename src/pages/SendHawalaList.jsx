@@ -195,7 +195,7 @@ export default function SendHawalaList() {
       {/* Page header with a specific class for mobile styling */}
       <div className="list-header send-hawala-header">
         <h2 className="section-title">{t("sentHawalasLog")}</h2>
-        <div className="header-actions-group">
+        <div className="header-actions-group send-hawala-actions">
           <div className="search-bar">
             <input type="text" placeholder={t("searchNameOrId")} />
             <button className="search-btn">{t("search")}</button>

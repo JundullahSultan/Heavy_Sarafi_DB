@@ -328,6 +328,7 @@ const translations = {
       'e.g., "Sent to Kabul Branch for Mr. Ahmad"',
     noBranchData: "No data found for this branch.",
     noGlobalData: "No data found for the selected time period.",
+    createAccount: "Create Account",
   },
   ps: {
     dashboard: "داشبورډ",
@@ -657,6 +658,7 @@ const translations = {
     transactionDescriptionPlaceholder: "بېلګه: دلته نوټونه ولیکه",
     noBranchData: "د دې څانګې لپاره هیڅ معلومات شتون نلري.",
     noGlobalData: "د دې شبکې لپاره هیڅ معلومات شتون نلري.",
+    createAccount: "حساب جوړول",
   },
   da: {
     dashboard: "داشبورد",
@@ -977,6 +979,7 @@ const translations = {
     transactionDescriptionPlaceholder: "مثال: یادداشت‌ها را اینجا ",
     noBranchData: "هیچ داده‌ای برای این شعبه یافت نشد.",
     noGlobalData: "هیچ داده‌ای برای این بازه زمانی یافت نشد.",
+    createAccount: "ایجاد حساب",
   },
 };
 

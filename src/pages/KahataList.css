@@ -5,6 +5,13 @@
   color: var(--success) !important;
 }
 
+.kahata-filter-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
 .text-danger {
   color: var(--danger) !important;
 }

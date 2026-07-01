@@ -17,7 +17,7 @@ export default function KahataList() {
     {
       id: "KHT-8001",
       name: "Haji Abdul Rahman",
-      type: "Partner Sarafi",
+      type: t("partnerSarafi"),
       phone: "0799112233",
       address: "Kandahar Market",
       currency: "AFN",
@@ -42,7 +42,7 @@ export default function KahataList() {
     {
       id: "KHT-8002",
       name: "Zamani Electronics",
-      type: "Merchant Customer",
+      type: t("merchantCustomer"),
       phone: "0700445566",
       address: "Kabul, District 2",
       currency: "USD",
@@ -117,7 +117,7 @@ export default function KahataList() {
     <div className="list-container">
       <div className="list-header">
         <h2 className="section-title">{t("kahataDirectory")}</h2>
-        <div className="header-actions-group">
+        <div className="header-actions-group kahata-filter-actions">
           <div className="search-bar">
             <input type="text" placeholder={t("searchNamePhoneOrId")} />
             <button className="search-btn">{t("search")}</button>

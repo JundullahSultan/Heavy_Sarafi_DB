@@ -528,19 +528,39 @@ export default function Reports() {
                 <tbody>
                   {filtered.length > 0 ? (
                     filtered.map((tx) => (
-                      <tr key={tx.id}>
-                        <td className="fw-bold text-light">{tx.id}</td>
-                        <td>{tx.date.split("T")[1].substring(0, 5)}</td>
-                        <td style={{ textTransform: "capitalize" }}>
+                      <tr key={tx.id} className="responsive-table-row">
+                        <td
+                          className="fw-bold text-light"
+                          data-label={t("hawalaId")}
+                        >
+                          {tx.id}
+                        </td>
+                        <td data-label={t("time")}>
+                          <span className="mobile-label">{t("time")}: </span>
+                          {tx.date.split("T")[1].substring(0, 5)}
+                        </td>
+                        <td
+                          data-label={t("type")}
+                          style={{ textTransform: "capitalize" }}
+                        >
+                          <span className="mobile-label">{t("type")}: </span>
                           {tx.type}
                         </td>
-                        <td className="fw-bold">
+                        <td data-label={t("amount")} className="fw-bold">
+                          <span className="mobile-label">{t("amount")}: </span>
                           {tx.amount.toLocaleString()} {tx.currency}
                         </td>
-                        <td className="text-success">
+                        <td
+                          data-label={t("feeCollected")}
+                          className="text-success"
+                        >
+                          <span className="mobile-label">
+                            {t("feeCollected")}:{" "}
+                          </span>
                           +{tx.fee} {tx.currency}
                         </td>
-                        <td>
+                        <td data-label={t("status")}>
+                          <span className="mobile-label">{t("status")}: </span>
                           <span
                             className={`status-badge ${tx.status === "paid" ? "paid" : "pending"}`}
                           >
@@ -606,15 +626,29 @@ export default function Reports() {
                 <tbody>
                   {Object.keys(branchSummary).length > 0 ? (
                     Object.keys(branchSummary).map((b) => (
-                      <tr key={b}>
-                        <td className="fw-bold">{b}</td>
-                        <td>
+                      <tr key={b} className="responsive-table-row">
+                        <td
+                          className="fw-bold cell-branch-name"
+                          data-label={t("branchLocation")}
+                        >
+                          {b}
+                        </td>
+                        <td data-label={t("totalCapitalSent")}>
+                          <span className="mobile-label">
+                            {t("totalCapitalSent")}:{" "}
+                          </span>
                           <CurrencyBadges dataObj={branchSummary[b].sent} />
                         </td>
-                        <td>
+                        <td data-label={t("totalCapitalReceived")}>
+                          <span className="mobile-label">
+                            {t("totalCapitalReceived")}:{" "}
+                          </span>
                           <CurrencyBadges dataObj={branchSummary[b].received} />
                         </td>
-                        <td>
+                        <td data-label={t("commissionCollected")}>
+                          <span className="mobile-label">
+                            {t("commissionCollected")}:{" "}
+                          </span>
                           <CurrencyBadges
                             dataObj={branchSummary[b].commission}
                           />

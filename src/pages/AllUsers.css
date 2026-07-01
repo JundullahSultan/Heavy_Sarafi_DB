@@ -12,11 +12,21 @@
   transition:
     border-color 0.2s,
     box-shadow 0.2s;
+  width: 100%;
 }
 
 .branch-filter:focus {
   border-color: var(--primary-color);
   box-shadow: var(--focus-ring);
+}
+
+.user-filter-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
 }
 
 /* --- Role Tags --- */

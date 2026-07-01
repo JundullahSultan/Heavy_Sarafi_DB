@@ -99,15 +99,7 @@ export default function AllUsers() {
           <p className="helper-text">{t("manageBranchAccess")}</p>
         </div>
 
-        <div className="header-actions-group">
-          <div className="search-bar">
-            <input
-              type="text"
-              placeholder={t("searchNameOrId")}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
+        <div className="header-actions-group user-filter-actions">
           <select
             className="branch-filter"
             value={branchFilter}
@@ -118,6 +110,14 @@ export default function AllUsers() {
             <option value="Herat Main">Herat Main</option>
             <option value="Dubai Branch">Dubai Branch</option>
           </select>
+          <div className="search-bar">
+            <input
+              type="text"
+              placeholder={t("searchNameOrId")}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
           <button
             className="action-btn submit-btn fw-bold"
             onClick={() => setIsAddModalOpen(true)}
