@@ -1,0 +1,410 @@
+.list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.list-header > div:first-child {
+  flex: 1 1 320px;
+  min-width: 0;
+}
+
+.section-title {
+  margin: 0;
+  line-height: 1.2;
+}
+
+.helper-text {
+  margin: 0.35rem 0 0;
+  color: var(--text-light);
+}
+
+.header-actions-group.user-filter-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.branch-filter {
+  min-width: 210px;
+  min-height: 44px;
+  padding: 0.75rem 0.9rem;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background-color: var(--white);
+  color: var(--text-main);
+  font: inherit;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.branch-filter:focus {
+  border-color: var(--primary-color);
+  box-shadow: var(--focus-ring);
+}
+
+.search-bar {
+  display: flex;
+  align-items: stretch;
+  gap: 0.65rem;
+}
+
+.search-bar input {
+  min-width: 240px;
+  min-height: 44px;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--white);
+  color: var(--text-main);
+  font: inherit;
+}
+
+.search-bar input::placeholder {
+  color: var(--text-light);
+}
+
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.hawala-table th:last-child,
+.hawala-table td:last-child {
+  white-space: nowrap;
+}
+
+.role-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.role-tag.owner {
+  background-color: var(--role-owner-bg);
+  color: var(--role-owner-text);
+  border: 1px solid var(--role-owner-border);
+}
+
+.role-tag.manager {
+  background-color: var(--role-manager-bg);
+  color: var(--role-manager-text);
+  border: 1px solid var(--role-manager-border);
+}
+
+.role-tag.employee {
+  background-color: var(--role-employee-bg);
+  color: var(--role-employee-text);
+  border: 1px solid var(--role-employee-border);
+}
+
+.small-btn {
+  width: auto;
+  min-height: 36px;
+  padding: 0.45rem 0.8rem;
+  font-size: 0.8rem;
+}
+
+.actions-cell {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.suspended-row td {
+  opacity: 0.65;
+  background-color: var(--hover-bg);
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  z-index: 1000;
+}
+
+.modal-content.add-modal {
+  width: min(100%, 550px);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  background: inherit;
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 1.25rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  line-height: 1.35;
+}
+
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.25rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: var(--text-light);
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  min-height: 44px;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--white);
+  color: var(--text-main);
+  font: inherit;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 1rem 1.25rem 1.25rem;
+  border-top: 1px solid var(--border-color);
+}
+
+@media (max-width: 768px) {
+  .list-container {
+    gap: 1.25rem;
+  }
+
+  .list-header {
+    align-items: stretch;
+  }
+
+  .header-actions-group.user-filter-actions {
+    width: 100%;
+    justify-content: stretch;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .branch-filter,
+  .search-bar,
+  .search-bar input,
+  .header-actions-group.user-filter-actions .submit-btn {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .search-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.25rem;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--white);
+}
+
+.search-bar input {
+  flex: 1 1 240px;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0.75rem 0.9rem;
+  border: none;
+  background: transparent;
+  color: var(--text-main);
+  font: inherit;
+  outline: none;
+  box-shadow: none;
+}
+
+  .table-wrapper {
+    overflow: visible;
+  }
+
+  .hawala-table {
+    border: none;
+  }
+
+  .hawala-table thead {
+    display: none;
+  }
+
+  .hawala-table tbody {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+  }
+
+  .hawala-table tbody tr {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "name status"
+      "uid uid"
+      "role branch"
+      "phone phone"
+      "actions actions";
+    gap: 0.55rem 0.85rem;
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    background: var(--white);
+  }
+
+  .hawala-table tbody td {
+    padding: 0;
+    border: none;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    white-space: normal;
+  }
+
+  .hawala-table tbody td:nth-child(1) {
+    grid-area: uid;
+    font-size: 0.78rem;
+    color: var(--text-light);
+    word-break: break-all;
+  }
+
+  .hawala-table tbody td:nth-child(2) {
+    grid-area: name;
+    display: block;
+  }
+
+  .hawala-table tbody td:nth-child(3) {
+    grid-area: role;
+    align-items: flex-start;
+  }
+
+  .hawala-table tbody td:nth-child(4) {
+    grid-area: branch;
+    justify-content: flex-end;
+    text-align: right;
+    font-size: 0.9rem;
+    color: var(--text-main);
+  }
+
+  .hawala-table tbody td:nth-child(5) {
+    grid-area: phone;
+    font-size: 0.9rem;
+    color: var(--text-main);
+  }
+
+  .hawala-table tbody td:nth-child(6) {
+    grid-area: status;
+    justify-content: flex-end;
+    align-items: flex-start;
+  }
+
+  .hawala-table tbody td:nth-child(7) {
+    grid-area: actions;
+    margin-top: 0.35rem;
+    padding-top: 0.8rem;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .actions-cell {
+    justify-content: stretch;
+    gap: 0.6rem;
+  }
+
+  .actions-cell .action-btn {
+    flex: 1 1 0;
+    justify-content: center;
+  }
+
+  .hawala-table tbody tr td:nth-child(2) .helper-text {
+    margin-top: 0.2rem;
+    font-size: 0.78rem !important;
+  }
+
+  .modal-overlay {
+    padding: 0.85rem;
+  }
+
+  .modal-content.add-modal {
+    width: 100%;
+  }
+
+  .modal-footer {
+    flex-direction: column;
+  }
+
+  .modal-footer .action-btn,
+  .modal-footer .submit-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 520px) {
+  .hawala-table tbody tr {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "name"
+      "status"
+      "uid"
+      "role"
+      "branch"
+      "phone"
+      "actions";
+  }
+
+  .hawala-table tbody td:nth-child(4),
+  .hawala-table tbody td:nth-child(6) {
+    justify-content: flex-start;
+    text-align: left;
+  }
+
+  .actions-cell {
+    flex-direction: column;
+  }
+
+  .actions-cell .action-btn {
+    width: 100%;
+  }
+
+  .modal-header,
+  .modal-body,
+  .modal-footer {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}

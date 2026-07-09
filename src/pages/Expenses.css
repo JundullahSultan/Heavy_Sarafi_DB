@@ -1,0 +1,745 @@
+/* src/pages/Expenses.css */
+/* Inherits .list-container, .list-header, .section-title, .table-wrapper,
+   .hawala-table, .modal-overlay, .modal-content, .modal-header, .close-btn,
+   .detail-card, .form-input-group from the shared CSS (ReceivedHawalaList.css, etc.) */
+
+/* ===== Summary Cards Row ===== */
+.expense-summary-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.expense-summary-card {
+  flex: 1;
+  min-width: 150px;
+  background: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 2px 8px var(--shadow-color);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.expense-summary-card .summary-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+  color: var(--text-light);
+}
+
+.expense-summary-card .summary-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--danger);
+}
+
+.expense-summary-card.count-card .summary-value {
+  color: var(--primary-color);
+}
+
+/* ===== Filter Bar ===== */
+.expense-filters {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.expense-filters .search-bar {
+  flex: 1;
+  min-width: 220px;
+}
+
+.filter-select {
+  padding: 0.6rem 1rem;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background: var(--white);
+  color: var(--text-main);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.filter-select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(16, 163, 127, 0.15);
+  outline: none;
+}
+
+/* ===== Table Enhancements ===== */
+.clickable-row {
+  cursor: pointer;
+}
+
+.clickable-row:hover {
+  background: var(--hover-bg);
+}
+
+.expense-id-badge {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  background: rgba(16, 163, 127, 0.08);
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+}
+
+.amount-cell {
+  font-weight: 600;
+  color: var(--danger);
+  white-space: nowrap;
+}
+
+.desc-cell {
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recorded-by-cell {
+  color: var(--text-light);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.empty-state {
+  text-align: center;
+  color: var(--text-light);
+  padding: 3rem 1rem !important;
+  font-size: 0.95rem;
+}
+
+/* ===== Category Badges ===== */
+.category-badge {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.cat-rentutilities {
+  background: #dbeafe;
+  color: #1e40af;
+}
+.cat-staffexpenses {
+  background: #fce7f3;
+  color: #9d174d;
+}
+.cat-governmentlegal {
+  background: #fef3c7;
+  color: #92400e;
+}
+.cat-operational {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+.cat-commissionsfees {
+  background: #d1fae5;
+  color: #065f46;
+}
+.cat-transporttravel {
+  background: #f3e8ff;
+  color: #6b21a8;
+}
+.cat-miscellaneous {
+  background: var(--hover-bg);
+  color: var(--text-light);
+}
+
+/* ===== Add Expense Modal ===== */
+.expense-modal {
+  max-width: 680px;
+}
+
+.expense-form {
+  padding: 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  background: var(--bg-color);
+}
+
+.form-section {
+  background: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 2px 6px var(--shadow-color);
+}
+
+.form-section-title {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-light);
+  margin: 0 0 1rem 0;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.section-icon {
+  font-size: 1rem;
+}
+
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.form-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 0.75rem;
+}
+
+.form-input-group label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.required-star {
+  color: var(--danger);
+}
+
+.form-input-group input,
+.form-input-group select,
+.form-input-group textarea {
+  padding: 0.6rem 0.85rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: var(--text-main);
+  background: var(--input-bg);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-input-group input:focus,
+.form-input-group select:focus,
+.form-input-group textarea:focus {
+  border-color: var(--primary-color);
+  box-shadow: var(--focus-ring);
+  outline: none;
+}
+
+.readonly-field {
+  background: var(--hover-bg) !important;
+  color: var(--text-light) !important;
+  cursor: not-allowed;
+}
+
+/* ===== File Upload Zone ===== */
+.file-upload-zone {
+  position: relative;
+}
+
+.file-upload-zone input[type="file"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.upload-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.8rem 1rem;
+  border: 2px dashed var(--border-color);
+  border-radius: 10px;
+  background: var(--hover-bg);
+  color: var(--text-light);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.upload-label:hover {
+  border-color: var(--primary-color);
+  background: rgba(16, 163, 127, 0.04);
+}
+
+.upload-icon {
+  font-size: 1.1rem;
+}
+
+.receipt-preview {
+  margin-top: 0.75rem;
+  max-width: 200px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+}
+
+.receipt-preview img {
+  width: 100%;
+  display: block;
+}
+
+/* ===== Form Actions ===== */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding-top: 0.5rem;
+}
+
+.action-btn {
+  padding: 0.65rem 1.5rem;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+}
+
+.action-btn:active {
+  transform: scale(0.97);
+}
+
+.primary-btn {
+  background: var(--primary-color);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(16, 163, 127, 0.25);
+}
+
+.primary-btn:hover {
+  background: #0d8e6e;
+  box-shadow: 0 4px 12px rgba(16, 163, 127, 0.35);
+}
+
+.cancel-btn {
+  background: var(--hover-bg);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+}
+
+.cancel-btn:hover {
+  background: var(--border-color);
+}
+
+/* ===== View Detail Modal ===== */
+.expense-detail-body {
+  padding: 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  background: var(--bg-color);
+}
+
+.expense-detail-body .detail-card {
+  background: var(--white);
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 2px 6px var(--shadow-color);
+}
+
+.expense-detail-body .detail-card h4 {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-light);
+  margin: 0 0 0.75rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.detail-label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-light);
+  flex-shrink: 0;
+  margin-right: 1rem;
+}
+
+.detail-value {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-main);
+  text-align: right;
+  word-break: break-word;
+}
+
+.expense-amount-highlight {
+  font-size: 1.1rem;
+  color: var(--danger);
+}
+
+/* ===== Small Modal Override ===== */
+.small-modal {
+  max-width: 550px;
+}
+
+/* ===== Responsive ===== */
+@media screen and (max-width: 768px) {
+  .expense-summary-row {
+    flex-direction: column;
+  }
+  .expense-filters .search-bar {
+    min-width: 100%;
+  }
+
+  .filter-select {
+    width: 100%;
+  }
+
+  .form-grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .expense-modal {
+    max-width: 100%;
+  }
+
+  .desc-cell {
+    max-width: 140px;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .form-actions .action-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .detail-row {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .detail-value {
+    text-align: left;
+  }
+}
+
+/* ===== Period Report Buttons Row ===== */
+.period-btns-row {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.period-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.25rem;
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  background: var(--white);
+  color: var(--text-main);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 6px var(--shadow-color);
+}
+
+.period-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px var(--shadow-color);
+}
+
+.period-btn:active {
+  transform: translateY(0) scale(0.97);
+}
+
+.period-btn-icon {
+  font-size: 1.1rem;
+}
+
+/* Daily - warm amber */
+.period-btn-daily {
+  border-color: #f59e0b;
+  color: #92400e;
+}
+.period-btn-daily:hover,
+.period-btn-daily.active {
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  border-color: #d97706;
+  color: #78350f;
+}
+
+/* Weekly - cool blue */
+.period-btn-weekly {
+  border-color: #3b82f6;
+  color: #1e40af;
+}
+.period-btn-weekly:hover,
+.period-btn-weekly.active {
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+  border-color: #2563eb;
+  color: #1e3a8a;
+}
+
+/* Monthly - vibrant purple */
+.period-btn-monthly {
+  border-color: #8b5cf6;
+  color: #5b21b6;
+}
+.period-btn-monthly:hover,
+.period-btn-monthly.active {
+  background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+  border-color: #7c3aed;
+  color: #4c1d95;
+}
+
+/* ===== Period Report Modal ===== */
+.period-report-modal {
+  max-width: 850px;
+  width: 95%;
+}
+
+.period-report-body {
+  padding: 1.5rem 2rem;
+  background: var(--bg-color);
+  max-height: 65vh;
+  overflow-y: auto;
+}
+
+/* Hidden on screen, shown only for print */
+.print-report-header {
+  display: none;
+}
+
+.print-report-header h2 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.5rem;
+  color: #111;
+}
+
+.print-period-label {
+  font-size: 0.95rem;
+  color: #555;
+  margin: 0 0 1rem 0;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #ddd;
+}
+
+/* Period Totals Row */
+.period-totals-row {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.period-total-card {
+  flex: 1;
+  min-width: 140px;
+  background: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 0.85rem 1.1rem;
+  box-shadow: 0 2px 6px var(--shadow-color);
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.period-total-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+  color: var(--text-light);
+}
+
+.period-total-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--danger);
+}
+
+.period-total-card.count-card .period-total-value {
+  color: var(--primary-color);
+}
+
+/* Period Report Actions (Print Button) */
+.period-report-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 1rem 2rem 1.5rem;
+  background: var(--bg-color);
+  border-top: 1px solid var(--border-color);
+}
+
+.print-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.7rem 1.75rem;
+  font-size: 0.92rem;
+}
+
+/* ===== Print Styles ===== */
+@media print {
+  /* Hide unrelated containers and elements completely to avoid layout shifting or blank pages */
+  .sidebar,
+  .top-header,
+  .list-container > .list-header,
+  .list-container > .expense-summary-row,
+  .list-container > .period-btns-row,
+  .list-container > .expense-filters,
+  .list-container > .table-wrapper,
+  .modal-header,
+  .period-report-actions,
+  .close-btn {
+    display: none !important;
+  }
+
+  /* Reset layout structure for print flow */
+  .app-layout,
+  .main-content,
+  .list-container {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  html, body {
+    height: auto !important;
+    overflow: visible !important;
+    background: #fff !important;
+  }
+
+  /* Reset the modal overlay and content so they don't center or restrict */
+  .modal-overlay {
+    position: static !important;
+    background: transparent !important;
+    display: block !important;
+    padding: 0 !important;
+  }
+
+  .modal-content.period-report-modal {
+    position: static !important;
+    box-shadow: none !important;
+    border: none !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+  }
+
+  .period-report-body {
+    padding: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    background: #fff !important;
+  }
+
+  /* Show the print-only header */
+  .print-report-header {
+    display: block !important;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Clean table for printing */
+  .period-report-body .hawala-table {
+    box-shadow: none;
+    border: 1px solid #ccc;
+    width: 100%;
+  }
+
+  .period-report-body .hawala-table th {
+    background: #f3f4f6 !important;
+    color: #111 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .period-report-body .hawala-table td,
+  .period-report-body .hawala-table th {
+    border: 1px solid #ddd;
+    padding: 0.5rem 0.75rem;
+  }
+
+  /* Print-friendly totals */
+  .period-total-card {
+    border: 1px solid #ccc;
+    box-shadow: none;
+    background: #f9fafb !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Hide category badge colors for clarity */
+  .category-badge {
+    background: transparent !important;
+    border: 1px solid #999;
+    color: #333 !important;
+  }
+
+  .expense-id-badge {
+    background: transparent !important;
+    color: #333 !important;
+  }
+}
+
+/* ===== Responsive for Period Buttons ===== */
+@media screen and (max-width: 768px) {
+  .period-btns-row {
+    flex-direction: column;
+  }
+
+  .period-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .period-report-modal {
+    max-width: 100%;
+  }
+
+  .period-report-body {
+    padding: 1rem;
+  }
+
+  .period-totals-row {
+    flex-direction: column;
+  }
+
+  .period-report-actions {
+    padding: 1rem;
+  }
+}

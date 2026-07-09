@@ -1,0 +1,401 @@
+import React, { useState, useEffect } from "react";
+import { useLanguage } from "../context/LanguageContext";
+import API from "../utils/api";
+import "./SarafiVault.css";
+
+const LOCATIONS = [
+  "Primary Vault (Safe)",
+  "Operator Cash Drawer (Till)",
+  "Local Bank Vault",
+];
+
+const CURRENCIES = ["AFN", "USD", "PKR", "EUR", "CNY", "IRR", "GBP"];
+
+export default function SarafiVault() {
+  const { t } = useLanguage();
+
+  const [transactions, setTransactions] = useState([]);
+  const [balances, setBalances] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filterLocation, setFilterLocation] = useState("all");
+  const [filterCurrency, setFilterCurrency] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [userBranch, setUserBranch] = useState("Kabul Branch");
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalType, setModalType] = useState("Credit"); // "Credit" = Deposit, "Debit" = Withdrawal
+
+  // Form Fields
+  const [dateField, setDateField] = useState(() => new Date().toISOString().split("T")[0]);
+  const [locationField, setLocationField] = useState("Primary Vault (Safe)");
+  const [amountField, setAmountField] = useState("");
+  const [currencyField, setCurrencyField] = useState("AFN");
+  const [descriptionField, setDescriptionField] = useState("");
+
+  const getTranslatedLocation = (loc) => {
+    const maps = {
+      "Primary Vault (Safe)": t("primaryVault"),
+      "Operator Cash Drawer (Till)": t("operatorTill"),
+      "Local Bank Vault": t("localBankVault"),
+    };
+    return maps[loc] || loc;
+  };
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const [txsRes, balRes, userRes] = await Promise.all([
+        API.get(`/safes?location=${filterLocation}&currency=${filterCurrency}&search=${searchTerm}`),
+        API.get("/safes/balances"),
+        API.get("/auth/me"),
+      ]);
+      setTransactions(txsRes.data);
+      setBalances(balRes.data);
+      setUserBranch(userRes.data.branch || "Kabul Branch");
+    } catch (err) {
+      console.error("Error fetching safes data:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [filterLocation, filterCurrency, searchTerm]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!amountField || !descriptionField) return;
+
+    try {
+      const payload = {
+        date: dateField,
+        type: modalType,
+        location: locationField,
+        amount: parseFloat(amountField),
+        currency: currencyField,
+        description: descriptionField,
+      };
+
+      await API.post("/safes", payload);
+      alert(modalType === "Credit" ? t("depositSuccess") : t("withdrawalSuccess"));
+      setIsModalOpen(false);
+      // Reset form
+      setAmountField("");
+      setDescriptionField("");
+      fetchData();
+    } catch (err) {
+      console.error("Error creating transaction:", err);
+      alert("Error: " + (err.response?.data?.message || err.message));
+    }
+  };
+
+  const handleDelete = async (txId) => {
+    if (!window.confirm(t("deleteConfirm"))) return;
+    try {
+      await API.delete(`/safes/${txId}`);
+      alert(t("deleteSuccess"));
+      fetchData();
+    } catch (err) {
+      console.error("Error deleting transaction:", err);
+      alert("Error: " + (err.response?.data?.message || err.message));
+    }
+  };
+
+  // Group balances by location
+  const getBalancesByLocation = () => {
+    const locMap = {};
+    LOCATIONS.forEach((loc) => {
+      locMap[loc] = {};
+      CURRENCIES.forEach((cur) => {
+        locMap[loc][cur] = 0;
+      });
+    });
+
+    balances.forEach((bal) => {
+      if (locMap[bal.location]) {
+        locMap[bal.location][bal.currency] = bal.balance;
+      }
+    });
+
+    return locMap;
+  };
+
+  // Group balances by global currency
+  const getGlobalBalances = () => {
+    const global = { AFN: 0, USD: 0, PKR: 0, EUR: 0 };
+    balances.forEach((bal) => {
+      if (global[bal.currency] !== undefined) {
+        global[bal.currency] += bal.balance;
+      }
+    });
+    return global;
+  };
+
+  const locBalances = getBalancesByLocation();
+  const globalBalances = getGlobalBalances();
+
+  return (
+    <div className="list-container">
+      <div className="list-header" style={{ justifyContent: "flex-end" }}>
+        <div className="header-actions">
+          <button
+            className="add-btn"
+            style={{ backgroundColor: "var(--success)", border: "none", marginRight: "10px" }}
+            onClick={() => {
+              setModalType("Credit");
+              setIsModalOpen(true);
+            }}
+          >
+            {t("depositCash")}
+          </button>
+          <button
+            className="add-btn"
+            style={{ backgroundColor: "var(--danger)", border: "none" }}
+            onClick={() => {
+              setModalType("Debit");
+              setIsModalOpen(true);
+            }}
+          >
+            {t("withdrawTransferCash")}
+          </button>
+        </div>
+      </div>
+
+      {/* Global Liquidity Cards */}
+      <h3 className="section-title mt-4">{t("globalNetLiquidity")}</h3>
+      <div className="grid stats-grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))" }}>
+        {Object.entries(globalBalances).map(([cur, bal]) => (
+          <div key={cur} className="card metric-card">
+            <h3>{t("totalSafeCash")} ({cur})</h3>
+            <div className={`value ${bal >= 0 ? "text-success" : "text-danger"}`}>
+              {bal.toLocaleString()} {cur}
+            </div>
+            <p className="trend neutral">{t("netNetworkAssets")}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Till-by-Till breakdown */}
+      <h3 className="section-title mt-4">{t("physicalVaultLocations")}</h3>
+      <div className="grid action-grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "1.25rem" }}>
+        {LOCATIONS.map((loc) => {
+          return (
+            <div key={loc} className="card loc-card">
+              <h4>🏢 {getTranslatedLocation(loc)}</h4>
+              <div className="loc-currency-list">
+                {CURRENCIES.map((cur) => {
+                  const bal = locBalances[loc]?.[cur] || 0;
+                  return (
+                    <div key={cur} className="loc-currency-row">
+                      <span className="cur-label">{cur}</span>
+                      <span className={`cur-value ${bal >= 0 ? "text-success" : "text-danger"}`}>
+                        {bal.toLocaleString()} {cur}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Filter and Transaction Logs */}
+      <h3 className="section-title mt-4">{t("safeLedgerAuditLogs")}</h3>
+      <div className="expense-filters">
+        <div className="search-bar">
+          <input
+            type="text"
+            placeholder={t("searchDescriptionPlaceholder")}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        <select
+          className="filter-select"
+          value={filterLocation}
+          onChange={(e) => setFilterLocation(e.target.value)}
+        >
+          <option value="all">{t("allLocations")}</option>
+          {LOCATIONS.map((loc) => (
+            <option key={loc} value={loc}>
+              {getTranslatedLocation(loc)}
+            </option>
+          ))}
+        </select>
+        <select
+          className="filter-select"
+          value={filterCurrency}
+          onChange={(e) => setFilterCurrency(e.target.value)}
+        >
+          <option value="all">{t("allCurrencies")}</option>
+          {CURRENCIES.map((cur) => (
+            <option key={cur} value={cur}>
+              {cur}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Transactions Table */}
+      <div className="table-wrapper">
+        {loading ? (
+          <div className="empty-state">{t("loadingTransactions")}</div>
+        ) : (
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>{t("txId")}</th>
+                <th>{t("date")}</th>
+                <th>{t("locationTill")}</th>
+                <th>{t("type")}</th>
+                <th>{t("amount")}</th>
+                <th>{t("description")}</th>
+                <th>{t("recordedBy")}</th>
+                <th style={{ textAlign: "right" }}>{t("actions")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {transactions.length === 0 ? (
+                <tr>
+                  <td colSpan="8" className="empty-state">
+                    {t("noTransactionsMatching")}
+                  </td>
+                </tr>
+              ) : (
+                transactions.map((tx) => (
+                  <tr key={tx.id}>
+                    <td className="text-light">{tx.id}</td>
+                    <td>{tx.date}</td>
+                    <td className="fw-bold">{getTranslatedLocation(tx.location)}</td>
+                    <td>
+                      <span className={`status-badge ${tx.type === "Credit" ? "paid" : "pending"}`}>
+                        {tx.type === "Credit" ? t("deposit") : t("withdrawal")}
+                      </span>
+                    </td>
+                    <td className="fw-bold" style={{ color: tx.type === "Credit" ? "var(--success)" : "var(--danger)" }}>
+                      {tx.type === "Credit" ? "+" : "-"}
+                      {tx.amount.toLocaleString()} {tx.currency}
+                    </td>
+                    <td>{tx.description}</td>
+                    <td>{tx.recordedBy}</td>
+                    <td style={{ textAlign: "right" }}>
+                      <button
+                        className="action-btn danger small-btn"
+                        onClick={() => handleDelete(tx.id)}
+                      >
+                        {t("delete")}
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      {/* MODAL: Record Inflow / Outflow */}
+      {isModalOpen && (
+        <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
+          <div
+            className="modal-content add-modal"
+            onClick={(e) => e.stopPropagation()}
+            style={{ maxWidth: "550px" }}
+          >
+            <div className="modal-header">
+              <h3>
+                {modalType === "Credit" ? t("depositSafeCashCredit") : t("withdrawTransferSafeCashDebit")}
+              </h3>
+              <button className="close-btn" onClick={() => setIsModalOpen(false)}>
+                &times;
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit}>
+              <div className="modal-body">
+                <div className="form-group">
+                  <label>{t("date")}</label>
+                  <input
+                    type="date"
+                    required
+                    value={dateField}
+                    onChange={(e) => setDateField(e.target.value)}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>{t("sourceDestinationTill")}</label>
+                  <select
+                    value={locationField}
+                    onChange={(e) => setLocationField(e.target.value)}
+                  >
+                    {LOCATIONS.map((loc) => (
+                      <option key={loc} value={loc}>
+                        {getTranslatedLocation(loc)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-grid-2">
+                  <div className="form-group">
+                    <label>{t("amount")}</label>
+                    <input
+                      type="number"
+                      required
+                      min="0.01"
+                      step="0.01"
+                      placeholder="0.00"
+                      value={amountField}
+                      onChange={(e) => setAmountField(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Currency</label>
+                    <select
+                      value={currencyField}
+                      onChange={(e) => setCurrencyField(e.target.value)}
+                    >
+                      {CURRENCIES.map((cur) => (
+                        <option key={cur} value={cur}>
+                          {cur}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label>{t("descriptionRemarks")}</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder={t("safeDescriptionPlaceholder")}
+                    value={descriptionField}
+                    onChange={(e) => setDescriptionField(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="action-btn secondary"
+                  onClick={() => setIsModalOpen(false)}
+                >
+                  {t("cancel")}
+                </button>
+                <button type="submit" className="action-btn submit-btn">
+                  {t("recordSafeEntry")}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
