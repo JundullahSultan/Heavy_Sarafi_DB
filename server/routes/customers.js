@@ -33,15 +33,18 @@ router.get("/", checkAuth, async (req, res) => {
   try {
     const { search } = req.query;
     let query = {};
+    
+    if (req.dbUser.role !== "owner") {
+      query.branch = req.dbUser.branch;
+    }
+
     if (search) {
-      query = {
-        $or: [
-          { name: { $regex: search, $options: "i" } },
-          { idNumber: { $regex: search, $options: "i" } },
-          { phone: { $regex: search, $options: "i" } },
-          { id: { $regex: search, $options: "i" } },
-        ],
-      };
+      query.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { idNumber: { $regex: search, $options: "i" } },
+        { phone: { $regex: search, $options: "i" } },
+        { id: { $regex: search, $options: "i" } },
+      ];
     }
     const customers = await Customer.find(query).sort({ createdAt: -1 });
     res.json(customers);
@@ -100,6 +103,7 @@ router.post("/", checkAuth, upload.single("idImage"), async (req, res) => {
       idNumber,
       address,
       idImageUrl,
+      branch: req.dbUser.branch || "Kabul Branch",
     });
 
     await newCustomer.save();
@@ -117,6 +121,10 @@ router.put("/:id", checkAuth, upload.single("idImage"), async (req, res) => {
     const customer = await Customer.findOne({ id: req.params.id });
     if (!customer) {
       return res.status(404).json({ message: "Customer not found." });
+    }
+
+    if (req.dbUser.role !== "owner" && customer.branch !== req.dbUser.branch) {
+      return res.status(403).json({ message: "Access denied. Customer belongs to another branch." });
     }
 
     const { name, fatherName, phone, idNumber, address } = req.body;
@@ -149,10 +157,16 @@ router.put("/:id", checkAuth, upload.single("idImage"), async (req, res) => {
 // DELETE customer
 router.delete("/:id", checkAuth, async (req, res) => {
   try {
-    const customer = await Customer.findOneAndDelete({ id: req.params.id });
+    const customer = await Customer.findOne({ id: req.params.id });
     if (!customer) {
       return res.status(404).json({ message: "Customer not found." });
     }
+
+    if (req.dbUser.role !== "owner" && customer.branch !== req.dbUser.branch) {
+      return res.status(403).json({ message: "Access denied. Customer belongs to another branch." });
+    }
+
+    await Customer.deleteOne({ id: req.params.id });
     res.json({ message: "Customer deleted.", id: req.params.id });
   } catch (error) {
     res.status(500).json({ message: error.message });

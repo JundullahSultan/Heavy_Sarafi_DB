@@ -10,6 +10,10 @@ router.get("/", checkAuth, async (req, res) => {
     const { search } = req.query;
     let query = {};
     
+    if (req.dbUser.role !== "owner") {
+      query.branch = req.dbUser.branch;
+    }
+
     if (search) {
       query.$or = [
         { name: { $regex: search, $options: "i" } },
@@ -29,6 +33,7 @@ router.get("/", checkAuth, async (req, res) => {
           address: "Kandahar Market",
           currency: "AFN",
           netBalance: 250000,
+          branch: "Kabul Branch",
           transactions: [
             {
               id: "TXN-1",
@@ -54,6 +59,7 @@ router.get("/", checkAuth, async (req, res) => {
           address: "Kabul, District 2",
           currency: "USD",
           netBalance: -1500,
+          branch: "Kabul Branch",
           transactions: [
             {
               id: "TXN-3",
@@ -109,6 +115,7 @@ router.post("/", checkAuth, async (req, res) => {
       address,
       currency,
       netBalance: parsedBalance,
+      branch: req.dbUser.branch || "Kabul Branch",
       transactions,
     });
 
@@ -126,6 +133,11 @@ router.get("/:id", checkAuth, async (req, res) => {
     if (!account) {
       return res.status(404).json({ message: "Kahata account not found." });
     }
+
+    if (req.dbUser.role !== "owner" && account.branch !== req.dbUser.branch) {
+      return res.status(403).json({ message: "Access denied. Account belongs to another branch." });
+    }
+
     res.json(account);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -140,6 +152,10 @@ router.post("/:id/transaction", checkAuth, async (req, res) => {
     
     if (!account) {
       return res.status(404).json({ message: "Kahata account not found." });
+    }
+
+    if (req.dbUser.role !== "owner" && account.branch !== req.dbUser.branch) {
+      return res.status(403).json({ message: "Access denied. Account belongs to another branch." });
     }
 
     const parsedAmount = parseFloat(amount);
@@ -177,6 +193,10 @@ router.delete("/:id", checkAuth, async (req, res) => {
       return res.status(404).json({ message: "Kahata account not found." });
     }
     
+    if (req.dbUser.role !== "owner" && account.branch !== req.dbUser.branch) {
+      return res.status(403).json({ message: "Access denied. Account belongs to another branch." });
+    }
+
     await Kahata.deleteOne({ id: req.params.id });
     res.json({ message: `Account ${req.params.id} deleted successfully.` });
   } catch (error) {

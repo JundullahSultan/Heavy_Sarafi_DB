@@ -212,7 +212,7 @@ function App() {
             element={
               currentUserRole === ROLES.OWNER ||
               currentUserRole === ROLES.MANAGER ? (
-                <Reports />
+                <Reports user={user} />
               ) : (
                 <Navigate to={defaultRoute} replace />
               )

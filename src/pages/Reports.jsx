@@ -1,298 +1,8 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import "./Reports.css";
 import { getRole, ROLES } from "../utils/auth";
 import { useLanguage } from "../context/LanguageContext";
-
-// Expanded Mock Data — 24 transactions across 5 days, 4 branches, 3 currencies
-const SAMPLE_TX = [
-  // June 29 (Today)
-  {
-    id: "SHW-5011",
-    date: "2026-06-29T09:00:00",
-    branch: "Herat Main",
-    type: "sent",
-    amount: 15000,
-    currency: "AFN",
-    fee: 150,
-    status: "pending",
-    kahataDelta: 0,
-    exchangeMargin: 0,
-  },
-  {
-    id: "SHW-5012",
-    date: "2026-06-29T10:45:00",
-    branch: "Dubai Branch",
-    type: "sent",
-    amount: 5000,
-    currency: "USD",
-    fee: 25,
-    status: "paid",
-    kahataDelta: 0,
-    exchangeMargin: 12,
-  },
-  {
-    id: "RHW-3001",
-    date: "2026-06-29T11:05:00",
-    branch: "Kabul Branch",
-    type: "received",
-    amount: 10000,
-    currency: "AFN",
-    fee: 100,
-    status: "paid",
-    kahataDelta: 0,
-    exchangeMargin: 0,
-  },
-  {
-    id: "SHW-5013",
-    date: "2026-06-29T14:20:00",
-    branch: "Kabul Branch",
-    type: "sent",
-    amount: 2000,
-    currency: "USD",
-    fee: 15,
-    status: "paid",
-    kahataDelta: 0,
-    exchangeMargin: 5,
-  },
-  {
-    id: "RHW-3010",
-    date: "2026-06-29T16:30:00",
-    branch: "Herat Main",
-    type: "received",
-    amount: 18500,
-    currency: "AFN",
-    fee: 185,
-    status: "pending",
-    kahataDelta: 0,
-    exchangeMargin: 0,
-  },
-
-  // June 28
-  {
-    id: "SHW-5014",
-    date: "2026-06-28T08:30:00",
-    branch: "Mazar-e-Sharif Main",
-    type: "sent",
-    amount: 25000,
-    currency: "AFN",
-    fee: 250,
-    status: "paid",
-    kahataDelta: 25000,
-    exchangeMargin: 0,
-  },
-  {
-    id: "RHW-3002",
-    date: "2026-06-28T09:15:00",
-    branch: "Herat Main",
-    type: "received",
-    amount: 8000,
-    currency: "USD",
-    fee: 80,
-    status: "paid",
-    kahataDelta: 0,
-    exchangeMargin: 18,
-  },
-  {
-    id: "SHW-5015",
-    date: "2026-06-28T11:00:00",
-    branch: "Dubai Branch",
-    type: "sent",
-    amount: 12000,
-    currency: "PKR",
-    fee: 120,
-    status: "pending",
-    kahataDelta: 0,
-    exchangeMargin: 0,
-  },
-  {
-    id: "RHW-3003",
-    date: "2026-06-28T13:45:00",
-    branch: "Kabul Branch",
-    type: "received",
-    amount: 35000,
-    currency: "AFN",
-    fee: 350,
-    status: "paid",
-    kahataDelta: 0,
-    exchangeMargin: 0,
-  },
-  {
-    id: "SHW-5016",
-    date: "2026-06-28T15:30:00",
-    branch: "Herat Main",
-    type: "sent",
-    amount: 4500,
-    currency: "USD",
-    fee: 45,
-    status: "paid",
-    kahataDelta: 0,
-    exchangeMargin: 9,
-  },
-
-  // June 27
-  {
-    id: "RHW-3004",
-    date: "2026-06-27T08:00:00",
-    branch: "Dubai Branch",
-    type: "received",
-    amount: 15000,
-    currency: "USD",
-    fee: 150,
-    status: "pending",
-    kahataDelta: 0,
-    exchangeMargin: 35,
-  },
-  {
-    id: "SHW-5017",
-    date: "2026-06-27T10:20:00",
-    branch: "Kabul Branch",
-    type: "sent",
-    amount: 18000,
-    currency: "AFN",
-    fee: 180,
-    status: "paid",
-    kahataDelta: 0,
-    exchangeMargin: 0,
-  },
-  {
-    id: "RHW-3005",
-    date: "2026-06-27T12:00:00",
-    branch: "Mazar-e-Sharif Main",
-    type: "received",
-    amount: 22000,
-    currency: "AFN",
-    fee: 220,
-    status: "paid",
-    kahataDelta: 0,
-    exchangeMargin: 0,
-  },
-  {
-    id: "SHW-5018",
-    date: "2026-06-27T14:10:00",
-    branch: "Dubai Branch",
-    type: "sent",
-    amount: 8000,
-    currency: "USD",
-    fee: 80,
-    status: "paid",
-    kahataDelta: 0,
-    exchangeMargin: 22,
-  },
-
-  // June 26
-  {
-    id: "RHW-3006",
-    date: "2026-06-26T09:30:00",
-    branch: "Herat Main",
-    type: "received",
-    amount: 5000,
-    currency: "PKR",
-    fee: 50,
-    status: "paid",
-    kahataDelta: 0,
-    exchangeMargin: 0,
-  },
-  {
-    id: "SHW-5019",
-    date: "2026-06-26T11:45:00",
-    branch: "Kabul Branch",
-    type: "sent",
-    amount: 32000,
-    currency: "AFN",
-    fee: 320,
-    status: "pending",
-    kahataDelta: 0,
-    exchangeMargin: 0,
-  },
-  {
-    id: "RHW-3007",
-    date: "2026-06-26T16:00:00",
-    branch: "Dubai Branch",
-    type: "received",
-    amount: 9500,
-    currency: "USD",
-    fee: 95,
-    status: "paid",
-    kahataDelta: 0,
-    exchangeMargin: 28,
-  },
-
-  // June 25
-  {
-    id: "SHW-5020",
-    date: "2026-06-25T08:15:00",
-    branch: "Mazar-e-Sharif Main",
-    type: "sent",
-    amount: 14000,
-    currency: "AFN",
-    fee: 140,
-    status: "paid",
-    kahataDelta: 14000,
-    exchangeMargin: 0,
-  },
-  {
-    id: "RHW-3008",
-    date: "2026-06-25T10:30:00",
-    branch: "Kabul Branch",
-    type: "received",
-    amount: 6000,
-    currency: "USD",
-    fee: 60,
-    status: "pending",
-    kahataDelta: 0,
-    exchangeMargin: 15,
-  },
-  {
-    id: "SHW-5021",
-    date: "2026-06-25T13:00:00",
-    branch: "Herat Main",
-    type: "sent",
-    amount: 28000,
-    currency: "AFN",
-    fee: 280,
-    status: "paid",
-    kahataDelta: 0,
-    exchangeMargin: 0,
-  },
-  {
-    id: "RHW-3009",
-    date: "2026-06-25T15:45:00",
-    branch: "Mazar-e-Sharif Main",
-    type: "received",
-    amount: 11000,
-    currency: "PKR",
-    fee: 110,
-    status: "paid",
-    kahataDelta: 0,
-    exchangeMargin: 0,
-  },
-
-  // June 24 (older data)
-  {
-    id: "SHW-5022",
-    date: "2026-06-24T09:00:00",
-    branch: "Dubai Branch",
-    type: "sent",
-    amount: 9500,
-    currency: "USD",
-    fee: 95,
-    status: "paid",
-    kahataDelta: 0,
-    exchangeMargin: 24,
-  },
-  {
-    id: "RHW-3011",
-    date: "2026-06-24T14:30:00",
-    branch: "Kabul Branch",
-    type: "received",
-    amount: 42000,
-    currency: "AFN",
-    fee: 420,
-    status: "paid",
-    kahataDelta: 0,
-    exchangeMargin: 0,
-  },
-];
+import API from "../utils/api";
 
 function formatDateInput(date) {
   const d = new Date(date);
@@ -319,12 +29,16 @@ const CurrencyBadges = ({ dataObj }) => {
   );
 };
 
-export default function Reports() {
+export default function Reports({ user }) {
   const { t } = useLanguage();
   const currentUserRole = getRole() || ROLES.EMPLOYEE;
-  const userBranch = "Kabul Branch"; // Hardcoded for demo
+  const userBranch = user?.branch || "Kabul Branch";
 
-  // Default date range spans the last 5 days so all fake data is visible
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  // Default date range spans the last 5 days so all data is visible
   const fiveDaysAgo = new Date();
   fiveDaysAgo.setDate(fiveDaysAgo.getDate() - 5);
 
@@ -332,7 +46,34 @@ export default function Reports() {
   const [toDate, setToDate] = useState(formatDateInput(new Date()));
   const [currencyFilter, setCurrencyFilter] = useState("");
 
-  const transactions = useMemo(() => SAMPLE_TX, []);
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        setLoading(true);
+        setError("");
+        const res = await API.get("/hawalas");
+        const mapped = res.data.map(h => ({
+          id: h.id,
+          date: h.date && h.date.includes("T") ? h.date : new Date(h.createdAt || h.date).toISOString(),
+          branch: h.type === "sent" ? h.senderBranch : h.destinationBranch,
+          type: h.type,
+          amount: h.amount,
+          currency: h.currency,
+          fee: h.fee || 0,
+          status: h.status === "Paid Out" ? "paid" : "pending",
+          kahataDelta: h.fundingSource === "kahata" ? h.amount : 0,
+          exchangeMargin: 0,
+        }));
+        setTransactions(mapped);
+      } catch (err) {
+        console.error("Failed to fetch reports:", err);
+        setError("Failed to load report data from the backend.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTransactions();
+  }, []);
 
   // Filter logic
   const filtered = useMemo(() => {
@@ -423,6 +164,23 @@ export default function Reports() {
     a.click();
     URL.revokeObjectURL(url);
   };
+
+  if (loading) {
+    return (
+      <div className="empty-state" style={{ height: "60vh", display: "flex", justifyContent: "center", alignItems: "center" }}>
+        <h3>Loading report data, please wait...</h3>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="empty-state" style={{ height: "60vh", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", gap: "1rem" }}>
+        <h3 className="text-danger">⚠️ {error}</h3>
+        <button className="action-btn auto-width" onClick={() => window.location.reload()}>Retry</button>
+      </div>
+    );
+  }
 
   return (
     <div className="list-container">

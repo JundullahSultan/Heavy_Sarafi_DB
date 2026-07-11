@@ -13,64 +13,72 @@ const __dirname = path.dirname(__filename);
 // Load Environment Variables
 dotenv.config();
 
-// Connect to Database
-connectDB();
+// Boot the server only after DB is connected
+const startServer = async () => {
+  // 1. Connect to Database FIRST (must be ready before routes import)
+  await connectDB();
 
-const app = express();
+  const app = express();
 
-// Ensure uploads folder exists
-const uploadsDir = path.join(__dirname, "uploads");
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
-app.use("/uploads", express.static(uploadsDir));
+  // Ensure uploads folder exists
+  const uploadsDir = path.join(__dirname, "uploads");
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+  }
+  app.use("/uploads", express.static(uploadsDir));
 
-// Middlewares
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin || /^http:\/\/localhost:\d+$/.test(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true,
-  })
-);
-app.use(express.json());
-app.use(
-  cookieSession({
-    name: "session",
-    keys: [process.env.SESSION_SECRET || "heavysarafisessionkeysecret"],
-    maxAge: 365 * 24 * 60 * 60 * 1000, // 1 year session lifespan
-    secure: false, // set to true in production with HTTPS
-    httpOnly: true,
-  })
-);
+  // Middlewares
+  app.use(
+    cors({
+      origin: (origin, callback) => {
+        if (!origin || /^http:\/\/localhost:\d+$/.test(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error("Not allowed by CORS"));
+        }
+      },
+      credentials: true,
+    })
+  );
+  app.use(express.json());
+  app.use(
+    cookieSession({
+      name: "session",
+      keys: [process.env.SESSION_SECRET || "heavysarafisessionkeysecret"],
+      maxAge: 365 * 24 * 60 * 60 * 1000, // 1 year session lifespan
+      secure: false, // set to true in production with HTTPS
+      httpOnly: true,
+    })
+  );
 
-// Routes
-import authRouter from "./routes/auth.js";
-import customersRouter from "./routes/customers.js";
-import hawalasRouter from "./routes/hawalas.js";
-import expensesRouter from "./routes/expenses.js";
-import kahataRouter from "./routes/kahata.js";
-import safesRouter from "./routes/safes.js";
+  // 2. Import routes AFTER DB is connected (so seedDefaultUser in auth.js works)
+  const { default: authRouter } = await import("./routes/auth.js");
+  const { default: customersRouter } = await import("./routes/customers.js");
+  const { default: hawalasRouter } = await import("./routes/hawalas.js");
+  const { default: expensesRouter } = await import("./routes/expenses.js");
+  const { default: kahataRouter } = await import("./routes/kahata.js");
+  const { default: safesRouter } = await import("./routes/safes.js");
 
-app.use("/api/auth", authRouter);
-app.use("/api/customers", customersRouter);
-app.use("/api/hawalas", hawalasRouter);
-app.use("/api/expenses", expensesRouter);
-app.use("/api/kahata", kahataRouter);
-app.use("/api/safes", safesRouter);
+  app.use("/api/auth", authRouter);
+  app.use("/api/customers", customersRouter);
+  app.use("/api/hawalas", hawalasRouter);
+  app.use("/api/expenses", expensesRouter);
+  app.use("/api/kahata", kahataRouter);
+  app.use("/api/safes", safesRouter);
 
-// Health Check
-app.get("/", (req, res) => {
-  res.send("Heavy Sarafi DB API is running...");
-});
+  // Health Check
+  app.get("/", (req, res) => {
+    res.send("Heavy Sarafi DB API is running...");
+  });
 
-// Start Server
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  // Start Server
+  const PORT = process.env.PORT || 50001;
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+};
+
+startServer().catch((err) => {
+  console.error("Fatal startup error:", err);
+  process.exit(1);
 });

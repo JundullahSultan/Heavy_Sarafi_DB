@@ -26,6 +26,10 @@ router.get("/", checkAuth, async (req, res) => {
     const { search, category } = req.query;
     let query = {};
 
+    if (req.dbUser.role !== "owner") {
+      query.branch = req.dbUser.branch;
+    }
+
     if (category && category !== "all") {
       query.categoryId = category;
     }
@@ -49,6 +53,7 @@ router.get("/", checkAuth, async (req, res) => {
           currency: "AFN",
           description: "Office rent for July 2026",
           recordedBy: "Manager",
+          branch: "Kabul Branch",
         },
         {
           id: "EXP-1002",
@@ -58,6 +63,7 @@ router.get("/", checkAuth, async (req, res) => {
           currency: "AFN",
           description: "Electricity bill",
           recordedBy: "Manager",
+          branch: "Kabul Branch",
         },
         {
           id: "EXP-1003",
@@ -67,6 +73,7 @@ router.get("/", checkAuth, async (req, res) => {
           currency: "AFN",
           description: "Tea and refreshments",
           recordedBy: "Employee",
+          branch: "Herat Main",
         }
       ]);
     }
@@ -108,6 +115,7 @@ router.post("/", checkAuth, upload.single("receipt"), async (req, res) => {
       currency,
       description,
       recordedBy: req.dbUser.name,
+      branch: req.dbUser.branch || "Kabul Branch",
       receiptUrl,
     });
 
@@ -124,6 +132,10 @@ router.put("/:id", checkAuth, upload.single("receipt"), async (req, res) => {
     const expense = await Expense.findOne({ id: req.params.id });
     if (!expense) {
       return res.status(404).json({ message: "Expense not found." });
+    }
+
+    if (req.dbUser.role !== "owner" && expense.branch !== req.dbUser.branch) {
+      return res.status(403).json({ message: "Access denied. Expense belongs to another branch." });
     }
 
     const { date, categoryId, amount, currency, description } = req.body;
@@ -156,10 +168,16 @@ router.put("/:id", checkAuth, upload.single("receipt"), async (req, res) => {
 // DELETE expense
 router.delete("/:id", checkAuth, async (req, res) => {
   try {
-    const expense = await Expense.findOneAndDelete({ id: req.params.id });
+    const expense = await Expense.findOne({ id: req.params.id });
     if (!expense) {
       return res.status(404).json({ message: "Expense not found." });
     }
+
+    if (req.dbUser.role !== "owner" && expense.branch !== req.dbUser.branch) {
+      return res.status(403).json({ message: "Access denied. Expense belongs to another branch." });
+    }
+
+    await Expense.deleteOne({ id: req.params.id });
     res.json({ message: "Expense deleted.", id: req.params.id });
   } catch (error) {
     res.status(500).json({ message: error.message });

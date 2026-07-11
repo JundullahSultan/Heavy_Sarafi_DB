@@ -1,9 +1,32 @@
 import mongoose from "mongoose";
 
 export const connectDB = async () => {
+  const uri = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/heavy_sarafi";
+
+  // Ensure database name is present in the URI
+  let finalUri = uri;
+  if (!uri.includes("mongodb+srv") && !uri.match(/\/[^/]+$/)) {
+    finalUri = uri.replace(/\/?$/, "/heavy_sarafi");
+  } else if (!uri.includes("mongodb+srv") && uri.match(/:\d+\/?$/)) {
+    finalUri = uri.replace(/\/?$/, "/heavy_sarafi");
+  }
+
+  console.log("───────────────────────────────────────");
+  console.log("📡 Connecting to MongoDB...");
+  console.log(`   URI: ${finalUri.replace(/\/\/([^:]+):([^@]+)@/, "//$1:****@")}`);
+  console.log("───────────────────────────────────────");
+
   try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI);
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
+    const conn = await mongoose.connect(finalUri);
+    const host = conn.connection.host;
+    const dbName = conn.connection.name;
+
+    console.log("───────────────────────────────────────");
+    console.log("✅ MongoDB Connected Successfully!");
+    console.log(`   Host:     ${host}`);
+    console.log(`   Database: ${dbName}`);
+    console.log(`   State:    ${mongoose.connection.readyState === 1 ? "Connected" : "Disconnected"}`);
+    console.log("───────────────────────────────────────");
     
     // Drop stale unique uid index left from older schemas
     try {
@@ -20,8 +43,35 @@ export const connectDB = async () => {
     } catch (err) {
       console.warn("Warning during stale index cleanup:", err.message);
     }
+
+    // Auto-seed all sections data if database is currently empty of customers
+    try {
+      const { Customer } = await import("../models/Customer.js");
+      const customerCount = await Customer.countDocuments();
+      if (customerCount === 0) {
+        console.log("No customers found in database. Automatically seeding all sections data...");
+        const { seedData } = await import("../seedAllData.js");
+        await seedData();
+      }
+    } catch (seedErr) {
+      console.error("Auto-seed error on startup:", seedErr.message);
+    }
   } catch (error) {
-    console.error(`Database Connection Error: ${error.message}`);
+    console.log("───────────────────────────────────────");
+    console.log("❌ MongoDB Connection FAILED!");
+    console.log(`   Error: ${error.message}`);
+    console.log("───────────────────────────────────────");
     process.exit(1);
   }
+
+  // Log connection state changes
+  mongoose.connection.on("disconnected", () => {
+    console.log("⚠️  MongoDB disconnected!");
+  });
+  mongoose.connection.on("reconnected", () => {
+    console.log("✅ MongoDB reconnected!");
+  });
+  mongoose.connection.on("error", (err) => {
+    console.error("❌ MongoDB connection error:", err.message);
+  });
 };

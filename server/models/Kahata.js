@@ -49,6 +49,10 @@ const KahataSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    branch: {
+      type: String,
+      required: true,
+    },
     transactions: [KahataTransactionSchema],
   },
   { timestamps: true }

@@ -35,36 +35,47 @@ router.get("/", checkAuth, async (req, res) => {
     let query = {};
     
     const isOwner = req.dbUser.role === "owner";
-    
+    const andConditions = [];
+
     if (type === "sent") {
-      query.type = "sent";
+      andConditions.push({ type: "sent" });
       if (!isOwner) {
-        query.senderBranch = req.dbUser.branch;
+        andConditions.push({ senderBranch: req.dbUser.branch });
       }
     } else if (type === "received") {
       if (!isOwner) {
-        query.destinationBranch = req.dbUser.branch;
+        andConditions.push({ destinationBranch: req.dbUser.branch });
       } else {
-        query.$or = [
-          { type: "received" },
-          { destinationBranch: { $exists: true } }
-        ];
+        andConditions.push({
+          $or: [
+            { type: "received" },
+            { destinationBranch: { $exists: true } }
+          ]
+        });
       }
     } else {
       if (!isOwner) {
-        query.$or = [
-          { senderBranch: req.dbUser.branch },
-          { destinationBranch: req.dbUser.branch }
-        ];
+        andConditions.push({
+          $or: [
+            { senderBranch: req.dbUser.branch },
+            { destinationBranch: req.dbUser.branch }
+          ]
+        });
       }
     }
     
     if (search) {
-      query.$or = [
-        { id: { $regex: search, $options: "i" } },
-        { senderName: { $regex: search, $options: "i" } },
-        { receiverName: { $regex: search, $options: "i" } },
-      ];
+      andConditions.push({
+        $or: [
+          { id: { $regex: search, $options: "i" } },
+          { senderName: { $regex: search, $options: "i" } },
+          { receiverName: { $regex: search, $options: "i" } },
+        ]
+      });
+    }
+
+    if (andConditions.length > 0) {
+      query.$and = andConditions;
     }
     
     // Auto-populate initial data if empty
@@ -234,6 +245,10 @@ router.put("/:id/payout", checkAuth, async (req, res) => {
       return res.status(404).json({ message: "Hawala not found." });
     }
     
+    if (req.dbUser.role !== "owner" && hawala.destinationBranch !== req.dbUser.branch) {
+      return res.status(403).json({ message: "Access denied. Payouts must be processed by the destination branch." });
+    }
+    
     hawala.status = "Paid Out";
     if (req.body.receiverIdImageUrl) {
       hawala.receiverIdImageUrl = req.body.receiverIdImageUrl;
@@ -252,6 +267,10 @@ router.delete("/:id", checkAuth, async (req, res) => {
     const hawala = await Hawala.findOne({ id: req.params.id });
     if (!hawala) {
       return res.status(404).json({ message: "Hawala not found." });
+    }
+
+    if (req.dbUser.role !== "owner" && hawala.senderBranch !== req.dbUser.branch && hawala.destinationBranch !== req.dbUser.branch) {
+      return res.status(403).json({ message: "Access denied. Hawala belongs to another branch." });
     }
 
     // Role checking

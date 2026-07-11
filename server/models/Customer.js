@@ -23,14 +23,9 @@ const CustomerSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    address: {
-      type: String,
-      required: true,
-    },
-    idImageUrl: {
-      type: String,
-      required: true,
-    },
+    address: { type: String, required: true },
+    idImageUrl: { type: String, required: true },
+    branch: { type: String, required: true },
     registeredDate: {
       type: String,
       default: () => new Date().toISOString().split("T")[0],
