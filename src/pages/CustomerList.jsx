@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
+import { usePopup } from "../context/PopupContext";
 import API from "../utils/api";
 import "./CustomerList.css";
 
 export default function CustomerList() {
   const { t } = useLanguage();
+  const { showAlert } = usePopup();
   const { id } = useParams();
   const navigate = useNavigate();
   
@@ -24,13 +26,22 @@ export default function CustomerList() {
   const [address, setAddress] = useState("");
   const [idImage, setIdImage] = useState(null);
 
-  // Fetch customers from backend
+  // Fetch customers from backend with localStorage caching
   useEffect(() => {
     const fetchCustomers = async () => {
-      try {
+      const cacheKey = `cache_customers_${activeSearch}`;
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        setCustomers(JSON.parse(cached));
+        setLoading(false);
+      } else {
         setLoading(true);
+      }
+
+      try {
         const res = await API.get(`/customers?search=${activeSearch}`);
         setCustomers(res.data);
+        localStorage.setItem(cacheKey, JSON.stringify(res.data));
       } catch (err) {
         console.error("Error fetching customers:", err);
       } finally {
@@ -61,11 +72,9 @@ export default function CustomerList() {
     }
 
     try {
-      const res = await API.post("/customers", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const res = await API.post("/customers", formData);
       setCustomers((prev) => [res.data, ...prev]);
-      alert(t("saveCustomerMessage"));
+      showAlert(t("saveCustomerMessage"));
       setIsAddModalOpen(false);
       // Reset form
       setName("");
@@ -76,7 +85,7 @@ export default function CustomerList() {
       setIdImage(null);
     } catch (err) {
       console.error("Error saving customer:", err);
-      alert("Error registering customer: " + (err.response?.data?.message || err.message));
+      showAlert("Error registering customer: " + (err.response?.data?.message || err.message));
     }
   };
 
@@ -106,7 +115,9 @@ export default function CustomerList() {
 
       <div className="table-wrapper">
         {loading ? (
-          <div className="empty-state">Loading customer records...</div>
+          <div className="empty-state" style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "150px" }}>
+            <div className="loader"></div>
+          </div>
         ) : (
           <table className="data-table">
             <thead>

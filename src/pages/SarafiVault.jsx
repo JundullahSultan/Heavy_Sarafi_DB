@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLanguage } from "../context/LanguageContext";
+import { usePopup } from "../context/PopupContext";
 import API from "../utils/api";
 import "./SarafiVault.css";
 
@@ -13,6 +14,7 @@ const CURRENCIES = ["AFN", "USD", "PKR", "EUR", "CNY", "IRR", "GBP"];
 
 export default function SarafiVault() {
   const { t } = useLanguage();
+  const { showAlert, showConfirm } = usePopup();
 
   const [transactions, setTransactions] = useState([]);
   const [balances, setBalances] = useState([]);
@@ -42,8 +44,20 @@ export default function SarafiVault() {
   };
 
   const fetchData = async () => {
-    try {
+    const cacheKeyTxs = `cache_vault_txs_${filterLocation}_${filterCurrency}_${searchTerm}`;
+    const cacheKeyBals = `cache_vault_bals`;
+    const cachedTxs = localStorage.getItem(cacheKeyTxs);
+    const cachedBals = localStorage.getItem(cacheKeyBals);
+
+    if (cachedTxs && cachedBals) {
+      setTransactions(JSON.parse(cachedTxs));
+      setBalances(JSON.parse(cachedBals));
+      setLoading(false);
+    } else {
       setLoading(true);
+    }
+
+    try {
       const [txsRes, balRes, userRes] = await Promise.all([
         API.get(`/safes?location=${filterLocation}&currency=${filterCurrency}&search=${searchTerm}`),
         API.get("/safes/balances"),
@@ -52,6 +66,9 @@ export default function SarafiVault() {
       setTransactions(txsRes.data);
       setBalances(balRes.data);
       setUserBranch(userRes.data.branch || "Kabul Branch");
+      
+      localStorage.setItem(cacheKeyTxs, JSON.stringify(txsRes.data));
+      localStorage.setItem(cacheKeyBals, JSON.stringify(balRes.data));
     } catch (err) {
       console.error("Error fetching safes data:", err);
     } finally {
@@ -78,7 +95,7 @@ export default function SarafiVault() {
       };
 
       await API.post("/safes", payload);
-      alert(modalType === "Credit" ? t("depositSuccess") : t("withdrawalSuccess"));
+      showAlert(modalType === "Credit" ? t("depositSuccess") : t("withdrawalSuccess"));
       setIsModalOpen(false);
       // Reset form
       setAmountField("");
@@ -86,19 +103,19 @@ export default function SarafiVault() {
       fetchData();
     } catch (err) {
       console.error("Error creating transaction:", err);
-      alert("Error: " + (err.response?.data?.message || err.message));
+      showAlert("Error: " + (err.response?.data?.message || err.message));
     }
   };
 
   const handleDelete = async (txId) => {
-    if (!window.confirm(t("deleteConfirm"))) return;
+    if (!await showConfirm(t("deleteConfirm"))) return;
     try {
       await API.delete(`/safes/${txId}`);
-      alert(t("deleteSuccess"));
+      showAlert(t("deleteSuccess"));
       fetchData();
     } catch (err) {
       console.error("Error deleting transaction:", err);
-      alert("Error: " + (err.response?.data?.message || err.message));
+      showAlert("Error: " + (err.response?.data?.message || err.message));
     }
   };
 
@@ -241,7 +258,9 @@ export default function SarafiVault() {
       {/* Transactions Table */}
       <div className="table-wrapper">
         {loading ? (
-          <div className="empty-state">{t("loadingTransactions")}</div>
+          <div className="empty-state" style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "150px" }}>
+            <div className="loader"></div>
+          </div>
         ) : (
           <table className="data-table">
             <thead>

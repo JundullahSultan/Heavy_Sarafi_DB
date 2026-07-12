@@ -49,7 +49,8 @@ const seedDefaultUser = async () => {
       console.log(`Seeded user created fresh: ${u.username} (${u.password})`);
     } else {
       const isMatch = await bcrypt.compare(u.password, existing.password);
-      if (!isMatch || existing.branch !== u.branch || existing.role !== u.role || existing.name !== u.name || existing.status !== "Active") {
+      const needsMetadataUpdate = existing.branch !== u.branch || existing.role !== u.role || existing.name !== u.name || existing.status !== "Active";
+      if (!isMatch) {
         existing.password = u.password;
         existing.branch = u.branch;
         existing.role = u.role;
@@ -57,6 +58,13 @@ const seedDefaultUser = async () => {
         existing.status = "Active";
         await existing.save();
         console.log(`Updated seeded user credentials: ${u.username} (${u.password})`);
+      } else if (needsMetadataUpdate) {
+        existing.branch = u.branch;
+        existing.role = u.role;
+        existing.name = u.name;
+        existing.status = "Active";
+        await existing.save();
+        console.log(`Updated seeded user metadata for: ${u.username}`);
       }
     }
   }

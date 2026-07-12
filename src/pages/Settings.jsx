@@ -2,11 +2,13 @@ import React, { useState } from "react";
 import "./Settings.css";
 import { getRole, ROLES } from "../utils/auth";
 import { useLanguage } from "../context/LanguageContext";
+import { usePopup } from "../context/PopupContext";
 import { LogOut } from "lucide-react";
 
 export default function Settings({ isDarkMode, setIsDarkMode, onLogout }) {
   // receive props
   const currentUserRole = getRole();
+  const { showAlert } = usePopup();
 
   // Profile state
   const [profilePic, setProfilePic] = useState(
@@ -27,7 +29,7 @@ export default function Settings({ isDarkMode, setIsDarkMode, onLogout }) {
 
   const handleSaveSettings = (e) => {
     e.preventDefault();
-    alert(`${t("settingsSaved")} ${t("newRole")} ${role}`);
+    showAlert(`${t("settingsSaved")} ${t("newRole")} ${role}`);
   };
 
   // Handler for theme change

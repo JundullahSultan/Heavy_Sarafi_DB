@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
+import { usePopup } from "../context/PopupContext";
 import API from "../utils/api";
 import "./Expenses.css";
 
@@ -10,6 +11,7 @@ const todayStr = () => new Date().toISOString().split("T")[0];
 
 const Expenses = () => {
   const { t } = useLanguage();
+  const { showAlert } = usePopup();
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -33,13 +35,22 @@ const Expenses = () => {
     return found ? found.label : catId;
   };
 
-  // --- Fetch Expenses ---
+  // --- Fetch Expenses with localStorage caching ---
   useEffect(() => {
     const fetchExpenses = async () => {
-      try {
+      const cacheKey = `cache_expenses_${filterCategory}_${searchTerm}`;
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        setExpenses(JSON.parse(cached));
+        setLoading(false);
+      } else {
         setLoading(true);
+      }
+
+      try {
         const res = await API.get(`/expenses?category=${filterCategory}&search=${searchTerm}`);
         setExpenses(res.data);
+        localStorage.setItem(cacheKey, JSON.stringify(res.data));
       } catch (err) {
         console.error("Error fetching expenses:", err);
       } finally {
@@ -97,16 +108,14 @@ const Expenses = () => {
     }
 
     try {
-      const res = await API.post("/expenses", formData, {
-        headers: { "Content-Type": "multipart/form-data" }
-      });
+      const res = await API.post("/expenses", formData);
       setExpenses((prev) => [res.data, ...prev]);
       setForm({ ...emptyForm });
       setIsAddModalOpen(false);
-      alert("Expense recorded successfully!");
+      showAlert("Expense recorded successfully!");
     } catch (err) {
       console.error("Error logging expense:", err);
-      alert("Error recording expense: " + (err.response?.data?.message || err.message));
+      showAlert("Error recording expense: " + (err.response?.data?.message || err.message));
     }
   };
 
@@ -271,7 +280,9 @@ const Expenses = () => {
       {/* --- Table --- */}
       <div className="table-wrapper">
         {loading ? (
-          <div className="empty-state">Loading expenses log...</div>
+          <div className="empty-state" style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "150px" }}>
+            <div className="loader"></div>
+          </div>
         ) : (
           <table className="hawala-table">
             <thead>

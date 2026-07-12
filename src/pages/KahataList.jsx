@@ -2,11 +2,13 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getRole } from "../utils/auth";
 import { useLanguage } from "../context/LanguageContext";
+import { usePopup } from "../context/PopupContext";
 import API from "../utils/api";
 import "./KahataList.css";
 
 export default function KahataList() {
   const { t } = useLanguage();
+  const { showAlert, showConfirm } = usePopup();
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -34,13 +36,22 @@ export default function KahataList() {
   const [txnDesc, setTxnDesc] = useState("");
   const [txnDate, setTxnDate] = useState(() => new Date().toISOString().split("T")[0]);
 
-  // Fetch accounts from database
+  // Fetch accounts from database with localStorage caching
   useEffect(() => {
     const fetchAccounts = async () => {
-      try {
+      const cacheKey = `cache_kahata_${activeSearch}`;
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        setKahataAccounts(JSON.parse(cached));
+        setLoading(false);
+      } else {
         setLoading(true);
+      }
+
+      try {
         const res = await API.get(`/kahata?search=${activeSearch}`);
         setKahataAccounts(res.data);
+        localStorage.setItem(cacheKey, JSON.stringify(res.data));
       } catch (err) {
         console.error("Error fetching ledger accounts:", err);
       } finally {
@@ -69,7 +80,7 @@ export default function KahataList() {
       
       const res = await API.post("/kahata", payload);
       setKahataAccounts((prev) => [...prev, res.data]);
-      alert("Ledger account opened successfully!");
+      showAlert("Ledger account opened successfully!");
       setIsNewAccountModalOpen(false);
       // Reset fields
       setNewAccName("");
@@ -78,7 +89,7 @@ export default function KahataList() {
       setNewAccInitBalance("0");
     } catch (err) {
       console.error("Error creating account:", err);
-      alert("Error: " + (err.response?.data?.message || err.message));
+      showAlert("Error: " + (err.response?.data?.message || err.message));
     }
   };
 
@@ -97,27 +108,27 @@ export default function KahataList() {
         prev.map((a) => (a.id === selectedAccount.id ? res.data : a))
       );
       
-      alert("Transaction successfully logged to ledger.");
+      showAlert("Transaction successfully logged to ledger.");
       setIsTransactionModalOpen(false);
       // Reset transaction form
       setTxnAmount("");
       setTxnDesc("");
     } catch (err) {
       console.error("Error logging transaction:", err);
-      alert("Error: " + (err.response?.data?.message || err.message));
+      showAlert("Error: " + (err.response?.data?.message || err.message));
     }
   };
 
   const handleDeleteAccount = async (account) => {
     const confirmationMessage = `Are you sure you want to permanently delete account: ${account.name} (${account.id})?`;
-    if (window.confirm(confirmationMessage)) {
+    if (await showConfirm(confirmationMessage)) {
       try {
         await API.delete(`/kahata/${account.id}`);
         setKahataAccounts((prev) => prev.filter((acc) => acc.id !== account.id));
         closeViewModal();
       } catch (err) {
         console.error("Error deleting account:", err);
-        alert("Error: " + (err.response?.data?.message || err.message));
+        showAlert("Error: " + (err.response?.data?.message || err.message));
       }
     }
   };
@@ -151,7 +162,9 @@ export default function KahataList() {
 
       <div className="table-wrapper">
         {loading ? (
-          <div className="empty-state">Loading ledger accounts...</div>
+          <div className="empty-state" style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "150px" }}>
+            <div className="loader"></div>
+          </div>
         ) : (
           <table className="data-table">
             <thead>

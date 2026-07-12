@@ -13,10 +13,7 @@ function formatDateInput(date) {
 const CurrencyBadges = ({ dataObj }) => {
   if (!dataObj || Object.keys(dataObj).length === 0) return <span>-</span>;
   return (
-    <div
-      className="currency-badge-group"
-      style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}
-    >
+    <div className="currency-badge-group">
       {Object.entries(dataObj).map(([currency, amount]) => (
         <span
           key={currency}
@@ -48,8 +45,16 @@ export default function Reports({ user }) {
 
   useEffect(() => {
     const fetchTransactions = async () => {
-      try {
+      const cacheKey = `cache_reports_hawalas`;
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        setTransactions(JSON.parse(cached));
+        setLoading(false);
+      } else {
         setLoading(true);
+      }
+
+      try {
         setError("");
         const res = await API.get("/hawalas");
         const mapped = res.data.map(h => ({
@@ -65,6 +70,7 @@ export default function Reports({ user }) {
           exchangeMargin: 0,
         }));
         setTransactions(mapped);
+        localStorage.setItem(cacheKey, JSON.stringify(mapped));
       } catch (err) {
         console.error("Failed to fetch reports:", err);
         setError("Failed to load report data from the backend.");
@@ -167,17 +173,17 @@ export default function Reports({ user }) {
 
   if (loading) {
     return (
-      <div className="empty-state" style={{ height: "60vh", display: "flex", justifyContent: "center", alignItems: "center" }}>
-        <h3>Loading report data, please wait...</h3>
+      <div className="empty-state flex-center" style={{ height: "60vh" }}>
+        <div className="loader"></div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="empty-state" style={{ height: "60vh", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", gap: "1rem" }}>
+      <div className="empty-state flex-column flex-center gap-1" style={{ height: "60vh" }}>
         <h3 className="text-danger">⚠️ {error}</h3>
-        <button className="action-btn auto-width" onClick={() => window.location.reload()}>Retry</button>
+        <button className="action-btn" onClick={() => window.location.reload()}>Retry</button>
       </div>
     );
   }
@@ -187,7 +193,7 @@ export default function Reports({ user }) {
       {/* --- HEADER --- */}
       <div className="list-header">
         <div>
-          <span className="role-badge" style={{ marginTop: 0 }}>
+          <span className="role-badge">
             {t("accessLevel")}: {currentUserRole}
           </span>
         </div>
@@ -286,37 +292,26 @@ export default function Reports({ user }) {
                   {filtered.length > 0 ? (
                     filtered.map((tx) => (
                       <tr key={tx.id} className="responsive-table-row">
-                        <td
-                          className="fw-bold text-light"
-                          data-label={t("hawalaId")}
-                        >
+                        <td className="fw-bold text-light">
                           {tx.id}
                         </td>
-                        <td data-label={t("time")}>
+                        <td>
                           <span className="mobile-label">{t("time")}: </span>
                           {tx.date.split("T")[1].substring(0, 5)}
                         </td>
-                        <td
-                          data-label={t("type")}
-                          style={{ textTransform: "capitalize" }}
-                        >
+                        <td className="text-capitalize">
                           <span className="mobile-label">{t("type")}: </span>
                           {tx.type}
                         </td>
-                        <td data-label={t("amount")} className="fw-bold">
+                        <td className="fw-bold">
                           <span className="mobile-label">{t("amount")}: </span>
                           {tx.amount.toLocaleString()} {tx.currency}
                         </td>
-                        <td
-                          data-label={t("feeCollected")}
-                          className="text-success"
-                        >
-                          <span className="mobile-label">
-                            {t("feeCollected")}:{" "}
-                          </span>
+                        <td className="text-success">
+                          <span className="mobile-label">{t("feeCollected")}: </span>
                           +{tx.fee} {tx.currency}
                         </td>
-                        <td data-label={t("status")}>
+                        <td>
                           <span className="mobile-label">{t("status")}: </span>
                           <span
                             className={`status-badge ${tx.status === "paid" ? "paid" : "pending"}`}
@@ -384,25 +379,22 @@ export default function Reports({ user }) {
                   {Object.keys(branchSummary).length > 0 ? (
                     Object.keys(branchSummary).map((b) => (
                       <tr key={b} className="responsive-table-row">
-                        <td
-                          className="fw-bold cell-branch-name"
-                          data-label={t("branchLocation")}
-                        >
+                        <td className="fw-bold cell-branch-name">
                           {b}
                         </td>
-                        <td data-label={t("totalCapitalSent")}>
+                        <td>
                           <span className="mobile-label">
                             {t("totalCapitalSent")}:{" "}
                           </span>
                           <CurrencyBadges dataObj={branchSummary[b].sent} />
                         </td>
-                        <td data-label={t("totalCapitalReceived")}>
+                        <td>
                           <span className="mobile-label">
                             {t("totalCapitalReceived")}:{" "}
                           </span>
                           <CurrencyBadges dataObj={branchSummary[b].received} />
                         </td>
-                        <td data-label={t("commissionCollected")}>
+                        <td>
                           <span className="mobile-label">
                             {t("commissionCollected")}:{" "}
                           </span>

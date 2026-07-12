@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
+import { usePopup } from "../context/PopupContext";
 import API from "../utils/api";
 import "./ReceivedHawalaList.css";
 
 export default function ReceivedHawalaList() {
   const { t } = useLanguage();
+  const { showAlert } = usePopup();
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -19,13 +21,22 @@ export default function ReceivedHawalaList() {
   const [isNewCustomer, setIsNewCustomer] = useState(false);
   const [isImageZoomed, setIsImageZoomed] = useState(false);
 
-  // Fetch received hawalas from backend
+  // Fetch received hawalas from backend with localStorage caching
   useEffect(() => {
     const fetchHawalas = async () => {
-      try {
+      const cacheKey = `cache_received_hawalas_${activeSearch}`;
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        setHawalas(JSON.parse(cached));
+        setLoading(false);
+      } else {
         setLoading(true);
+      }
+
+      try {
         const res = await API.get(`/hawalas?type=received&search=${activeSearch}`);
         setHawalas(res.data);
+        localStorage.setItem(cacheKey, JSON.stringify(res.data));
       } catch (err) {
         console.error("Error fetching received hawalas:", err);
       } finally {
@@ -55,13 +66,13 @@ export default function ReceivedHawalaList() {
       setHawalas((prev) =>
         prev.map((h) => (h.id === selectedHawala.id ? res.data : h))
       );
-      alert(
+      showAlert(
         `Hawala ${selectedHawala.id} paid out successfully!`
       );
       closeModal();
     } catch (err) {
       console.error("Payout error:", err);
-      alert("Error processing payout: " + (err.response?.data?.message || err.message));
+      showAlert("Error processing payout: " + (err.response?.data?.message || err.message));
     }
   };
 
@@ -111,7 +122,9 @@ export default function ReceivedHawalaList() {
 
       <div className="table-wrapper">
         {loading ? (
-          <div className="empty-state">Loading transactions queue...</div>
+          <div className="empty-state" style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "150px" }}>
+            <div className="loader"></div>
+          </div>
         ) : (
           <table className="hawala-table">
             <thead>

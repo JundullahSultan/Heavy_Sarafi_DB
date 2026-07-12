@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { getRole, ROLES } from "../utils/auth";
 import { useLanguage } from "../context/LanguageContext";
+import { usePopup } from "../context/PopupContext";
 import API from "../utils/api";
 import "./AllUsers.css";
 
 export default function AllUsers() {
   const { t } = useLanguage();
+  const { showAlert } = usePopup();
   const currentUserRole = getRole();
 
   const [users, setUsers] = useState([]);
@@ -50,7 +52,7 @@ export default function AllUsers() {
   const handleAddUser = async (e) => {
     e.preventDefault();
     // Simulate user creation (In firebase integration, they would sign up via Firebase client SDK)
-    alert("In Firebase Auth setup, you would call firebase client auth to sign up a user, then register their role.");
+    showAlert("In Firebase Auth setup, you would call firebase client auth to sign up a user, then register their role.");
     setIsAddModalOpen(false);
   };
 
@@ -63,12 +65,12 @@ export default function AllUsers() {
       );
     } catch (err) {
       console.error("Error toggling user status:", err);
-      alert(err.response?.data?.message || err.message);
+      showAlert(err.response?.data?.message || err.message);
     }
   };
 
   const resetPassword = (name) => {
-    alert(`${t("temporaryPassword")} ${name}.`);
+    showAlert(`${t("temporaryPassword")} ${name}.`);
   };
 
   if (currentUserRole !== ROLES.OWNER) {
@@ -115,7 +117,9 @@ export default function AllUsers() {
 
       <div className="table-wrapper">
         {loading ? (
-          <div className="empty-state">Loading staff accounts...</div>
+          <div className="empty-state" style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "150px" }}>
+            <div className="loader"></div>
+          </div>
         ) : (
           <table className="hawala-table">
             <thead>

@@ -156,7 +156,7 @@ function App() {
   if (loadingSession) {
     return (
       <div className="empty-state" style={{ height: "100vh", display: "flex", justifyContent: "center", alignItems: "center" }}>
-        <h3>Loading session, please wait...</h3>
+        <div className="loader"></div>
       </div>
     );
   }

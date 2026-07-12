@@ -2,11 +2,13 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getRole, ROLES } from "../utils/auth";
 import { useLanguage } from "../context/LanguageContext";
+import { usePopup } from "../context/PopupContext";
 import API from "../utils/api";
 import "./SendHawalaList.css";
 
 export default function SendHawalaList() {
   const { t } = useLanguage();
+  const { showAlert, showConfirm } = usePopup();
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -40,17 +42,32 @@ export default function SendHawalaList() {
   const [selectedKahataId, setSelectedKahataId] = useState("");
   const [kahataAccounts, setKahataAccounts] = useState([]);
 
-  // Fetch sent hawalas and Kahata accounts
+  // Fetch sent hawalas and Kahata accounts with localStorage caching
   useEffect(() => {
     const fetchSentData = async () => {
-      try {
+      const cacheKeyHawalas = `cache_sent_hawalas_${activeSearch}`;
+      const cacheKeyKahata = `cache_kahata_list_dropdown`;
+      const cachedHawalas = localStorage.getItem(cacheKeyHawalas);
+      const cachedKahata = localStorage.getItem(cacheKeyKahata);
+      
+      if (cachedHawalas && cachedKahata) {
+        setSentHawalas(JSON.parse(cachedHawalas));
+        setKahataAccounts(JSON.parse(cachedKahata));
+        setLoading(false);
+      } else {
         setLoading(true);
+      }
+
+      try {
         const [hawalasRes, kahataRes] = await Promise.all([
           API.get(`/hawalas?type=sent&search=${activeSearch}`),
           API.get("/kahata")
         ]);
         setSentHawalas(hawalasRes.data);
         setKahataAccounts(kahataRes.data);
+        
+        localStorage.setItem(cacheKeyHawalas, JSON.stringify(hawalasRes.data));
+        localStorage.setItem(cacheKeyKahata, JSON.stringify(kahataRes.data));
       } catch (err) {
         console.error("Error fetching sent page data:", err);
       } finally {
@@ -99,7 +116,7 @@ export default function SendHawalaList() {
   const handleSendHawala = async (e) => {
     e.preventDefault();
     if (fundingSource === "kahata" && !selectedKahataId) {
-      alert(t("selectKahataError"));
+      showAlert(t("selectKahataError"));
       return;
     }
 
@@ -127,9 +144,7 @@ export default function SendHawalaList() {
         formData.append("receiverIdImage", receiverIdImage);
       }
 
-      const res = await API.post("/hawalas", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const res = await API.post("/hawalas", formData);
       setSentHawalas((prev) => [res.data, ...prev]);
       
       // If funded from Kahata ledger, post a transaction to that ledger as well
@@ -147,11 +162,11 @@ export default function SendHawalaList() {
           ? t("mainSafeLabel")
           : `${t("kahataLabel")} (${selectedKahataId})`;
           
-      alert(`${t("recordedHawalaMessage")} ${sourceText}`);
+      showAlert(`${t("recordedHawalaMessage")} ${sourceText}`);
       closeSendModal();
     } catch (err) {
       console.error("Error creating outgoing transaction:", err);
-      alert("Error logging outgoing transaction: " + (err.response?.data?.message || err.message));
+      showAlert("Error logging outgoing transaction: " + (err.response?.data?.message || err.message));
     }
   };
 
@@ -165,14 +180,14 @@ export default function SendHawalaList() {
       ? `${t("managerOverride")} ${hawalaId}? ${t("outsideWindow")}`
       : `${t("deleteConfirmation")} ${hawalaId}?`;
 
-    if (window.confirm(confirmationMessage)) {
+    if (await showConfirm(confirmationMessage)) {
       try {
         await API.delete(`/hawalas/${hawalaId}`);
         setSentHawalas((prev) => prev.filter((h) => h.id !== hawalaId));
         closeViewModal();
       } catch (err) {
         console.error("Deletion error:", err);
-        alert("Error deleting record: " + (err.response?.data?.message || err.message));
+        showAlert("Error deleting record: " + (err.response?.data?.message || err.message));
       }
     }
   };
@@ -203,7 +218,9 @@ export default function SendHawalaList() {
 
       <div className="table-wrapper">
         {loading ? (
-          <div className="empty-state">Loading sent transaction logs...</div>
+          <div className="empty-state" style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "150px" }}>
+            <div className="loader"></div>
+          </div>
         ) : (
           <table className="hawala-table">
             <thead>
