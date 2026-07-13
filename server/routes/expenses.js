@@ -1,24 +1,12 @@
 import express from "express";
 import multer from "multer";
-import { v2 as cloudinary } from "cloudinary";
 import { Expense } from "../models/Expense.js";
 import { checkAuth } from "../middleware/auth.js";
+import { uploadFile } from "../utils/upload.js";
 
 const router = express.Router();
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
-
-// Configure Cloudinary Helper
-let isCloudinaryConfigured = false;
-if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET) {
-  cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-  });
-  isCloudinaryConfigured = true;
-  console.log("Cloudinary configured successfully for Expense uploads.");
-}
 
 // GET all expenses
 router.get("/", checkAuth, async (req, res) => {
@@ -91,17 +79,12 @@ router.post("/", checkAuth, upload.single("receipt"), async (req, res) => {
     const { date, categoryId, amount, currency, description } = req.body;
     let receiptUrl = null;
 
-    if (req.file && isCloudinaryConfigured) {
-      const uploadResult = await new Promise((resolve, reject) => {
-        cloudinary.uploader.upload_stream(
-          { folder: "heavy_sarafi_expenses" },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          }
-        ).end(req.file.buffer);
-      });
-      receiptUrl = uploadResult.secure_url;
+    if (req.file) {
+      receiptUrl = await uploadFile(
+        req.file.buffer,
+        "heavy_sarafi_expenses",
+        req.file.originalname
+      );
     }
 
     const count = await Expense.countDocuments();
@@ -145,17 +128,12 @@ router.put("/:id", checkAuth, upload.single("receipt"), async (req, res) => {
     if (currency) expense.currency = currency;
     if (description) expense.description = description;
 
-    if (req.file && isCloudinaryConfigured) {
-      const uploadResult = await new Promise((resolve, reject) => {
-        cloudinary.uploader.upload_stream(
-          { folder: "heavy_sarafi_expenses" },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          }
-        ).end(req.file.buffer);
-      });
-      expense.receiptUrl = uploadResult.secure_url;
+    if (req.file) {
+      expense.receiptUrl = await uploadFile(
+        req.file.buffer,
+        "heavy_sarafi_expenses",
+        req.file.originalname
+      );
     }
 
     await expense.save();

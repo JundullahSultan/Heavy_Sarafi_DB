@@ -1,32 +1,12 @@
 import express from "express";
 import multer from "multer";
-import { v2 as cloudinary } from "cloudinary";
-import path from "path";
-import fs from "fs";
-import { fileURLToPath } from "url";
 import { Hawala } from "../models/Hawala.js";
 import { checkAuth } from "../middleware/auth.js";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import { uploadFile } from "../utils/upload.js";
 
 const router = express.Router();
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
-
-// Configure Cloudinary Helper
-let isCloudinaryConfigured = false;
-if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET) {
-  cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-  });
-  isCloudinaryConfigured = true;
-  console.log("Cloudinary configured successfully for Hawala uploads.");
-} else {
-  console.warn("Cloudinary credentials missing for Hawala uploads.");
-}
 
 // GET all hawalas
 router.get("/", checkAuth, async (req, res) => {
@@ -171,27 +151,11 @@ router.post("/", checkAuth, upload.single("receiverIdImage"), async (req, res) =
     let receiverIdImageUrl = "";
 
     if (req.file) {
-      if (isCloudinaryConfigured) {
-        const uploadResult = await new Promise((resolve, reject) => {
-          cloudinary.uploader.upload_stream(
-            { folder: "heavy_sarafi_hawalas" },
-            (error, result) => {
-              if (error) reject(error);
-              else resolve(result);
-            }
-          ).end(req.file.buffer);
-        });
-        receiverIdImageUrl = uploadResult.secure_url;
-      } else {
-        const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-        const fileExt = req.file.originalname.split(".").pop();
-        const fileName = `receiver-id-${uniqueSuffix}.${fileExt}`;
-        const filePath = path.join(__dirname, "../uploads", fileName);
-        
-        fs.writeFileSync(filePath, req.file.buffer);
-        receiverIdImageUrl = `http://localhost:5000/uploads/${fileName}`;
-        console.log("Receiver ID image saved locally: ", receiverIdImageUrl);
-      }
+      receiverIdImageUrl = await uploadFile(
+        req.file.buffer,
+        "heavy_sarafi_hawalas",
+        req.file.originalname
+      );
     }
 
     const prefix = type === "sent" ? "SHW" : "HW";
@@ -221,7 +185,7 @@ router.post("/", checkAuth, upload.single("receiverIdImage"), async (req, res) =
       receiverFather,
       receiverPhone,
       receiverExpectedId,
-      receiverIdImageUrl, // set the uploaded Cloudinary image URL
+      receiverIdImageUrl, // set the uploaded image URL
       amount: parseFloat(amount),
       currency,
       fee: parseFloat(fee) || 0,
