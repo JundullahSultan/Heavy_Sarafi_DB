@@ -42,11 +42,26 @@ export default function SendHawalaList() {
   const [selectedKahataId, setSelectedKahataId] = useState("");
   const [kahataAccounts, setKahataAccounts] = useState([]);
 
+  const purgeLegacyCacheKeys = (prefix, branch) => {
+    const branchPrefix = `${prefix}_${branch}_`;
+    const legacyPrefix = `${prefix}_`;
+    for (let i = localStorage.length - 1; i >= 0; i -= 1) {
+      const key = localStorage.key(i);
+      if (!key) continue;
+      if (key.startsWith(legacyPrefix) && !key.startsWith(branchPrefix)) {
+        localStorage.removeItem(key);
+      }
+    }
+  };
+
   // Fetch sent hawalas and Kahata accounts with localStorage caching
   useEffect(() => {
     const fetchSentData = async () => {
-      const cacheKeyHawalas = `cache_sent_hawalas_${activeSearch}`;
-      const cacheKeyKahata = `cache_kahata_list_dropdown`;
+      const userBranch = localStorage.getItem("userBranch") || "unknown";
+      purgeLegacyCacheKeys("cache_sent_hawalas", userBranch);
+      purgeLegacyCacheKeys("cache_kahata_list_dropdown", userBranch);
+      const cacheKeyHawalas = `cache_sent_hawalas_${userBranch}_${activeSearch}`;
+      const cacheKeyKahata = `cache_kahata_list_dropdown_${userBranch}`;
       const cachedHawalas = localStorage.getItem(cacheKeyHawalas);
       const cachedKahata = localStorage.getItem(cacheKeyKahata);
       
@@ -199,7 +214,8 @@ export default function SendHawalaList() {
       // Update state with actual response
       setSentHawalas((prev) => {
         const updated = prev.map((h) => (h.id === tempId ? res.data : h));
-        const cacheKey = `cache_hawalas_sent_${searchTerm}`;
+        const userBranch = localStorage.getItem("userBranch") || "unknown";
+        const cacheKey = `cache_sent_hawalas_${userBranch}_${activeSearch}`;
         localStorage.setItem(cacheKey, JSON.stringify(updated));
         return updated;
       });
@@ -214,7 +230,8 @@ export default function SendHawalaList() {
             date: new Date().toISOString().split("T")[0]
           });
           // Invalidate Kahata cache so it pulls fresh on next visit
-          localStorage.removeItem(`cache_kahata_`);
+          const userBranch = localStorage.getItem("userBranch") || "unknown";
+          localStorage.removeItem(`cache_kahata_list_dropdown_${userBranch}`);
         } catch (err) {
           console.error("Ledger transaction background logging failed:", err);
         }
@@ -231,7 +248,8 @@ export default function SendHawalaList() {
       // Revert state
       setSentHawalas((prev) => {
         const reverted = prev.filter((h) => h.id !== tempId);
-        const cacheKey = `cache_hawalas_sent_${searchTerm}`;
+        const userBranch = localStorage.getItem("userBranch") || "unknown";
+        const cacheKey = `cache_sent_hawalas_${userBranch}_${activeSearch}`;
         localStorage.setItem(cacheKey, JSON.stringify(reverted));
         return reverted;
       });

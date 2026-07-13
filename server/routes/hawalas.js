@@ -12,33 +12,27 @@ const upload = multer({ storage });
 router.get("/", checkAuth, async (req, res) => {
   try {
     const { search, type } = req.query;
+    const userBranch = req.dbUser.branch;
     let query = {};
     
     const isOwner = req.dbUser.role === "owner";
     const andConditions = [];
 
     if (type === "sent") {
-      andConditions.push({ type: "sent" });
-      if (!isOwner) {
-        andConditions.push({ senderBranch: req.dbUser.branch });
-      }
+      andConditions.push({ type: "sent", senderBranch: userBranch });
     } else if (type === "received") {
       if (!isOwner) {
-        andConditions.push({ destinationBranch: req.dbUser.branch });
+        andConditions.push({ destinationBranch: userBranch });
+        andConditions.push({ type: { $in: ["sent", "received"] } });
       } else {
-        andConditions.push({
-          $or: [
-            { type: "received" },
-            { destinationBranch: { $exists: true } }
-          ]
-        });
+        andConditions.push({ destinationBranch: { $exists: true } });
       }
     } else {
       if (!isOwner) {
         andConditions.push({
           $or: [
-            { senderBranch: req.dbUser.branch },
-            { destinationBranch: req.dbUser.branch }
+            { senderBranch: userBranch },
+            { destinationBranch: userBranch }
           ]
         });
       }

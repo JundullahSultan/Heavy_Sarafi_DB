@@ -109,6 +109,7 @@ function App() {
         setUser(res.data);
         setCurrentUserRole(res.data.role);
         localStorage.setItem("userRole", res.data.role);
+        localStorage.setItem("userBranch", res.data.branch);
         setIsAuthenticated(true);
       } catch (err) {
         console.log("No active session or session expired.");
@@ -116,6 +117,7 @@ function App() {
         setUser(null);
         setCurrentUserRole(null);
         localStorage.removeItem("userRole");
+        localStorage.removeItem("userBranch");
       } finally {
         setLoadingSession(false);
       }
@@ -133,6 +135,7 @@ function App() {
     setUser(userData);
     setCurrentUserRole(userData.role);
     localStorage.setItem("userRole", userData.role);
+    localStorage.setItem("userBranch", userData.branch);
     setIsAuthenticated(true);
     navigate(getDefaultRouteForRole(userData.role));
   };
@@ -147,6 +150,7 @@ function App() {
       setUser(null);
       setCurrentUserRole(null);
       localStorage.removeItem("userRole");
+      localStorage.removeItem("userBranch");
       navigate("/");
     }
   };

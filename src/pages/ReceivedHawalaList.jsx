@@ -18,13 +18,27 @@ export default function ReceivedHawalaList() {
   
   const [searchQuery, setSearchQuery] = useState("");
   const [foundCustomer, setFoundCustomer] = useState(null);
+
+  const purgeLegacyCacheKeys = (prefix, branch) => {
+    const branchPrefix = `${prefix}_${branch}_`;
+    const legacyPrefix = `${prefix}_`;
+    for (let i = localStorage.length - 1; i >= 0; i -= 1) {
+      const key = localStorage.key(i);
+      if (!key) continue;
+      if (key.startsWith(legacyPrefix) && !key.startsWith(branchPrefix)) {
+        localStorage.removeItem(key);
+      }
+    }
+  };
   const [isNewCustomer, setIsNewCustomer] = useState(false);
   const [isImageZoomed, setIsImageZoomed] = useState(false);
 
   // Fetch received hawalas from backend with localStorage caching
   useEffect(() => {
     const fetchHawalas = async () => {
-      const cacheKey = `cache_received_hawalas_${activeSearch}`;
+      const userBranch = localStorage.getItem("userBranch") || "unknown";
+      purgeLegacyCacheKeys("cache_received_hawalas", userBranch);
+      const cacheKey = `cache_received_hawalas_${userBranch}_${activeSearch}`;
       const cached = localStorage.getItem(cacheKey);
       if (cached) {
         setHawalas(JSON.parse(cached));
@@ -81,8 +95,9 @@ export default function ReceivedHawalaList() {
       const res = await API.put(`/hawalas/${selectedHawala.id}/payout`);
       // Update state with actual response
       setHawalas((prev) => {
+        const userBranch = localStorage.getItem("userBranch") || "unknown";
         const updated = prev.map((h) => (h.id === selectedHawala.id ? res.data : h));
-        const cacheKey = `cache_hawalas_received_${activeSearch}`;
+        const cacheKey = `cache_received_hawalas_${userBranch}_${activeSearch}`;
         localStorage.setItem(cacheKey, JSON.stringify(updated));
         return updated;
       });
@@ -94,8 +109,9 @@ export default function ReceivedHawalaList() {
       console.error("Payout error:", err);
       // Revert state
       setHawalas((prev) => {
+        const userBranch = localStorage.getItem("userBranch") || "unknown";
         const reverted = prev.map((h) => (h.id === selectedHawala.id ? originalHawala : h));
-        const cacheKey = `cache_hawalas_received_${activeSearch}`;
+        const cacheKey = `cache_received_hawalas_${userBranch}_${activeSearch}`;
         localStorage.setItem(cacheKey, JSON.stringify(reverted));
         return reverted;
       });
