@@ -108,7 +108,6 @@
   background: var(--white);
   border-radius: 16px;
   border: 1px solid var(--border-color);
-  overflow: hidden;
   box-shadow: 0 4px 12px var(--shadow-color);
 }
 
@@ -173,7 +172,6 @@
   align-items: flex-start;
   z-index: 1000;
   padding: 2rem 1.5rem;
-  overflow-y: auto;
 }
 
 .modal-content {
@@ -181,7 +179,6 @@
   border-radius: 20px;
   width: 100%;
   max-height: 90vh;
-  overflow-y: auto;
   box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2);
   display: flex;
   flex-direction: column;
@@ -336,7 +333,6 @@
 
 .view-modal .id-image-wrapper {
   border-radius: 12px;
-  overflow: hidden;
   border: 1px solid var(--border-color);
   background: var(--white);
   cursor: zoom-in;

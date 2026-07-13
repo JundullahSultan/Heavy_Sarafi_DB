@@ -8,7 +8,7 @@ import "./KahataList.css";
 
 export default function KahataList() {
   const { t } = useLanguage();
-  const { showAlert, showConfirm } = usePopup();
+  const { showAlert, showConfirm, showToast } = usePopup();
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -68,53 +68,190 @@ export default function KahataList() {
 
   const handleCreateAccount = async (e) => {
     e.preventDefault();
+    if (!newAccName.trim()) return;
+
+    const tempId = `KHT-TEMP-${Date.now()}`;
+    const initialBal = parseFloat(newAccInitBalance) || 0;
+    const tempTransactions = [];
+    if (initialBal !== 0) {
+      tempTransactions.push({
+        id: "TXN-1",
+        date: new Date().toISOString().split("T")[0],
+        type: initialBal > 0 ? "Credit" : "Debit",
+        amount: Math.abs(initialBal),
+        description: "Opening Balance Adjustment",
+      });
+    }
+
+    const tempAccount = {
+      id: tempId,
+      name: newAccName.trim(),
+      type: newAccType,
+      phone: newAccPhone.trim(),
+      address: newAccAddress.trim(),
+      currency: newAccCurrency,
+      netBalance: initialBal,
+      branch: "",
+      transactions: tempTransactions,
+      createdAt: new Date().toISOString(),
+    };
+
+    // 1. Instantly update UI and close modal
+    setKahataAccounts((prev) => [...prev, tempAccount]);
+    setIsNewAccountModalOpen(false);
+
+    // Save form inputs for recovery
+    const savedInputs = {
+      name: newAccName,
+      type: newAccType,
+      phone: newAccPhone,
+      address: newAccAddress,
+      currency: newAccCurrency,
+      initialBalance: newAccInitBalance,
+    };
+
+    // Reset inputs immediately
+    setNewAccName("");
+    setNewAccPhone("");
+    setNewAccAddress("");
+    setNewAccInitBalance("0");
+
+    showToast("Opening ledger account...", { severity: "info", duration: 1500 });
+
     try {
       const payload = {
-        name: newAccName,
-        type: newAccType,
-        phone: newAccPhone,
-        address: newAccAddress,
-        currency: newAccCurrency,
-        initialBalance: parseFloat(newAccInitBalance) || 0
+        name: savedInputs.name,
+        type: savedInputs.type,
+        phone: savedInputs.phone,
+        address: savedInputs.address,
+        currency: savedInputs.currency,
+        initialBalance: parseFloat(savedInputs.initialBalance) || 0
       };
       
       const res = await API.post("/kahata", payload);
-      setKahataAccounts((prev) => [...prev, res.data]);
-      showAlert("Ledger account opened successfully!");
-      setIsNewAccountModalOpen(false);
-      // Reset fields
-      setNewAccName("");
-      setNewAccPhone("");
-      setNewAccAddress("");
-      setNewAccInitBalance("0");
+      // Replace optimistic account in state
+      setKahataAccounts((prev) => {
+        const updated = prev.map((a) => (a.id === tempId ? res.data : a));
+        const cacheKey = `cache_kahata_${activeSearch}`;
+        localStorage.setItem(cacheKey, JSON.stringify(updated));
+        return updated;
+      });
+      showToast("Ledger account opened successfully!", { severity: "success" });
     } catch (err) {
       console.error("Error creating account:", err);
+      // Rollback optimistic update
+      setKahataAccounts((prev) => {
+        const reverted = prev.filter((a) => a.id !== tempId);
+        const cacheKey = `cache_kahata_${activeSearch}`;
+        localStorage.setItem(cacheKey, JSON.stringify(reverted));
+        return reverted;
+      });
+      // Restore inputs and reopen modal
+      setNewAccName(savedInputs.name);
+      setNewAccType(savedInputs.type);
+      setNewAccPhone(savedInputs.phone);
+      setNewAccAddress(savedInputs.address);
+      setNewAccCurrency(savedInputs.currency);
+      setNewAccInitBalance(savedInputs.initialBalance);
+      setIsNewAccountModalOpen(true);
       showAlert("Error: " + (err.response?.data?.message || err.message));
     }
   };
 
   const handleAddTransaction = async (e) => {
     e.preventDefault();
+    if (!txnAmount || !selectedAccount) return;
+
+    const tempTxnId = `TXN-TEMP-${Date.now()}`;
+    const parsedAmount = parseFloat(txnAmount);
+    
+    // Create optimistic transaction
+    const newTxn = {
+      id: tempTxnId,
+      date: txnDate || new Date().toISOString().split("T")[0],
+      type: txnType,
+      amount: parsedAmount,
+      description: txnDesc,
+    };
+
+    // Calculate optimistic netBalance
+    const balanceChange = txnType === "Credit" ? parsedAmount : -parsedAmount;
+    
+    // 1. Instantly update account transactions & balance and close modal
+    setKahataAccounts((prev) =>
+      prev.map((a) => {
+        if (a.id === selectedAccount.id) {
+          return {
+            ...a,
+            netBalance: a.netBalance + balanceChange,
+            transactions: [...a.transactions, newTxn],
+          };
+        }
+        return a;
+      })
+    );
+    setIsTransactionModalOpen(false);
+
+    // Save inputs for recovery
+    const savedInputs = {
+      type: txnType,
+      amount: txnAmount,
+      description: txnDesc,
+      date: txnDate,
+      accountId: selectedAccount.id,
+    };
+
+    // Reset inputs immediately
+    setTxnAmount("");
+    setTxnDesc("");
+
+    showToast("Logging transaction to ledger...", { severity: "info", duration: 1500 });
+
     try {
       const payload = {
-        type: txnType,
-        amount: parseFloat(txnAmount),
-        description: txnDesc,
-        date: txnDate
+        type: savedInputs.type,
+        amount: parseFloat(savedInputs.amount),
+        description: savedInputs.description,
+        date: savedInputs.date
       };
       
-      const res = await API.post(`/kahata/${selectedAccount.id}/transaction`, payload);
-      setKahataAccounts((prev) =>
-        prev.map((a) => (a.id === selectedAccount.id ? res.data : a))
-      );
+      const res = await API.post(`/kahata/${savedInputs.accountId}/transaction`, payload);
+      // Replace optimistic state with the server returned updated account
+      setKahataAccounts((prev) => {
+        const updated = prev.map((a) => (a.id === savedInputs.accountId ? res.data : a));
+        const cacheKey = `cache_kahata_${activeSearch}`;
+        localStorage.setItem(cacheKey, JSON.stringify(updated));
+        return updated;
+      });
       
-      showAlert("Transaction successfully logged to ledger.");
-      setIsTransactionModalOpen(false);
-      // Reset transaction form
-      setTxnAmount("");
-      setTxnDesc("");
+      // If we are currently viewing this account, we need to refresh the URL router context so the detail modal updates
+      // but selectedAccount is derived from URL parameters and find() in KahataList, which automatically updates since we updated kahataAccounts state!
+      
+      showToast("Transaction successfully logged to ledger.", { severity: "success" });
     } catch (err) {
       console.error("Error logging transaction:", err);
+      // Revert optimistic changes
+      setKahataAccounts((prev) => {
+        const reverted = prev.map((a) => {
+          if (a.id === savedInputs.accountId) {
+            return {
+              ...a,
+              netBalance: a.netBalance - balanceChange,
+              transactions: a.transactions.filter((t) => t.id !== tempTxnId),
+            };
+          }
+          return a;
+        });
+        const cacheKey = `cache_kahata_${activeSearch}`;
+        localStorage.setItem(cacheKey, JSON.stringify(reverted));
+        return reverted;
+      });
+      // Restore form inputs and reopen modal
+      setTxnAmount(savedInputs.amount);
+      setTxnDesc(savedInputs.description);
+      setTxnDate(savedInputs.date);
+      setTxnType(savedInputs.type);
+      setIsTransactionModalOpen(true);
       showAlert("Error: " + (err.response?.data?.message || err.message));
     }
   };

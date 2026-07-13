@@ -7,7 +7,7 @@ import "./AllUsers.css";
 
 export default function AllUsers() {
   const { t } = useLanguage();
-  const { showAlert } = usePopup();
+  const { showAlert, showToast } = usePopup();
   const currentUserRole = getRole();
 
   const [users, setUsers] = useState([]);
@@ -16,8 +16,10 @@ export default function AllUsers() {
   const [searchQuery, setSearchQuery] = useState("");
   const [branchFilter, setBranchFilter] = useState("All");
 
-  // Form Fields for adding mock user (or mapping firebase manually in dev)
+  // Form Fields for adding user
   const [newUserName, setNewUserName] = useState("");
+  const [newUsername, setNewUsername] = useState("");
+  const [newUserPassword, setNewUserPassword] = useState("");
   const [newUserRole, setNewUserRole] = useState("employee");
   const [newUserBranch, setNewUserBranch] = useState("Kabul Branch");
   const [newUserPhone, setNewUserPhone] = useState("");
@@ -43,7 +45,8 @@ export default function AllUsers() {
   const filteredUsers = users.filter((user) => {
     const matchesSearch =
       user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.uid.toLowerCase().includes(searchQuery.toLowerCase());
+      user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (user._id && user._id.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesBranch =
       branchFilter === "All" || user.branch === branchFilter;
     return matchesSearch && matchesBranch;
@@ -51,26 +54,102 @@ export default function AllUsers() {
 
   const handleAddUser = async (e) => {
     e.preventDefault();
-    // Simulate user creation (In firebase integration, they would sign up via Firebase client SDK)
-    showAlert("In Firebase Auth setup, you would call firebase client auth to sign up a user, then register their role.");
+    if (!newUserName.trim() || !newUsername.trim() || !newUserPassword) return;
+
+    const tempId = `USR-TEMP-${Date.now()}`;
+    const tempUser = {
+      _id: tempId,
+      name: newUserName.trim(),
+      username: newUsername.trim().toLowerCase(),
+      role: newUserRole,
+      branch: newUserBranch,
+      phone: newUserPhone.trim(),
+      status: "Active",
+      lastLogin: null,
+      createdAt: new Date().toISOString(),
+    };
+
+    // 1. Instantly update UI state and close modal
+    setUsers((prev) => [tempUser, ...prev]);
     setIsAddModalOpen(false);
+
+    // Save inputs for recovery
+    const savedInputs = {
+      name: newUserName,
+      username: newUsername,
+      password: newUserPassword,
+      role: newUserRole,
+      branch: newUserBranch,
+      phone: newUserPhone,
+    };
+
+    // Reset fields immediately
+    setNewUserName("");
+    setNewUsername("");
+    setNewUserPassword("");
+    setNewUserPhone("");
+
+    showToast("Creating staff account...", { severity: "info", duration: 1500 });
+
+    try {
+      const payload = {
+        name: savedInputs.name.trim(),
+        username: savedInputs.username.trim().toLowerCase(),
+        password: savedInputs.password,
+        role: savedInputs.role,
+        branch: savedInputs.branch,
+        phone: savedInputs.phone.trim(),
+      };
+      
+      const res = await API.post("/auth/register", payload);
+      // Replace optimistic temp user with actual saved user
+      setUsers((prev) => prev.map((u) => (u._id === tempId ? res.data : u)));
+      showToast("Staff account created successfully!", { severity: "success" });
+    } catch (err) {
+      console.error("Error registering user:", err);
+      // Rollback optimistic user
+      setUsers((prev) => prev.filter((u) => u._id !== tempId));
+      // Re-populate modal inputs and reopen modal
+      setNewUserName(savedInputs.name);
+      setNewUsername(savedInputs.username);
+      setNewUserPassword(savedInputs.password);
+      setNewUserRole(savedInputs.role);
+      setNewUserBranch(savedInputs.branch);
+      setNewUserPhone(savedInputs.phone);
+      setIsAddModalOpen(true);
+      showAlert(err.response?.data?.message || err.message);
+    }
   };
 
-  const toggleUserStatus = async (uid, currentStatus) => {
+  const toggleUserStatus = async (id, currentStatus) => {
     const nextStatus = currentStatus === "Active" ? "Suspended" : "Active";
+    
+    // 1. Instantly toggle status in UI state
+    setUsers((prev) =>
+      prev.map((user) => (user._id === id ? { ...user, status: nextStatus } : user))
+    );
+
+    showToast(nextStatus === "Active" ? "Reactivating user..." : "Suspending user...", { severity: "info", duration: 1500 });
+
     try {
-      const res = await API.put(`/auth/users/${uid}/status`, { status: nextStatus });
+      const res = await API.put(`/auth/users/${id}/status`, { status: nextStatus });
+      // Update with actual response data
       setUsers((prev) =>
-        prev.map((user) => (user.uid === uid ? res.data : user))
+        prev.map((user) => (user._id === id ? res.data : user))
       );
+      showToast(`User status updated to ${nextStatus}`, { severity: "success" });
     } catch (err) {
       console.error("Error toggling user status:", err);
+      // Rollback status toggle
+      setUsers((prev) =>
+        prev.map((user) => (user._id === id ? { ...user, status: currentStatus } : user))
+      );
       showAlert(err.response?.data?.message || err.message);
     }
   };
 
   const resetPassword = (name) => {
-    showAlert(`${t("temporaryPassword")} ${name}.`);
+    showToast(`${t("temporaryPassword")} ${name}.`, { severity: "success" });
   };
 
   if (currentUserRole !== ROLES.OWNER) {
@@ -136,11 +215,11 @@ export default function AllUsers() {
             <tbody>
               {filteredUsers.map((user) => (
                 <tr
-                  key={user.uid}
+                  key={user._id || user.username}
                   className={user.status === "Suspended" ? "suspended-row" : ""}
                 >
                   <td className="fw-bold text-light" style={{ fontSize: "0.8rem" }}>
-                    {user.uid.slice(0, 10)}...
+                    {user._id ? (user._id.startsWith("USR-TEMP-") ? "TEMP" : user._id.slice(0, 10)) : "—"}
                   </td>
                   <td className="fw-bold">
                     {user.name}
@@ -148,7 +227,7 @@ export default function AllUsers() {
                       className="helper-text"
                       style={{ fontSize: "0.75rem", marginTop: "2px" }}
                     >
-                      Last Login: {new Date(user.lastLogin || Date.now()).toLocaleDateString()}
+                      Username: <span className="text-light">{user.username}</span> | Last Login: {new Date(user.lastLogin || Date.now()).toLocaleDateString()}
                     </div>
                   </td>
                   <td>
@@ -169,13 +248,14 @@ export default function AllUsers() {
                     <button
                       className="action-btn secondary small-btn"
                       onClick={() => resetPassword(user.name)}
-                      disabled={user.status === "Suspended"}
+                      disabled={user.status === "Suspended" || (user._id && user._id.startsWith("USR-TEMP-"))}
                     >
                       {t("resetPassword")}
                     </button>
                     <button
                       className={`action-btn small-btn ${user.status === "Active" ? "danger" : "submit-btn"}`}
-                      onClick={() => toggleUserStatus(user.uid, user.status)}
+                      onClick={() => toggleUserStatus(user._id, user.status)}
+                      disabled={user._id && user._id.startsWith("USR-TEMP-")}
                     >
                       {user.status === "Active" ? t("suspend") : t("reactivate")}
                     </button>
@@ -224,6 +304,28 @@ export default function AllUsers() {
                     required
                     value={newUserName}
                     onChange={(e) => setNewUserName(e.target.value)}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Username</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. jamil"
+                    value={newUsername}
+                    onChange={(e) => setNewUsername(e.target.value)}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Password</label>
+                  <input
+                    type="password"
+                    required
+                    placeholder="Min 6 characters"
+                    value={newUserPassword}
+                    onChange={(e) => setNewUserPassword(e.target.value)}
                   />
                 </div>
 

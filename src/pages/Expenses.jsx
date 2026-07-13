@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import { usePopup } from "../context/PopupContext";
-import API from "../utils/api";
+import API, { resolveFileUrl } from "../utils/api";
 import "./Expenses.css";
 
 const CURRENCIES = ["AFN", "USD", "PKR", "EUR", "CNY", "IRR", "GBP"];
@@ -11,7 +11,7 @@ const todayStr = () => new Date().toISOString().split("T")[0];
 
 const Expenses = () => {
   const { t } = useLanguage();
-  const { showAlert } = usePopup();
+  const { showAlert, showToast } = usePopup();
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -97,24 +97,65 @@ const Expenses = () => {
     e.preventDefault();
     if (!form.amount || !form.category) return;
 
+    const tempId = `EXP-TEMP-${Date.now()}`;
+    const tempExpense = {
+      id: tempId,
+      date: form.date || new Date().toISOString().split("T")[0],
+      categoryId: form.category,
+      amount: parseFloat(form.amount),
+      currency: form.currency,
+      description: form.description,
+      recordedBy: "", 
+      branch: "",
+      receiptUrl: form.receiptPreview || null,
+      createdAt: new Date().toISOString(),
+    };
+
+    // 1. Instantly update UI and close modal
+    setExpenses((prev) => [tempExpense, ...prev]);
+    setIsAddModalOpen(false);
+
+    // Save inputs for recovery
+    const savedForm = { ...form };
+
+    // Reset form state immediately
+    setForm({ ...emptyForm });
+
+    // Show initial saving toast
+    showToast("Recording expense...", { severity: "info", duration: 1500 });
+
     const formData = new FormData();
-    formData.append("amount", form.amount);
-    formData.append("currency", form.currency);
-    formData.append("categoryId", form.category);
-    formData.append("date", form.date);
-    formData.append("description", form.description);
-    if (form.receiptFile) {
-      formData.append("receipt", form.receiptFile);
+    formData.append("amount", savedForm.amount);
+    formData.append("currency", savedForm.currency);
+    formData.append("categoryId", savedForm.category);
+    formData.append("date", savedForm.date);
+    formData.append("description", savedForm.description);
+    if (savedForm.receiptFile) {
+      formData.append("receipt", savedForm.receiptFile);
     }
 
     try {
       const res = await API.post("/expenses", formData);
-      setExpenses((prev) => [res.data, ...prev]);
-      setForm({ ...emptyForm });
-      setIsAddModalOpen(false);
-      showAlert("Expense recorded successfully!");
+      // Replace temporary optimistic expense with the actual one from server
+      setExpenses((prev) => {
+        const updated = prev.map((exp) => (exp.id === tempId ? res.data : exp));
+        const cacheKey = `cache_expenses_${filterCategory}_${searchTerm}`;
+        localStorage.setItem(cacheKey, JSON.stringify(updated));
+        return updated;
+      });
+      showToast("Expense recorded successfully!", { severity: "success" });
     } catch (err) {
       console.error("Error logging expense:", err);
+      // Revert state
+      setExpenses((prev) => {
+        const reverted = prev.filter((exp) => exp.id !== tempId);
+        const cacheKey = `cache_expenses_${filterCategory}_${searchTerm}`;
+        localStorage.setItem(cacheKey, JSON.stringify(reverted));
+        return reverted;
+      });
+      // Restore form and open modal again
+      setForm(savedForm);
+      setIsAddModalOpen(true);
       showAlert("Error recording expense: " + (err.response?.data?.message || err.message));
     }
   };
@@ -395,7 +436,7 @@ const Expenses = () => {
                   <div className="detail-row">
                     <span className="detail-label">{t("receipt")}</span>
                     <span className="detail-value">
-                      <a href={viewingExpense.receiptUrl} target="_blank" rel="noreferrer" style={{ color: "var(--primary-color)", fontWeight: "bold" }}>
+                      <a href={resolveFileUrl(viewingExpense.receiptUrl)} target="_blank" rel="noreferrer" style={{ color: "var(--primary-color)", fontWeight: "bold" }}>
                         View Receipt Image
                       </a>
                     </span>

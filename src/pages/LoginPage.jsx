@@ -4,7 +4,7 @@ import { usePopup } from "../context/PopupContext";
 import "./LoginPage.css";
 
 export default function LoginPage({ onLoginSuccess }) {
-  const { showAlert } = usePopup();
+  const { showAlert, showToast } = usePopup();
   const [isRegister, setIsRegister] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -30,7 +30,7 @@ export default function LoginPage({ onLoginSuccess }) {
           phone: "",
         };
         const res = await API.post("/auth/register", payload);
-        showAlert("Registration successful! Please login.");
+        showToast("Registration successful! Please login.", { severity: "success" });
         setIsRegister(false);
         setPassword("");
       } else {

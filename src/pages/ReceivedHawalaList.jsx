@@ -2,12 +2,12 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import { usePopup } from "../context/PopupContext";
-import API from "../utils/api";
+import API, { resolveFileUrl } from "../utils/api";
 import "./ReceivedHawalaList.css";
 
 export default function ReceivedHawalaList() {
   const { t } = useLanguage();
-  const { showAlert } = usePopup();
+  const { showAlert, showToast } = usePopup();
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -61,17 +61,46 @@ export default function ReceivedHawalaList() {
   };
 
   const handlePayout = async () => {
+    if (!selectedHawala) return;
+
+    const originalHawala = { ...selectedHawala };
+    const tempPaidHawala = {
+      ...selectedHawala,
+      status: "Paid Out",
+    };
+
+    // 1. Instantly update state and close modal
+    setHawalas((prev) =>
+      prev.map((h) => (h.id === selectedHawala.id ? tempPaidHawala : h))
+    );
+    closeModal();
+
+    showToast(`Processing payout for Hawala ${selectedHawala.id}...`, { severity: "info", duration: 1500 });
+
     try {
       const res = await API.put(`/hawalas/${selectedHawala.id}/payout`);
-      setHawalas((prev) =>
-        prev.map((h) => (h.id === selectedHawala.id ? res.data : h))
+      // Update state with actual response
+      setHawalas((prev) => {
+        const updated = prev.map((h) => (h.id === selectedHawala.id ? res.data : h));
+        const cacheKey = `cache_hawalas_received_${activeSearch}`;
+        localStorage.setItem(cacheKey, JSON.stringify(updated));
+        return updated;
+      });
+      showToast(
+        `Hawala ${selectedHawala.id} paid out successfully!`,
+        { severity: "success" }
       );
-      showAlert(
-        `Hawala ${selectedHawala.id} paid out successfully!`
-      );
-      closeModal();
     } catch (err) {
       console.error("Payout error:", err);
+      // Revert state
+      setHawalas((prev) => {
+        const reverted = prev.map((h) => (h.id === selectedHawala.id ? originalHawala : h));
+        const cacheKey = `cache_hawalas_received_${activeSearch}`;
+        localStorage.setItem(cacheKey, JSON.stringify(reverted));
+        return reverted;
+      });
+      // Reopen modal for retry
+      navigate(`/receive-hawala/${selectedHawala.id}`);
       showAlert("Error processing payout: " + (err.response?.data?.message || err.message));
     }
   };
@@ -242,7 +271,7 @@ export default function ReceivedHawalaList() {
                       onClick={() => setIsImageZoomed(true)}
                     >
                       <img
-                        src={selectedHawala.receiverIdImageUrl || selectedHawala.idImageUrl}
+                        src={resolveFileUrl(selectedHawala.receiverIdImageUrl || selectedHawala.idImageUrl)}
                         alt="Receiver ID Document"
                       />
                     </div>
@@ -362,7 +391,7 @@ export default function ReceivedHawalaList() {
           className="fullscreen-overlay"
           onClick={() => setIsImageZoomed(false)}
         >
-          <img src={selectedHawala.receiverIdImageUrl || selectedHawala.idImageUrl} alt="Zoomed ID Document" />
+          <img src={resolveFileUrl(selectedHawala.receiverIdImageUrl || selectedHawala.idImageUrl)} alt="Zoomed ID Document" />
           <button
             className="close-fullscreen"
             onClick={(e) => {

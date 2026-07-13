@@ -2,12 +2,12 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import { usePopup } from "../context/PopupContext";
-import API from "../utils/api";
+import API, { resolveFileUrl } from "../utils/api";
 import "./CustomerList.css";
 
 export default function CustomerList() {
   const { t } = useLanguage();
-  const { showAlert } = usePopup();
+  const { showAlert, showToast } = usePopup();
   const { id } = useParams();
   const navigate = useNavigate();
   
@@ -60,31 +60,77 @@ export default function CustomerList() {
 
   const handleAddCustomer = async (e) => {
     e.preventDefault();
+    if (!name.trim()) return;
     
+    const tempId = `CUST-TEMP-${Date.now()}`;
+    const tempCustomer = {
+      id: tempId,
+      name: name.trim(),
+      fatherName: fatherName.trim(),
+      idNumber: idNumber.trim(),
+      phone: phone.trim(),
+      address: address.trim(),
+      idImageUrl: idImage ? URL.createObjectURL(idImage) : "https://placehold.co/600x400/e2e8f0/64748b?text=Default+ID+Scan",
+      branch: "", 
+      createdAt: new Date().toISOString(),
+    };
+
+    // 1. Instantly update list state and close the modal
+    setCustomers((prev) => [tempCustomer, ...prev]);
+    setIsAddModalOpen(false);
+
+    // Save inputs for recovery
+    const formVals = { name, fatherName, idNumber, phone, address, idImage };
+
+    // Reset inputs immediately
+    setName("");
+    setFatherName("");
+    setIdNumber("");
+    setPhone("");
+    setAddress("");
+    setIdImage(null);
+
+    // Show initial toast
+    showToast("Registering customer...", { severity: "info", duration: 1500 });
+
     const formData = new FormData();
-    formData.append("name", name);
-    formData.append("fatherName", fatherName);
-    formData.append("idNumber", idNumber);
-    formData.append("phone", phone);
-    formData.append("address", address);
-    if (idImage) {
-      formData.append("idImage", idImage);
+    formData.append("name", formVals.name);
+    formData.append("fatherName", formVals.fatherName);
+    formData.append("idNumber", formVals.idNumber);
+    formData.append("phone", formVals.phone);
+    formData.append("address", formVals.address);
+    if (formVals.idImage) {
+      formData.append("idImage", formVals.idImage);
     }
 
     try {
       const res = await API.post("/customers", formData);
-      setCustomers((prev) => [res.data, ...prev]);
-      showAlert(t("saveCustomerMessage"));
-      setIsAddModalOpen(false);
-      // Reset form
-      setName("");
-      setFatherName("");
-      setIdNumber("");
-      setPhone("");
-      setAddress("");
-      setIdImage(null);
+      // Replace optimistic temp customer with actual saved customer from DB
+      setCustomers((prev) => {
+        const updated = prev.map((c) => (c.id === tempId ? res.data : c));
+        // Update localStorage cache as well
+        const cacheKey = `cache_customers_${activeSearch}`;
+        localStorage.setItem(cacheKey, JSON.stringify(updated));
+        return updated;
+      });
+      showToast(t("saveCustomerMessage"), { severity: "success" });
     } catch (err) {
       console.error("Error saving customer:", err);
+      // Revert optimistic addition
+      setCustomers((prev) => {
+        const reverted = prev.filter((c) => c.id !== tempId);
+        const cacheKey = `cache_customers_${activeSearch}`;
+        localStorage.setItem(cacheKey, JSON.stringify(reverted));
+        return reverted;
+      });
+      // Restore form inputs and reopen modal so user can retry or adjust
+      setName(formVals.name);
+      setFatherName(formVals.fatherName);
+      setIdNumber(formVals.idNumber);
+      setPhone(formVals.phone);
+      setAddress(formVals.address);
+      setIdImage(formVals.idImage);
+      setIsAddModalOpen(true);
       showAlert("Error registering customer: " + (err.response?.data?.message || err.message));
     }
   };
@@ -217,7 +263,7 @@ export default function CustomerList() {
                   className="id-image-wrapper"
                   onClick={() => setIsImageZoomed(true)}
                 >
-                  <img src={selectedCustomer.idImageUrl} alt="Customer ID" />
+                  <img src={resolveFileUrl(selectedCustomer.idImageUrl)} alt="Customer ID" />
                 </div>
               </div>
             </div>
@@ -341,7 +387,7 @@ export default function CustomerList() {
           className="fullscreen-overlay"
           onClick={() => setIsImageZoomed(false)}
         >
-          <img src={selectedCustomer.idImageUrl} alt="Zoomed ID Document" />
+          <img src={resolveFileUrl(selectedCustomer.idImageUrl)} alt="Zoomed ID Document" />
           <button
             className="fullscreen-close"
             onClick={(e) => {

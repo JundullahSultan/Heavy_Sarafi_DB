@@ -8,7 +8,7 @@ import "./SendHawalaList.css";
 
 export default function SendHawalaList() {
   const { t } = useLanguage();
-  const { showAlert, showConfirm } = usePopup();
+  const { showAlert, showConfirm, showToast } = usePopup();
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -120,52 +120,138 @@ export default function SendHawalaList() {
       return;
     }
 
+    const tempId = `SHW-TEMP-${Date.now()}`;
+    const tempHawala = {
+      id: tempId,
+      type: "sent",
+      date: new Date().toLocaleString(),
+      senderBranch: "",
+      destinationBranch,
+      senderName,
+      senderFather,
+      senderPhone,
+      senderIdNum,
+      receiverName,
+      receiverFather: receiverFather || "",
+      receiverPhone,
+      receiverExpectedId: receiverExpectedId || "",
+      receiverIdImageUrl: receiverIdImage ? URL.createObjectURL(receiverIdImage) : "",
+      amount: parseFloat(amount),
+      currency,
+      fee: parseFloat(fee) || 0,
+      fundingSource,
+      kahataAccountId: selectedKahataId || undefined,
+      status: "Sent - Pending Payout",
+      createdAt: new Date().toISOString(),
+    };
+
+    // 1. Instantly update list state and close the modal
+    setSentHawalas((prev) => [tempHawala, ...prev]);
+    closeSendModal();
+
+    // Save inputs for recovery
+    const savedInputs = {
+      destinationBranch,
+      senderName,
+      senderFather,
+      senderPhone,
+      senderIdNum,
+      receiverName,
+      receiverFather,
+      receiverPhone,
+      receiverExpectedId,
+      amount,
+      currency,
+      fee,
+      fundingSource,
+      selectedKahataId,
+      receiverIdImage
+    };
+
+    showToast("Processing outgoing Hawala...", { severity: "info", duration: 1500 });
+
     try {
       const formData = new FormData();
       formData.append("type", "sent");
-      formData.append("date", new Date().toLocaleString());
-      formData.append("destinationBranch", destinationBranch);
-      formData.append("senderName", senderName);
-      formData.append("senderFather", senderFather);
-      formData.append("senderPhone", senderPhone);
-      formData.append("senderIdNum", senderIdNum);
-      formData.append("receiverName", receiverName);
-      formData.append("receiverFather", receiverFather || "");
-      formData.append("receiverPhone", receiverPhone);
-      formData.append("receiverExpectedId", receiverExpectedId || "");
-      formData.append("amount", amount);
-      formData.append("currency", currency);
-      formData.append("fee", fee || "0");
-      formData.append("fundingSource", fundingSource);
-      if (selectedKahataId) {
-        formData.append("kahataAccountId", selectedKahataId);
+      formData.append("date", tempHawala.date);
+      formData.append("destinationBranch", savedInputs.destinationBranch);
+      formData.append("senderName", savedInputs.senderName);
+      formData.append("senderFather", savedInputs.senderFather);
+      formData.append("senderPhone", savedInputs.senderPhone);
+      formData.append("senderIdNum", savedInputs.senderIdNum);
+      formData.append("receiverName", savedInputs.receiverName);
+      formData.append("receiverFather", savedInputs.receiverFather || "");
+      formData.append("receiverPhone", savedInputs.receiverPhone);
+      formData.append("receiverExpectedId", savedInputs.receiverExpectedId || "");
+      formData.append("amount", savedInputs.amount);
+      formData.append("currency", savedInputs.currency);
+      formData.append("fee", savedInputs.fee || "0");
+      formData.append("fundingSource", savedInputs.fundingSource);
+      if (savedInputs.selectedKahataId) {
+        formData.append("kahataAccountId", savedInputs.selectedKahataId);
       }
-      if (receiverIdImage) {
-        formData.append("receiverIdImage", receiverIdImage);
+      if (savedInputs.receiverIdImage) {
+        formData.append("receiverIdImage", savedInputs.receiverIdImage);
       }
 
       const res = await API.post("/hawalas", formData);
-      setSentHawalas((prev) => [res.data, ...prev]);
+      
+      // Update state with actual response
+      setSentHawalas((prev) => {
+        const updated = prev.map((h) => (h.id === tempId ? res.data : h));
+        const cacheKey = `cache_hawalas_sent_${searchTerm}`;
+        localStorage.setItem(cacheKey, JSON.stringify(updated));
+        return updated;
+      });
       
       // If funded from Kahata ledger, post a transaction to that ledger as well
-      if (fundingSource === "kahata") {
-        await API.post(`/kahata/${selectedKahataId}/transaction`, {
-          type: "Debit",
-          amount: parseFloat(amount),
-          description: `Debit settlement for Outgoing Hawala ${res.data.id}`,
-          date: new Date().toISOString().split("T")[0]
-        });
+      if (savedInputs.fundingSource === "kahata") {
+        try {
+          await API.post(`/kahata/${savedInputs.selectedKahataId}/transaction`, {
+            type: "Debit",
+            amount: parseFloat(savedInputs.amount),
+            description: `Debit settlement for Outgoing Hawala ${res.data.id}`,
+            date: new Date().toISOString().split("T")[0]
+          });
+          // Invalidate Kahata cache so it pulls fresh on next visit
+          localStorage.removeItem(`cache_kahata_`);
+        } catch (err) {
+          console.error("Ledger transaction background logging failed:", err);
+        }
       }
 
       let sourceText =
-        fundingSource === "sarafi"
+        savedInputs.fundingSource === "sarafi"
           ? t("mainSafeLabel")
-          : `${t("kahataLabel")} (${selectedKahataId})`;
+          : `${t("kahataLabel")} (${savedInputs.selectedKahataId})`;
           
-      showAlert(`${t("recordedHawalaMessage")} ${sourceText}`);
-      closeSendModal();
+      showToast(`${t("recordedHawalaMessage")} ${sourceText}`, { severity: "success" });
     } catch (err) {
       console.error("Error creating outgoing transaction:", err);
+      // Revert state
+      setSentHawalas((prev) => {
+        const reverted = prev.filter((h) => h.id !== tempId);
+        const cacheKey = `cache_hawalas_sent_${searchTerm}`;
+        localStorage.setItem(cacheKey, JSON.stringify(reverted));
+        return reverted;
+      });
+      // Re-populate modal inputs and re-open modal
+      setDestinationBranch(savedInputs.destinationBranch);
+      setSenderName(savedInputs.senderName);
+      setSenderFather(savedInputs.senderFather);
+      setSenderPhone(savedInputs.senderPhone);
+      setSenderIdNum(savedInputs.senderIdNum);
+      setReceiverName(savedInputs.receiverName);
+      setReceiverFather(savedInputs.receiverFather);
+      setReceiverPhone(savedInputs.receiverPhone);
+      setReceiverExpectedId(savedInputs.receiverExpectedId);
+      setAmount(savedInputs.amount);
+      setCurrency(savedInputs.currency);
+      setFee(savedInputs.fee);
+      setFundingSource(savedInputs.fundingSource);
+      setSelectedKahataId(savedInputs.selectedKahataId);
+      setReceiverIdImage(savedInputs.receiverIdImage);
+      setIsSendModalOpen(true);
       showAlert("Error logging outgoing transaction: " + (err.response?.data?.message || err.message));
     }
   };

@@ -1,5 +1,5 @@
 // src/context/PopupContext.jsx
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
 import { Info, CheckCircle2, AlertTriangle, XCircle, X } from "lucide-react";
 import { useLanguage } from "./LanguageContext";
 import "./PopupContext.css";
@@ -47,6 +47,8 @@ const defaultLabels = {
   }
 };
 
+let toastIdCounter = 0;
+
 export const PopupProvider = ({ children }) => {
   const { language } = useLanguage();
   const [popup, setPopup] = useState({
@@ -60,6 +62,10 @@ export const PopupProvider = ({ children }) => {
     resolve: null,
   });
 
+  // Toast notification state
+  const [toasts, setToasts] = useState([]);
+  const toastTimers = useRef({});
+
   // Handle escape key to close popup
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -70,6 +76,13 @@ export const PopupProvider = ({ children }) => {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [popup.isOpen, popup.resolve]);
+
+  // Clean up timers on unmount
+  useEffect(() => {
+    return () => {
+      Object.values(toastTimers.current).forEach(clearTimeout);
+    };
+  }, []);
 
   const labels = defaultLabels[language] || defaultLabels.en;
 
@@ -123,6 +136,46 @@ export const PopupProvider = ({ children }) => {
     });
   };
 
+  /**
+   * Show a non-blocking toast notification in the corner.
+   * @param {string} message - The toast message
+   * @param {object} options - { severity: "success"|"error"|"warning"|"info", duration: ms }
+   */
+  const showToast = useCallback((message, options = {}) => {
+    const id = ++toastIdCounter;
+    const severity = options.severity || "success";
+    const duration = options.duration || 4000;
+
+    const newToast = { id, message, severity, exiting: false };
+    setToasts((prev) => [...prev, newToast]);
+
+    // Start exit animation before removing
+    toastTimers.current[id] = setTimeout(() => {
+      setToasts((prev) =>
+        prev.map((t) => (t.id === id ? { ...t, exiting: true } : t))
+      );
+      // Remove after exit animation completes
+      toastTimers.current[`${id}-remove`] = setTimeout(() => {
+        setToasts((prev) => prev.filter((t) => t.id !== id));
+        delete toastTimers.current[id];
+        delete toastTimers.current[`${id}-remove`];
+      }, 350);
+    }, duration);
+
+    return id;
+  }, []);
+
+  const dismissToast = useCallback((id) => {
+    clearTimeout(toastTimers.current[id]);
+    clearTimeout(toastTimers.current[`${id}-remove`]);
+    setToasts((prev) =>
+      prev.map((t) => (t.id === id ? { ...t, exiting: true } : t))
+    );
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 350);
+  }, []);
+
   const handleConfirm = () => {
     if (popup.resolve) {
       popup.resolve(true);
@@ -138,25 +191,41 @@ export const PopupProvider = ({ children }) => {
   };
 
   // Determine icon based on severity
-  const getIcon = () => {
-    switch (popup.severity) {
+  const getIcon = (severity, size = 48) => {
+    switch (severity) {
       case "success":
-        return <CheckCircle2 className="popup-icon success-icon" size={48} />;
+        return <CheckCircle2 className="popup-icon success-icon" size={size} />;
       case "warning":
-        return <AlertTriangle className="popup-icon warning-icon" size={48} />;
+        return <AlertTriangle className="popup-icon warning-icon" size={size} />;
       case "error":
-        return <XCircle className="popup-icon error-icon" size={48} />;
+        return <XCircle className="popup-icon error-icon" size={size} />;
       case "info":
       default:
-        return <Info className="popup-icon info-icon" size={48} />;
+        return <Info className="popup-icon info-icon" size={size} />;
+    }
+  };
+
+  const getToastIcon = (severity) => {
+    switch (severity) {
+      case "success":
+        return <CheckCircle2 className="toast-severity-icon success-icon" size={20} />;
+      case "warning":
+        return <AlertTriangle className="toast-severity-icon warning-icon" size={20} />;
+      case "error":
+        return <XCircle className="toast-severity-icon error-icon" size={20} />;
+      case "info":
+      default:
+        return <Info className="toast-severity-icon info-icon" size={20} />;
     }
   };
 
   const isRTL = language === "ps" || language === "da";
 
   return (
-    <PopupContext.Provider value={{ showAlert, showConfirm }}>
+    <PopupContext.Provider value={{ showAlert, showConfirm, showToast, dismissToast }}>
       {children}
+
+      {/* Modal Popup */}
       {popup.isOpen && (
         <div className="popup-overlay animate-fade-in" onClick={handleCancel}>
           <div
@@ -169,7 +238,7 @@ export const PopupProvider = ({ children }) => {
 
             <div className="popup-header">
               <div className="popup-icon-container">
-                {getIcon()}
+                {getIcon(popup.severity)}
               </div>
               <h3 className="popup-title">{popup.title}</h3>
             </div>
@@ -201,6 +270,36 @@ export const PopupProvider = ({ children }) => {
               )}
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Toast Container */}
+      {toasts.length > 0 && (
+        <div className={`toast-container ${isRTL ? "toast-rtl" : "toast-ltr"}`}>
+          {toasts.map((toast) => (
+            <div
+              key={toast.id}
+              className={`toast-item toast-${toast.severity} ${
+                toast.exiting ? "toast-exit" : "toast-enter"
+              }`}
+            >
+              <div className="toast-icon-area">
+                {getToastIcon(toast.severity)}
+              </div>
+              <span className="toast-message">{toast.message}</span>
+              <button
+                className="toast-close"
+                onClick={() => dismissToast(toast.id)}
+                aria-label="Dismiss"
+              >
+                <X size={14} />
+              </button>
+              <div
+                className="toast-progress"
+                style={{ animationDuration: "4s" }}
+              />
+            </div>
+          ))}
         </div>
       )}
     </PopupContext.Provider>

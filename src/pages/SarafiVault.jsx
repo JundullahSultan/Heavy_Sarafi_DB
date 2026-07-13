@@ -14,7 +14,7 @@ const CURRENCIES = ["AFN", "USD", "PKR", "EUR", "CNY", "IRR", "GBP"];
 
 export default function SarafiVault() {
   const { t } = useLanguage();
-  const { showAlert, showConfirm } = usePopup();
+  const { showAlert, showConfirm, showToast } = usePopup();
 
   const [transactions, setTransactions] = useState([]);
   const [balances, setBalances] = useState([]);
@@ -84,37 +84,156 @@ export default function SarafiVault() {
     e.preventDefault();
     if (!amountField || !descriptionField) return;
 
+    const tempId = `SF-TEMP-${Date.now()}`;
+    const parsedAmount = parseFloat(amountField);
+    
+    // Create optimistic transaction
+    const tempTx = {
+      id: tempId,
+      date: dateField || new Date().toISOString().split("T")[0],
+      type: modalType,
+      location: locationField,
+      amount: parsedAmount,
+      currency: currencyField,
+      description: descriptionField,
+      recordedBy: "", 
+      branch: userBranch,
+      createdAt: new Date().toISOString(),
+    };
+
+    const savedInputs = {
+      date: dateField,
+      type: modalType,
+      location: locationField,
+      amount: amountField,
+      currency: currencyField,
+      description: descriptionField,
+    };
+
+    // 1. Instantly update list state and balances state
+    setTransactions((prev) => [tempTx, ...prev]);
+    
+    // Update balances optimistically
+    const balanceChange = modalType === "Credit" ? parsedAmount : -parsedAmount;
+    setBalances((prev) => {
+      let found = false;
+      const nextBals = prev.map((bal) => {
+        if (bal.location === locationField && bal.currency === currencyField) {
+          found = true;
+          return { ...bal, balance: bal.balance + balanceChange };
+        }
+        return bal;
+      });
+      if (!found) {
+        nextBals.push({ location: locationField, currency: currencyField, balance: balanceChange });
+      }
+      return nextBals;
+    });
+
+    setIsModalOpen(false);
+    
+    // Reset form fields immediately
+    setAmountField("");
+    setDescriptionField("");
+
+    showToast(modalType === "Credit" ? "Processing deposit..." : "Processing withdrawal...", { severity: "info", duration: 1500 });
+
     try {
       const payload = {
-        date: dateField,
-        type: modalType,
-        location: locationField,
-        amount: parseFloat(amountField),
-        currency: currencyField,
-        description: descriptionField,
+        date: savedInputs.date,
+        type: savedInputs.type,
+        location: savedInputs.location,
+        amount: parseFloat(savedInputs.amount),
+        currency: savedInputs.currency,
+        description: savedInputs.description,
       };
 
-      await API.post("/safes", payload);
-      showAlert(modalType === "Credit" ? t("depositSuccess") : t("withdrawalSuccess"));
-      setIsModalOpen(false);
-      // Reset form
-      setAmountField("");
-      setDescriptionField("");
-      fetchData();
+      const res = await API.post("/safes", payload);
+      
+      // Replace optimistic temp transaction with actual saved transaction from DB
+      setTransactions((prev) => {
+        const updated = prev.map((t) => (t.id === tempId ? res.data : t));
+        const cacheKeyTxs = `cache_vault_txs_${filterLocation}_${filterCurrency}_${searchTerm}`;
+        localStorage.setItem(cacheKeyTxs, JSON.stringify(updated));
+        return updated;
+      });
+
+      // Refetch actual fresh data in background to sync all balances & items perfectly
+      const balRes = await API.get("/safes/balances");
+      setBalances(balRes.data);
+      localStorage.setItem(`cache_vault_bals`, JSON.stringify(balRes.data));
+
+      showToast(savedInputs.type === "Credit" ? t("depositSuccess") : t("withdrawalSuccess"), { severity: "success" });
     } catch (err) {
       console.error("Error creating transaction:", err);
+      // Revert optimistic transactions
+      setTransactions((prev) => {
+        const reverted = prev.filter((t) => t.id !== tempId);
+        const cacheKeyTxs = `cache_vault_txs_${filterLocation}_${filterCurrency}_${searchTerm}`;
+        localStorage.setItem(cacheKeyTxs, JSON.stringify(reverted));
+        return reverted;
+      });
+      // Revert optimistic balances
+      setBalances((prev) =>
+        prev.map((bal) => {
+          if (bal.location === savedInputs.location && bal.currency === savedInputs.currency) {
+            return { ...bal, balance: bal.balance - balanceChange };
+          }
+          return bal;
+        })
+      );
+      // Restore form fields and open modal
+      setAmountField(savedInputs.amount);
+      setDescriptionField(savedInputs.description);
+      setDateField(savedInputs.date);
+      setLocationField(savedInputs.location);
+      setCurrencyField(savedInputs.currency);
+      setModalType(savedInputs.type);
+      setIsModalOpen(true);
       showAlert("Error: " + (err.response?.data?.message || err.message));
     }
   };
 
   const handleDelete = async (txId) => {
+    const txToDelete = transactions.find((t) => t.id === txId);
+    if (!txToDelete) return;
+
     if (!await showConfirm(t("deleteConfirm"))) return;
+
+    // Save state before optimistic delete
+    const originalTransactions = [...transactions];
+    const originalBalances = [...balances];
+
+    // 1. Instantly update UI states optimistically
+    setTransactions((prev) => prev.filter((t) => t.id !== txId));
+    
+    // Reverse the balance impact of the deleted transaction
+    const balanceChange = txToDelete.type === "Credit" ? -txToDelete.amount : txToDelete.amount;
+    setBalances((prev) =>
+      prev.map((bal) => {
+        if (bal.location === txToDelete.location && bal.currency === txToDelete.currency) {
+          return { ...bal, balance: bal.balance + balanceChange };
+        }
+        return bal;
+      })
+    );
+
+    showToast("Deleting transaction...", { severity: "info", duration: 1500 });
+
     try {
       await API.delete(`/safes/${txId}`);
-      showAlert(t("deleteSuccess"));
-      fetchData();
+      
+      // Update cache
+      const cacheKeyTxs = `cache_vault_txs_${filterLocation}_${filterCurrency}_${searchTerm}`;
+      localStorage.setItem(cacheKeyTxs, JSON.stringify(transactions.filter((t) => t.id !== txId)));
+      localStorage.setItem(`cache_vault_bals`, JSON.stringify(balances));
+
+      showToast(t("deleteSuccess"), { severity: "success" });
     } catch (err) {
       console.error("Error deleting transaction:", err);
+      // Revert state
+      setTransactions(originalTransactions);
+      setBalances(originalBalances);
       showAlert("Error: " + (err.response?.data?.message || err.message));
     }
   };
