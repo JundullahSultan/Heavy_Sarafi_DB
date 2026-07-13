@@ -295,7 +295,7 @@ export default function CustomerList() {
               </button>
             </div>
 
-            <form onSubmit={handleAddCustomer}>
+            <form className="new-user-form" onSubmit={handleAddCustomer}>
               <div className="modal-body">
                 <div className="upload-area">
                   <label>📸 {t("uploadIdImageRequired")}</label>

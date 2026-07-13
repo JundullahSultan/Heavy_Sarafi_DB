@@ -5,6 +5,10 @@
   margin: 0 auto;
 }
 
+.new-user-form {
+  overflow-y: visible;
+}
+
 /* --- Header --- */
 .list-header {
   display: flex;

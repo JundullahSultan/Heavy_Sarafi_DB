@@ -6,8 +6,6 @@ import "./SarafiVault.css";
 
 const LOCATIONS = [
   "Primary Vault (Safe)",
-  "Operator Cash Drawer (Till)",
-  "Local Bank Vault",
 ];
 
 const CURRENCIES = ["AFN", "USD", "PKR", "EUR", "CNY", "IRR", "GBP"];
@@ -259,7 +257,7 @@ export default function SarafiVault() {
 
   // Group balances by global currency
   const getGlobalBalances = () => {
-    const global = { AFN: 0, USD: 0, PKR: 0, EUR: 0 };
+    const global = { AFN: 0, USD: 0, EUR: 0 };
     balances.forEach((bal) => {
       if (global[bal.currency] !== undefined) {
         global[bal.currency] += bal.balance;
@@ -312,31 +310,6 @@ export default function SarafiVault() {
         ))}
       </div>
 
-      {/* Till-by-Till breakdown */}
-      <h3 className="section-title mt-4">{t("physicalVaultLocations")}</h3>
-      <div className="grid action-grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "1.25rem" }}>
-        {LOCATIONS.map((loc) => {
-          return (
-            <div key={loc} className="card loc-card">
-              <h4>🏢 {getTranslatedLocation(loc)}</h4>
-              <div className="loc-currency-list">
-                {CURRENCIES.map((cur) => {
-                  const bal = locBalances[loc]?.[cur] || 0;
-                  return (
-                    <div key={cur} className="loc-currency-row">
-                      <span className="cur-label">{cur}</span>
-                      <span className={`cur-value ${bal >= 0 ? "text-success" : "text-danger"}`}>
-                        {bal.toLocaleString()} {cur}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
       {/* Filter and Transaction Logs */}
       <h3 className="section-title mt-4">{t("safeLedgerAuditLogs")}</h3>
       <div className="expense-filters">
@@ -348,18 +321,6 @@ export default function SarafiVault() {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <select
-          className="filter-select"
-          value={filterLocation}
-          onChange={(e) => setFilterLocation(e.target.value)}
-        >
-          <option value="all">{t("allLocations")}</option>
-          {LOCATIONS.map((loc) => (
-            <option key={loc} value={loc}>
-              {getTranslatedLocation(loc)}
-            </option>
-          ))}
-        </select>
         <select
           className="filter-select"
           value={filterCurrency}

@@ -116,7 +116,7 @@ export default function KahataList() {
     setNewAccAddress("");
     setNewAccInitBalance("0");
 
-    showToast("Opening ledger account...", { severity: "info", duration: 1500 });
+    showToast(t("openingLedgerAccount"), { severity: "info", duration: 1500 });
 
     try {
       const payload = {
@@ -136,7 +136,7 @@ export default function KahataList() {
         localStorage.setItem(cacheKey, JSON.stringify(updated));
         return updated;
       });
-      showToast("Ledger account opened successfully!", { severity: "success" });
+      showToast(t("ledgerAccountOpened"), { severity: "success" });
     } catch (err) {
       console.error("Error creating account:", err);
       // Rollback optimistic update
@@ -205,7 +205,7 @@ export default function KahataList() {
     setTxnAmount("");
     setTxnDesc("");
 
-    showToast("Logging transaction to ledger...", { severity: "info", duration: 1500 });
+    showToast(t("loggingTransaction"), { severity: "info", duration: 1500 });
 
     try {
       const payload = {
@@ -227,7 +227,7 @@ export default function KahataList() {
       // If we are currently viewing this account, we need to refresh the URL router context so the detail modal updates
       // but selectedAccount is derived from URL parameters and find() in KahataList, which automatically updates since we updated kahataAccounts state!
       
-      showToast("Transaction successfully logged to ledger.", { severity: "success" });
+      showToast(t("transactionLogged"), { severity: "success" });
     } catch (err) {
       console.error("Error logging transaction:", err);
       // Revert optimistic changes
@@ -257,7 +257,7 @@ export default function KahataList() {
   };
 
   const handleDeleteAccount = async (account) => {
-    const confirmationMessage = `Are you sure you want to permanently delete account: ${account.name} (${account.id})?`;
+    const confirmationMessage = `${t("confirmDeleteAccount")} ${account.name} (${account.id})?`;
     if (await showConfirm(confirmationMessage)) {
       try {
         await API.delete(`/kahata/${account.id}`);
@@ -282,7 +282,7 @@ export default function KahataList() {
           <form className="search-bar" onSubmit={handleSearchSubmit}>
             <input
               type="text"
-              placeholder="Search by Name or ID..."
+              placeholder={t("searchByNameOrId")}
               value={searchVal}
               onChange={(e) => setSearchVal(e.target.value)}
             />
@@ -292,7 +292,7 @@ export default function KahataList() {
             className="add-btn"
             onClick={() => setIsNewAccountModalOpen(true)}
           >
-            + Create Account
+            {t("createKahataAccountButton")}
           </button>
         </div>
       </div>
@@ -306,18 +306,18 @@ export default function KahataList() {
           <table className="data-table">
             <thead>
               <tr>
-                <th>Account ID</th>
-                <th>Account Name</th>
-                <th>Classification</th>
-                <th>Currency</th>
-                <th>Net Balance</th>
+                <th>{t("kahataId")}</th>
+                <th>{t("accountName")}</th>
+                <th>{t("accountType")}</th>
+                <th>{t("currency")}</th>
+                <th>{t("netBalance")}</th>
               </tr>
             </thead>
             <tbody>
               {kahataAccounts.length === 0 ? (
                 <tr>
                   <td colSpan="5" className="empty-state">
-                    No ledger accounts found.
+                    {t("noKahataAccountsFound")}
                   </td>
                 </tr>
               ) : (
@@ -356,7 +356,7 @@ export default function KahataList() {
           >
             <div className="modal-header">
               <h3>
-                Ledger Account Statement: {selectedAccount.name} ({selectedAccount.id})
+                {t("ledgerAccountStatement")} {selectedAccount.name} ({selectedAccount.id})
               </h3>
               <button className="close-btn" onClick={closeViewModal}>
                 &times;
@@ -366,19 +366,19 @@ export default function KahataList() {
             <div className="modal-body">
               <div className="account-summary-row" style={{ display: "flex", gap: "1rem", marginBottom: "1rem" }}>
                 <div className="detail-card" style={{ flex: 1 }}>
-                  <h4>Account Classification</h4>
+                  <h4>{t("accountClassification")}</h4>
                   <p>{selectedAccount.type}</p>
                 </div>
                 <div className="detail-card" style={{ flex: 1 }}>
-                  <h4>Phone / Contact</h4>
+                  <h4>{t("contactInformation")}</h4>
                   <p>{selectedAccount.phone || "—"}</p>
                 </div>
                 <div className="detail-card" style={{ flex: 1 }}>
-                  <h4>Address</h4>
+                  <h4>{t("address")}</h4>
                   <p>{selectedAccount.address || "—"}</p>
                 </div>
                 <div className="detail-card" style={{ flex: 1 }}>
-                  <h4>Current Balance</h4>
+                  <h4>{t("currentNetBalance")}</h4>
                   <p
                     className="fw-bold"
                     style={{
@@ -394,23 +394,23 @@ export default function KahataList() {
                 </div>
               </div>
 
-              <h4>Transaction History</h4>
+              <h4>{t("transactionHistory")}</h4>
               <div className="table-wrapper" style={{ maxHeight: "250px", overflowY: "auto" }}>
                 <table className="data-table">
                   <thead>
                     <tr>
-                      <th>TXN ID</th>
-                      <th>Date</th>
-                      <th>Type</th>
-                      <th>Amount</th>
-                      <th>Description</th>
+                      <th>{t("txId")}</th>
+                      <th>{t("date")}</th>
+                      <th>{t("type")}</th>
+                      <th>{t("amount")}</th>
+                      <th>{t("description")}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {selectedAccount.transactions.length === 0 ? (
                       <tr>
                         <td colSpan="5" className="empty-state">
-                          No transactions recorded.
+                          {t("noTransactionsFound")}
                         </td>
                       </tr>
                     ) : (
@@ -427,7 +427,7 @@ export default function KahataList() {
                                   : "var(--danger)",
                             }}
                           >
-                            {txn.type.toUpperCase()}
+                            {t(txn.type.toLowerCase()).toUpperCase()}
                           </td>
                           <td>
                             {txn.amount.toLocaleString()} {selectedAccount.currency}
@@ -446,16 +446,16 @@ export default function KahataList() {
                 className="action-btn danger"
                 onClick={() => handleDeleteAccount(selectedAccount)}
               >
-                Delete Account
+                {t("deleteAccount")}
               </button>
               <button
                 className="action-btn submit-btn"
                 onClick={() => setIsTransactionModalOpen(true)}
               >
-                + Add Transaction
+                {t("addTransaction")}
               </button>
               <button className="action-btn secondary" onClick={closeViewModal}>
-                Close Ledger
+                {t("closeLedger")}
               </button>
             </div>
           </div>
@@ -474,7 +474,7 @@ export default function KahataList() {
             style={{ maxWidth: "600px" }}
           >
             <div className="modal-header">
-              <h3>Create Ledger (Kahata) Account</h3>
+              <h3>{t("createKahataAccountTitle")}</h3>
               <button
                 className="close-btn"
                 onClick={() => setIsNewAccountModalOpen(false)}
@@ -486,7 +486,7 @@ export default function KahataList() {
             <form onSubmit={handleCreateAccount}>
               <div className="modal-body">
                 <div className="form-group">
-                  <label>Account / Business Name</label>
+                  <label>{t("accountNameBusinessName")}</label>
                   <input
                     type="text"
                     required
@@ -496,23 +496,23 @@ export default function KahataList() {
                 </div>
 
                 <div className="form-group">
-                  <label>Classification Type</label>
+                  <label>{t("transactionClassification")}</label>
                   <select
                     value={newAccType}
                     onChange={(e) => setNewAccType(e.target.value)}
                   >
                     <option value="Partner Sarafi (Another Branch/City)">
-                      Partner Sarafi (Another Branch/City)
+                      {t("partnerSarafi")}
                     </option>
                     <option value="Merchant / Regular Customer">
-                      Merchant / Regular Customer
+                      {t("merchantCustomer")}
                     </option>
                   </select>
                 </div>
 
                 <div className="form-grid-2">
                   <div className="form-group">
-                    <label>Phone Number</label>
+                    <label>{t("phoneNumber")}</label>
                     <input
                       type="text"
                       value={newAccPhone}
@@ -520,7 +520,7 @@ export default function KahataList() {
                     />
                   </div>
                   <div className="form-group">
-                    <label>Address</label>
+                    <label>{t("address")}</label>
                     <input
                       type="text"
                       value={newAccAddress}
@@ -531,7 +531,7 @@ export default function KahataList() {
 
                 <div className="form-grid-2">
                   <div className="form-group">
-                    <label>Account Currency</label>
+                    <label>{t("accountCurrency")}</label>
                     <select
                       value={newAccCurrency}
                       onChange={(e) => setNewAccCurrency(e.target.value)}
@@ -546,7 +546,7 @@ export default function KahataList() {
                     </select>
                   </div>
                   <div className="form-group">
-                    <label>Opening Net Balance</label>
+                    <label>{t("openingNetBalance")}</label>
                     <input
                       type="number"
                       value={newAccInitBalance}
@@ -562,10 +562,10 @@ export default function KahataList() {
                   className="action-btn secondary"
                   onClick={() => setIsNewAccountModalOpen(false)}
                 >
-                  Cancel
+                  {t("cancel")}
                 </button>
                 <button type="submit" className="action-btn submit-btn">
-                  Open Account
+                  {t("openAccount")}
                 </button>
               </div>
             </form>
@@ -585,7 +585,7 @@ export default function KahataList() {
             style={{ maxWidth: "500px" }}
           >
             <div className="modal-header">
-              <h3>Add transaction: {selectedAccount.name}</h3>
+              <h3>{t("addTransactionTo")} {selectedAccount.name}</h3>
               <button
                 className="close-btn"
                 onClick={() => setIsTransactionModalOpen(false)}
@@ -597,18 +597,18 @@ export default function KahataList() {
             <form onSubmit={handleAddTransaction}>
               <div className="modal-body">
                 <div className="form-group">
-                  <label>Transaction Type</label>
+                  <label>{t("transactionType")}</label>
                   <select
                     value={txnType}
                     onChange={(e) => setTxnType(e.target.value)}
                   >
-                    <option value="Credit">Credit (Add Funds / Deposit)</option>
-                    <option value="Debit">Debit (Deduct Funds / Withdrawal)</option>
+                    <option value="Credit">{t("creditAddFunds")}</option>
+                    <option value="Debit">{t("debitDeductFunds")}</option>
                   </select>
                 </div>
 
                 <div className="form-group">
-                  <label>Amount ({selectedAccount.currency})</label>
+                  <label>{t("amount")} ({selectedAccount.currency})</label>
                   <input
                     type="number"
                     required
@@ -620,7 +620,7 @@ export default function KahataList() {
                 </div>
 
                 <div className="form-group">
-                  <label>Date</label>
+                  <label>{t("date")}</label>
                   <input
                     type="date"
                     required
@@ -630,11 +630,11 @@ export default function KahataList() {
                 </div>
 
                 <div className="form-group">
-                  <label>Description Remarks</label>
+                  <label>{t("descriptionRemarks")}</label>
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Cash settlement, transaction log"
+                    placeholder={t("transactionDescExample")}
                     value={txnDesc}
                     onChange={(e) => setTxnDesc(e.target.value)}
                   />
@@ -647,10 +647,10 @@ export default function KahataList() {
                   className="action-btn secondary"
                   onClick={() => setIsTransactionModalOpen(false)}
                 >
-                  Cancel
+                  {t("cancel")}
                 </button>
                 <button type="submit" className="action-btn submit-btn">
-                  Log Transaction
+                  {t("logTransaction")}
                 </button>
               </div>
             </form>

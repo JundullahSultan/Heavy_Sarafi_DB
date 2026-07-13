@@ -180,6 +180,7 @@
   background: var(--white);
   display: flex;
   flex-direction: column;
+  overflow-y: scroll;
 }
 
 .modal-header {
