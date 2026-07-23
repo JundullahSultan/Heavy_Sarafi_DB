@@ -58,6 +58,7 @@ const startServer = async () => {
   const { default: expensesRouter } = await import("./routes/expenses.js");
   const { default: kahataRouter } = await import("./routes/kahata.js");
   const { default: safesRouter } = await import("./routes/safes.js");
+  const { default: exchangesRouter } = await import("./routes/exchanges.js");
 
   app.use("/api/auth", authRouter);
   app.use("/api/customers", customersRouter);
@@ -65,6 +66,7 @@ const startServer = async () => {
   app.use("/api/expenses", expensesRouter);
   app.use("/api/kahata", kahataRouter);
   app.use("/api/safes", safesRouter);
+  app.use("/api/exchanges", exchangesRouter);
 
   // Health Check
   app.get("/", (req, res) => {

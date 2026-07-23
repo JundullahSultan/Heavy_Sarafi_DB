@@ -1,0 +1,201 @@
+/* Base Dropdown Container */
+.dropdown {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+/* Base Toggle Button */
+.dropdown-toggle {
+  background: var(--hover-bg, #333);
+  color: var(--text-main, white);
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-color, transparent);
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 44px;
+  box-sizing: border-box;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dropdown-toggle .chevron-icon {
+  transition: transform 0.25s ease;
+  margin-left: 8px;
+  flex-shrink: 0;
+}
+
+.dropdown-toggle .chevron-icon.rotate {
+  transform: rotate(180deg);
+}
+
+/* Base Menu Container */
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  min-width: 200px;
+  background: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  margin-top: 0.5rem;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1001;
+  padding: 0.35rem;
+  box-sizing: border-box;
+}
+
+/* Show Dropdown Menu Class */
+.dropdown-menu.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(5px);
+}
+
+/* Dropdown Item Elements */
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: var(--text-main);
+  text-decoration: none;
+  font-family: inherit;
+  font-size: 0.9rem;
+  text-align: left;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+.dropdown-item .item-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.8;
+}
+
+.dropdown-item:hover {
+  background-color: var(--hover-bg, #f5f5f5);
+  padding-left: 1.15rem;
+  color: var(--primary-color, #ff7e5f);
+}
+
+/* Variant 1: Modern Gradient (App Primary Blue-to-Light-Blue) */
+.dropdown-1 .dropdown-toggle {
+  background: linear-gradient(90deg, #3b82f6, #0ea5e9);
+  color: white;
+  border: none;
+  box-shadow: 0 4px 15px rgba(14, 165, 233, 0.25);
+}
+.dropdown-1 .dropdown-toggle:hover {
+  filter: brightness(1.08);
+}
+.dropdown-1 .dropdown-menu {
+  border-top: 3px solid #0ea5e9;
+}
+.dropdown-1 .dropdown-item:hover {
+  color: #0ea5e9;
+}
+
+/* Variant 2: Dark Elegant (App Dark Surface Accent) */
+.dropdown-2 .dropdown-toggle {
+  background: #1e293b;
+  border: 1px solid var(--border-color);
+  color: white;
+}
+.dropdown-2 .dropdown-toggle:hover {
+  background: #334155;
+}
+.dropdown-2 .dropdown-menu {
+  background: #1e293b;
+  border: 1px solid var(--border-color);
+}
+.dropdown-2 .dropdown-item {
+  color: #e2e8f0;
+}
+.dropdown-2 .dropdown-item:hover {
+  background-color: #334155;
+  color: #3b82f6;
+}
+
+/* Variant 3: Animated Icon (Indigo/Purple Gradient) */
+.dropdown-3 .dropdown-toggle {
+  background: linear-gradient(90deg, #6366f1, #8b5cf6);
+  color: white;
+  border: none;
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.25);
+}
+.dropdown-3 .dropdown-toggle:hover {
+  filter: brightness(1.08);
+}
+.dropdown-3 .dropdown-menu.show {
+  animation: slideDownMenu 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  transform-origin: top center;
+}
+.dropdown-3 .dropdown-item:hover {
+  color: #8b5cf6;
+}
+
+@keyframes slideDownMenu {
+  0% {
+    opacity: 0;
+    transform: scaleY(0.8) translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scaleY(1) translateY(5px);
+  }
+}
+
+/* Variant 5: Slide From Side (Green Gradient) */
+.dropdown-5 .dropdown-toggle {
+  background: linear-gradient(90deg, #10b981, #34d399);
+  color: white;
+  border: none;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.25);
+}
+.dropdown-5 .dropdown-toggle:hover {
+  filter: brightness(1.08);
+}
+.dropdown-5 .dropdown-menu {
+  transform: translateX(12px) translateY(5px);
+}
+.dropdown-5 .dropdown-menu.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0) translateY(5px);
+}
+.dropdown-5 .dropdown-item:hover {
+  color: #10b981;
+}
+
+/* Variant 6: Minimalist (Transparent Outline) */
+.dropdown-6 .dropdown-toggle {
+  background: transparent;
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+}
+.dropdown-6 .dropdown-toggle:hover {
+  background: var(--hover-bg);
+}
+.dropdown-6 .dropdown-menu {
+  border: 1px solid var(--border-color);
+}
+.dropdown-6 .dropdown-item:hover {
+  color: var(--primary-color);
+}

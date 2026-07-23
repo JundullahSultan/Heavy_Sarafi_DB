@@ -66,6 +66,10 @@ const HawalaSchema = new mongoose.Schema(
       default: "sarafi",
     },
     kahataAccountId: String,
+    skipVaultCredit: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

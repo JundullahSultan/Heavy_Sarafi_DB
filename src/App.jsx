@@ -12,9 +12,12 @@ import Reports from "./pages/Reports";
 import Expenses from "./pages/Expenses";
 import LoginPage from "./pages/LoginPage";
 import SarafiVault from "./pages/SarafiVault";
+import ExchangeList from "./pages/ExchangeList";
 import { getRole, ROLES } from "./utils/auth";
 import { useLanguage } from "./context/LanguageContext";
 import API from "./utils/api";
+import { Menu } from "lucide-react";
+import InstallPrompt from "./components/InstallPrompt";
 import "./App.css";
 
 // Route definitions mapped to nav item keys
@@ -25,6 +28,7 @@ const ROUTE_MAP = {
   Customers: "/customers",
   Kahata: "/kahata",
   "Sarafi Vault": "/sarafi-vault",
+  "Currency Exchange": "/currency-exchange",
   "All Users": "/all-users",
   Reports: "/reports",
   Settings: "/settings",
@@ -42,6 +46,7 @@ const getNavItemsForRole = (role) => {
     "Customers",
     "Kahata",
     "Sarafi Vault",
+    "Currency Exchange",
   ];
   switch (role) {
     case ROLES.OWNER:
@@ -69,6 +74,52 @@ function App() {
   const [navItems, setNavItems] = useState(() =>
     getNavItemsForRole(getRole())
   );
+
+  // --- Mobile Sidebar ---
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+
+  // --- Swipe Gesture for Mobile Sidebar ---
+  useEffect(() => {
+    let touchStartX = 0;
+    let touchStartY = 0;
+    const swipeThreshold = 60; // minimum distance to swipe
+    const edgeThreshold = 40;  // must start near left screen edge to open
+
+    const handleTouchStart = (e) => {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    };
+
+    const handleTouchEnd = (e) => {
+      const touchEndX = e.changedTouches[0].clientX;
+      const touchEndY = e.changedTouches[0].clientY;
+      const deltaX = touchEndX - touchStartX;
+      const deltaY = touchEndY - touchStartY;
+
+      // Check if horizontal swipe and surpasses threshold
+      if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > swipeThreshold) {
+        if (deltaX > 0) {
+          // Swiped right (Left-to-Right)
+          if (!isMobileSidebarOpen && touchStartX < edgeThreshold) {
+            setIsMobileSidebarOpen(true);
+          }
+        } else {
+          // Swiped left (Right-to-Left)
+          if (isMobileSidebarOpen) {
+            setIsMobileSidebarOpen(false);
+          }
+        }
+      }
+    };
+
+    window.addEventListener("touchstart", handleTouchStart, { passive: true });
+    window.addEventListener("touchend", handleTouchEnd, { passive: true });
+
+    return () => {
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, [isMobileSidebarOpen]);
 
   // --- Dark Mode ---
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -104,6 +155,23 @@ function App() {
   // --- Authenticate user session on mount ---
   useEffect(() => {
     const checkSession = async () => {
+      if (typeof window !== "undefined" && localStorage.getItem("isGuest") === "true") {
+        const guestRole = localStorage.getItem("userRole") || "owner";
+        const guestBranch = localStorage.getItem("userBranch") || "Kabul Branch";
+        setUser({
+          id: "guest-user",
+          username: "guest",
+          name: "Guest Demo User",
+          role: guestRole,
+          branch: guestBranch,
+          isGuest: true
+        });
+        setCurrentUserRole(guestRole);
+        setIsAuthenticated(true);
+        setLoadingSession(false);
+        return;
+      }
+
       try {
         const res = await API.get("/auth/me");
         setUser(res.data);
@@ -142,10 +210,13 @@ function App() {
 
   const handleLogout = async () => {
     try {
-      await API.post("/auth/logout");
+      if (localStorage.getItem("isGuest") !== "true") {
+        await API.post("/auth/logout");
+      }
     } catch (err) {
       console.error("Logout failed:", err);
     } finally {
+      localStorage.removeItem("isGuest");
       setIsAuthenticated(false);
       setUser(null);
       setCurrentUserRole(null);
@@ -169,6 +240,8 @@ function App() {
     return <LoginPage onLoginSuccess={handleLoginSuccess} />;
   }
 
+  const isGuestMode = localStorage.getItem("isGuest") === "true";
+
   return (
     <div className="app-layout">
       <Sidebar
@@ -176,12 +249,41 @@ function App() {
         routeMap={ROUTE_MAP}
         onLogout={handleLogout}
         user={user}
+        isMobileOpen={isMobileSidebarOpen}
+        onMobileClose={() => setIsMobileSidebarOpen(false)}
       />
+
+      <InstallPrompt />
 
       <main className="main-content">
         {/* --- Top Header --- */}
         <header className="top-header">
-          <div className="header-actions"></div>
+          <button
+            className="mobile-menu-btn"
+            onClick={() => setIsMobileSidebarOpen(true)}
+            aria-label="Open menu"
+          >
+            <Menu size={24} />
+          </button>
+          <div className="header-actions">
+            {isGuestMode && (
+              <div style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.4rem",
+                background: "rgba(56, 189, 248, 0.12)",
+                border: "1px solid rgba(56, 189, 248, 0.3)",
+                color: "#38bdf8",
+                padding: "0.35rem 0.85rem",
+                borderRadius: "20px",
+                fontSize: "0.78rem",
+                fontWeight: 600,
+                boxShadow: "0 2px 8px rgba(56, 189, 248, 0.15)"
+              }}>
+                ✨ Guest Sandbox Mode (Offline)
+              </div>
+            )}
+          </div>
         </header>
 
         {/* Page Content via Routes */}
@@ -197,6 +299,7 @@ function App() {
           <Route path="/kahata" element={<KahataList />} />
           <Route path="/kahata/:id" element={<KahataList />} />
           <Route path="/sarafi-vault" element={<SarafiVault />} />
+          <Route path="/currency-exchange" element={<ExchangeList />} />
 
           {/* Protected: Owner only */}
           <Route

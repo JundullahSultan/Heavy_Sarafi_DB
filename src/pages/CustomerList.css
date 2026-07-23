@@ -115,13 +115,14 @@
   box-shadow: 0 4px 12px var(--shadow-color);
 }
 
-.data-table {
+.data-table,
+.customer-data-table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 700px;
 }
 
-.data-table th {
+.data-table th,
+.customer-data-table th {
   background: var(--hover-bg);
   padding: 0.9rem 1.2rem;
   font-size: 0.78rem;
@@ -133,7 +134,8 @@
   text-align: left;
 }
 
-.data-table td {
+.data-table td,
+.customer-data-table td {
   padding: 0.9rem 1.2rem;
   border-bottom: 1px solid var(--border-color);
   vertical-align: middle;
@@ -141,16 +143,19 @@
   font-size: 0.95rem;
 }
 
-.data-table tr:last-child td {
+.data-table tr:last-child td,
+.customer-data-table tr:last-child td {
   border-bottom: none;
 }
 
-.data-table tbody tr {
+.data-table tbody tr,
+.customer-data-table tbody tr {
   transition: background 0.15s;
   cursor: pointer;
 }
 
-.data-table tbody tr:hover {
+.data-table tbody tr:hover,
+.customer-data-table tbody tr:hover {
   background: var(--hover-bg);
 }
 
@@ -248,27 +253,27 @@
 }
 
 /* --- View Customer Modal --- */
-.view-modal .modal-body {
+.customer-view-modal .modal-body {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
   padding: 1.5rem;
 }
 
-.view-modal .customer-details {
+.customer-view-modal .customer-details {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-.view-modal .customer-name {
+.customer-view-modal .customer-name {
   font-size: 1.6rem;
   font-weight: 700;
   margin: 0 0 0.25rem 0;
   color: var(--text-main);
 }
 
-.view-modal .verified-badge {
+.customer-view-modal .verified-badge {
   display: inline-block;
   background: #d1fae5;
   color: #065f46;
@@ -279,7 +284,7 @@
   margin-bottom: 1.25rem;
 }
 
-.view-modal .detail-item {
+.customer-view-modal .detail-item {
   display: flex;
   flex-direction: column;
   gap: 0.15rem;
@@ -287,11 +292,11 @@
   border-bottom: 1px solid var(--border-color);
 }
 
-.view-modal .detail-item:last-of-type {
+.customer-view-modal .detail-item:last-of-type {
   border-bottom: none;
 }
 
-.view-modal .detail-label {
+.customer-view-modal .detail-label {
   font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -299,25 +304,25 @@
   font-weight: 600;
 }
 
-.view-modal .detail-value {
+.customer-view-modal .detail-value {
   font-size: 1rem;
   font-weight: 600;
   color: var(--text-main);
 }
 
-.view-modal .id-section {
+.customer-view-modal .id-section {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.view-modal .id-header {
+.customer-view-modal .id-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.view-modal .id-header h4 {
+.customer-view-modal .id-header h4 {
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -326,7 +331,7 @@
   font-weight: 600;
 }
 
-.view-modal .enlarge-btn {
+.customer-view-modal .enlarge-btn {
   font-size: 0.8rem;
   color: var(--primary-color);
   cursor: pointer;
@@ -335,7 +340,7 @@
   font-weight: 600;
 }
 
-.view-modal .id-image-wrapper {
+.customer-view-modal .id-image-wrapper {
   border-radius: 12px;
   border: 1px solid var(--border-color);
   background: var(--white);
@@ -349,12 +354,12 @@
   justify-content: center;
 }
 
-.view-modal .id-image-wrapper:hover {
+.customer-view-modal .id-image-wrapper:hover {
   transform: scale(1.01);
   box-shadow: 0 6px 16px var(--shadow-color);
 }
 
-.view-modal .id-image-wrapper img {
+.customer-view-modal .id-image-wrapper img {
   width: 100%;
   height: auto;
   display: block;
@@ -514,7 +519,7 @@
 
 /* --- Responsive --- */
 @media screen and (max-width: 900px) {
-  .view-modal .modal-body {
+  .customer-view-modal .modal-body {
     grid-template-columns: 1fr;
     gap: 1.5rem;
   }
@@ -576,23 +581,23 @@
   }
 
   /* 2. Reset the table and hide the header */
-  .data-table {
+  .customer-data-table {
     min-width: 0; /* Override the 700px min-width */
   }
 
-  .data-table thead {
+  .customer-data-table thead {
     display: none; /* Hide column headers on mobile */
   }
 
   /* 3. Style the table body as a flex column to stack the rows */
-  .data-table tbody {
+  .customer-data-table tbody {
     display: flex;
     flex-direction: column;
     gap: 1rem;
   }
 
   /* 4. Transform each row into a stylized Grid card */
-  .data-table tbody tr {
+  .customer-data-table tbody tr {
     display: grid;
     grid-template-columns: 1fr auto;
     /* Map out where each piece of data should go */
@@ -609,7 +614,7 @@
   }
 
   /* 5. Clean up the cells */
-  .data-table tbody td {
+  .customer-data-table tbody td {
     padding: 0;
     border-bottom: none;
     display: flex;
@@ -620,47 +625,47 @@
   /* --- Data Cell Mapping (Matching the JSX order) --- */
 
   /* TD 1: Customer ID */
-  .data-table tbody td:nth-child(1) {
+  .customer-data-table tbody td:nth-child(1) {
     grid-area: id;
     font-size: 0.75rem;
     justify-content: flex-end;
   }
 
   /* TD 2: Full Name */
-  .data-table tbody td:nth-child(2) {
+  .customer-data-table tbody td:nth-child(2) {
     grid-area: name;
     font-size: 1.15rem;
     color: var(--text-main);
   }
 
   /* TD 3: Father's Name */
-  .data-table tbody td:nth-child(3) {
+  .customer-data-table tbody td:nth-child(3) {
     grid-area: father;
     color: var(--text-light);
   }
 
   /* Add subtle icons using pseudo-elements so we don't break localization */
-  .data-table tbody td:nth-child(3)::before {
+  .customer-data-table tbody td:nth-child(3)::before {
     content: "👤";
     margin-right: 6px;
     opacity: 0.5;
   }
 
   /* TD 4: Phone Number */
-  .data-table tbody td:nth-child(4) {
+  .customer-data-table tbody td:nth-child(4) {
     grid-area: phone;
     font-weight: 600;
     justify-content: flex-end;
   }
 
-  .data-table tbody td:nth-child(4)::before {
+  .customer-data-table tbody td:nth-child(4)::before {
     content: "📞";
     margin-right: 6px;
     opacity: 0.5;
   }
 
   /* TD 5: ID / Tazkira */
-  .data-table tbody td:nth-child(5) {
+  .customer-data-table tbody td:nth-child(5) {
     grid-area: tazkira;
     font-size: 0.85rem;
     justify-content: flex-end;
@@ -670,15 +675,148 @@
   }
 
   /* TD 6: Registered Date */
-  .data-table tbody td:nth-child(6) {
+  .customer-data-table tbody td:nth-child(6) {
     grid-area: date;
     font-size: 0.75rem;
     color: var(--text-light);
   }
 
-  .data-table tbody td:nth-child(6)::before {
+  .customer-data-table tbody td:nth-child(6)::before {
     content: "📅";
     margin-right: 6px;
     opacity: 0.5;
   }
 }
+
+/* Custom table styling for customer profile transactions history */
+.customer-tx-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.customer-tx-table th {
+  background: var(--hover-bg, rgba(255, 255, 255, 0.03));
+  padding: 0.75rem;
+  font-weight: 600;
+  color: var(--text-main);
+  border-bottom: 2px solid var(--border);
+  font-size: 0.85rem;
+}
+
+.customer-tx-table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-main);
+  font-size: 0.8rem;
+  vertical-align: middle;
+}
+
+.customer-tx-table tr:hover {
+  background: var(--hover-bg, rgba(255, 255, 255, 0.02));
+}
+
+.badge {
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  display: inline-block;
+}
+
+.badge-sent {
+  background: rgba(59, 130, 246, 0.15) !important;
+  color: #3b82f6 !important;
+}
+
+.badge-received {
+  background: rgba(16, 185, 129, 0.15) !important;
+  color: #10b981 !important;
+}
+
+/* Mobile responsive card layouts for transaction history list */
+@media screen and (max-width: 600px) {
+  .customer-tx-table thead {
+    display: none !important;
+  }
+
+  .customer-tx-table tbody {
+    display: block !important;
+    width: 100% !important;
+  }
+
+  .customer-tx-table .responsive-table-row {
+    display: grid !important;
+    grid-template-columns: 1fr auto !important;
+    grid-template-areas:
+      "date type"
+      "details amount"
+      "status status" !important;
+    gap: 0.5rem 1rem !important;
+    background: var(--white) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 8px !important;
+    padding: 0.85rem !important;
+    margin-bottom: 0.85rem !important;
+  }
+
+  .customer-tx-table .responsive-table-row td {
+    display: block !important;
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
+    width: auto !important;
+    min-width: 0 !important;
+  }
+
+  /* Assign grid areas */
+  .customer-tx-table .responsive-table-row .cell-date {
+    grid-area: date !important;
+    font-size: 0.75rem !important;
+    color: var(--text-light) !important;
+    text-align: left !important;
+  }
+
+  .customer-tx-table .responsive-table-row .cell-type {
+    grid-area: type !important;
+    text-align: right !important;
+  }
+
+  .customer-tx-table .responsive-table-row .cell-details {
+    grid-area: details !important;
+    font-size: 0.85rem !important;
+    color: var(--text-main) !important;
+    text-align: left !important;
+  }
+
+  .customer-tx-table .responsive-table-row .cell-amount {
+    grid-area: amount !important;
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+    text-align: right !important;
+  }
+
+  .customer-tx-table .responsive-table-row .cell-status {
+    grid-area: status !important;
+    font-size: 0.75rem !important;
+    text-align: left !important;
+    border-top: 1px dashed var(--border) !important;
+    padding-top: 0.4rem !important;
+    margin-top: 0.2rem !important;
+  }
+}
+
+/* Container for customer profile transaction history - hides scrollbars */
+.customer-tx-container {
+  max-height: 250px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+
+.customer-tx-container::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+

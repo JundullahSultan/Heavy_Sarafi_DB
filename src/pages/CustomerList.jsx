@@ -6,7 +6,7 @@ import API, { resolveFileUrl } from "../utils/api";
 import "./CustomerList.css";
 
 export default function CustomerList() {
-  const { t } = useLanguage();
+  const { t, formatDate } = useLanguage();
   const { showAlert, showToast } = usePopup();
   const { id } = useParams();
   const navigate = useNavigate();
@@ -52,6 +52,46 @@ export default function CustomerList() {
   }, [activeSearch]);
 
   const selectedCustomer = id ? customers.find((c) => c.id === id) : null;
+
+  const [customerTransactions, setCustomerTransactions] = useState([]);
+  const [loadingTransactions, setLoadingTransactions] = useState(false);
+
+  useEffect(() => {
+    if (selectedCustomer) {
+      const fetchCustomerTransactions = async () => {
+        setLoadingTransactions(true);
+        try {
+          const res = await API.get("/hawalas");
+          const matched = res.data.filter((h) => {
+            const customerNameLower = selectedCustomer.name.trim().toLowerCase();
+            
+            const cleanPhone = (num) => num ? num.replace(/[\s\-\+\(\)]/g, "") : "";
+            const custPhoneClean = cleanPhone(selectedCustomer.phone);
+            const senderPhoneClean = cleanPhone(h.senderPhone);
+            const receiverPhoneClean = cleanPhone(h.receiverPhone);
+
+            const matchesSender = h.senderName.trim().toLowerCase().includes(customerNameLower) ||
+              customerNameLower.includes(h.senderName.trim().toLowerCase()) ||
+              (custPhoneClean && senderPhoneClean && (senderPhoneClean.includes(custPhoneClean) || custPhoneClean.includes(senderPhoneClean)));
+
+            const matchesReceiver = h.receiverName.trim().toLowerCase().includes(customerNameLower) ||
+              customerNameLower.includes(h.receiverName.trim().toLowerCase()) ||
+              (custPhoneClean && receiverPhoneClean && (receiverPhoneClean.includes(custPhoneClean) || custPhoneClean.includes(receiverPhoneClean)));
+
+            return matchesSender || matchesReceiver;
+          });
+          setCustomerTransactions(matched);
+        } catch (err) {
+          console.error("Error fetching transactions for customer:", err);
+        } finally {
+          setLoadingTransactions(false);
+        }
+      };
+      fetchCustomerTransactions();
+    } else {
+      setCustomerTransactions([]);
+    }
+  }, [selectedCustomer]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -165,7 +205,7 @@ export default function CustomerList() {
             <div className="loader"></div>
           </div>
         ) : (
-          <table className="data-table">
+          <table className="customer-data-table">
             <thead>
               <tr>
                 <th>{t("customerId")}</th>
@@ -207,7 +247,7 @@ export default function CustomerList() {
       {selectedCustomer && (
         <div className="modal-overlay" onClick={closeProfileModal}>
           <div
-            className="modal-content view-modal"
+            className="modal-content customer-view-modal"
             onClick={(e) => e.stopPropagation()}
             style={{ maxWidth: "850px" }}
           >
@@ -218,53 +258,121 @@ export default function CustomerList() {
               </button>
             </div>
 
-            <div className="modal-body">
-              {/* Left: Details */}
-              <div className="customer-details">
-                <div>
-                  <div className="customer-name">{selectedCustomer.name}</div>
-                  <span className="verified-badge">Verified Customer</span>
+            <div className="modal-body" style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+              <div style={{ display: "flex", gap: "1.5rem", width: "100%", flexWrap: "wrap" }}>
+                {/* Left: Details */}
+                <div className="customer-details" style={{ flex: 1, minWidth: "280px" }}>
+                  <div>
+                    <div className="customer-name">{selectedCustomer.name}</div>
+                    <span className="verified-badge">Verified Customer</span>
+                  </div>
+
+                  <div className="detail-item">
+                    <span className="detail-label">{t("customerId")}</span>
+                    <span className="detail-value">{selectedCustomer.id}</span>
+                  </div>
+                  <div className="detail-item">
+                    <span className="detail-label">{t("fathersName")}</span>
+                    <span className="detail-value">{selectedCustomer.fatherName}</span>
+                  </div>
+                  <div className="detail-item">
+                    <span className="detail-label">{t("phoneNumber")}</span>
+                    <span className="detail-value">{selectedCustomer.phone}</span>
+                  </div>
+                  <div className="detail-item">
+                    <span className="detail-label">{t("idTazkira")}</span>
+                    <span className="detail-value">{selectedCustomer.idNumber}</span>
+                  </div>
+                  <div className="detail-item">
+                    <span className="detail-label">{t("homeAddress")}</span>
+                    <span className="detail-value">{selectedCustomer.address}</span>
+                  </div>
                 </div>
 
-                <div className="detail-item">
-                  <span className="detail-label">{t("customerId")}</span>
-                  <span className="detail-value">{selectedCustomer.id}</span>
-                </div>
-                <div className="detail-item">
-                  <span className="detail-label">{t("fathersName")}</span>
-                  <span className="detail-value">{selectedCustomer.fatherName}</span>
-                </div>
-                <div className="detail-item">
-                  <span className="detail-label">{t("phoneNumber")}</span>
-                  <span className="detail-value">{selectedCustomer.phone}</span>
-                </div>
-                <div className="detail-item">
-                  <span className="detail-label">{t("idTazkira")}</span>
-                  <span className="detail-value">{selectedCustomer.idNumber}</span>
-                </div>
-                <div className="detail-item">
-                  <span className="detail-label">{t("homeAddress")}</span>
-                  <span className="detail-value">{selectedCustomer.address}</span>
+                {/* Right: ID Image */}
+                <div className="id-section" style={{ flex: 1, minWidth: "280px" }}>
+                  <div className="id-header">
+                    <h4>{t("officialIdRecord")}</h4>
+                    <button
+                      className="enlarge-btn"
+                      onClick={() => setIsImageZoomed(true)}
+                    >
+                      🔍 {t("enlarge")}
+                    </button>
+                  </div>
+                  <div
+                    className="id-image-wrapper"
+                    onClick={() => setIsImageZoomed(true)}
+                  >
+                    <img src={resolveFileUrl(selectedCustomer.idImageUrl)} alt="Customer ID" />
+                  </div>
                 </div>
               </div>
 
-              {/* Right: ID Image */}
-              <div className="id-section">
-                <div className="id-header">
-                  <h4>{t("officialIdRecord")}</h4>
-                  <button
-                    className="enlarge-btn"
-                    onClick={() => setIsImageZoomed(true)}
-                  >
-                    🔍 {t("enlarge")}
-                  </button>
-                </div>
-                <div
-                  className="id-image-wrapper"
-                  onClick={() => setIsImageZoomed(true)}
-                >
-                  <img src={resolveFileUrl(selectedCustomer.idImageUrl)} alt="Customer ID" />
-                </div>
+              {/* Bottom: Transaction History */}
+              <div className="customer-transactions" style={{ width: "100%", borderTop: "1px solid var(--border)", paddingTop: "1.2rem" }}>
+                <h4 style={{ marginBottom: "1rem" }}>{t("transactionHistory")}</h4>
+                {loadingTransactions ? (
+                  <div style={{ textAlign: "center", padding: "1rem", color: "var(--text-light)" }}>Loading transactions...</div>
+                ) : customerTransactions.length === 0 ? (
+                  <div style={{ textAlign: "center", color: "var(--text-light)", padding: "1rem" }}>
+                    No transactions found for this customer.
+                  </div>
+                ) : (
+                  <div className="customer-tx-container">
+                    <table className="customer-tx-table" style={{ fontSize: "0.85rem", width: "100%", margin: 0 }}>
+                      <thead>
+                        <tr>
+                          <th>{t("date")}</th>
+                           <th>{t("type")}</th>
+                          <th>{t("sentFromTo")}</th>
+                          <th>{t("amount")}</th>
+                          <th>{t("status")}</th>
+                        </tr>
+                      </thead>
+                      <tbody style={{ background: "transparent" }}>
+                        {customerTransactions.map((tx) => {
+                          const isSender = tx.senderName.trim().toLowerCase() === selectedCustomer.name.trim().toLowerCase() ||
+                            (selectedCustomer.phone && tx.senderPhone && tx.senderPhone.trim() === selectedCustomer.phone.trim());
+                          return (
+                            <tr key={tx.id || tx._id} className="responsive-table-row">
+                              <td className="cell-date">{formatDate(tx.date)}</td>
+                              <td className="cell-type">
+                                <span className={`badge ${isSender ? "badge-sent" : "badge-received"}`} style={{
+                                  padding: "2px 6px",
+                                  borderRadius: "4px",
+                                  fontSize: "0.75rem",
+                                  background: isSender ? "rgba(59, 130, 246, 0.1)" : "rgba(16, 185, 129, 0.1)",
+                                  color: isSender ? "var(--primary)" : "var(--success)"
+                                }}>
+                                  {isSender ? "Sent" : "Received"}
+                                </span>
+                              </td>
+                              <td className="cell-details">
+                                {isSender ? (
+                                  <><strong>To:</strong> {tx.receiverName} ({tx.destinationBranch})</>
+                                ) : (
+                                  <><strong>From:</strong> {tx.senderName} ({tx.senderBranch})</>
+                                )}
+                              </td>
+                              <td className="cell-amount" style={{ fontWeight: "bold" }}>
+                                {tx.amount.toLocaleString()} {tx.currency}
+                              </td>
+                              <td className="cell-status">
+                                <span style={{
+                                  fontSize: "0.75rem",
+                                  color: tx.status === "Paid Out" ? "var(--success)" : "var(--warning)"
+                                }}>
+                                  {tx.status}
+                                </span>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
             </div>
 

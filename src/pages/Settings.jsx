@@ -3,7 +3,8 @@ import "./Settings.css";
 import { getRole, ROLES } from "../utils/auth";
 import { useLanguage } from "../context/LanguageContext";
 import { usePopup } from "../context/PopupContext";
-import { LogOut } from "lucide-react";
+import { LogOut, Sun, Moon } from "lucide-react";
+import CustomDropdown from "../components/CustomDropdown";
 
 export default function Settings({ isDarkMode, setIsDarkMode, onLogout }) {
   // receive props
@@ -17,7 +18,7 @@ export default function Settings({ isDarkMode, setIsDarkMode, onLogout }) {
   const [fullName, setFullName] = useState("Jundullah");
   const [role, setRole] = useState(currentUserRole);
 
-  const { language, setLanguage, t } = useLanguage();
+  const { language, setLanguage, calendarType, setCalendarType, t } = useLanguage();
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
@@ -95,14 +96,29 @@ export default function Settings({ isDarkMode, setIsDarkMode, onLogout }) {
               <div className="form-grid-2">
                 <div className="form-input-group">
                   <label>{t("systemLanguage")}</label>
-                  <select
+                  <CustomDropdown
+                    options={[
+                      { value: "en", label: t("english") },
+                      { value: "ps", label: t("pashto") },
+                      { value: "da", label: t("dari") }
+                    ]}
                     value={language}
-                    onChange={(e) => setLanguage(e.target.value)}
-                  >
-                    <option value="en">{t("english")}</option>
-                    <option value="ps">{t("pashto")}</option>
-                    <option value="da">{t("dari")}</option>
-                  </select>
+                    onChange={setLanguage}
+                    variant="6"
+                  />
+                </div>
+
+                <div className="form-input-group">
+                  <label>{t("calendarSystem")}</label>
+                  <CustomDropdown
+                    options={[
+                      { value: "gregorian", label: t("calendarGregorian") },
+                      { value: "shamsi", label: t("calendarShamsi") }
+                    ]}
+                    value={calendarType}
+                    onChange={setCalendarType}
+                    variant="6"
+                  />
                 </div>
 
                 <div className="form-input-group">
@@ -119,7 +135,7 @@ export default function Settings({ isDarkMode, setIsDarkMode, onLogout }) {
                         onChange={() => handleThemeChange("light")}
                         style={{ display: "none" }}
                       />
-                      {t("lightMode")}
+                      <Sun size={24} />
                     </label>
                     <label
                       className={`theme-btn ${isDarkMode ? "active" : ""}`}
@@ -132,7 +148,7 @@ export default function Settings({ isDarkMode, setIsDarkMode, onLogout }) {
                         onChange={() => handleThemeChange("dark")}
                         style={{ display: "none" }}
                       />
-                      {t("darkMode")}
+                      <Moon size={24} />
                     </label>
                   </div>
                 </div>

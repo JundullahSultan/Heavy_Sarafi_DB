@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import API from "../utils/api";
 import { usePopup } from "../context/PopupContext";
+import { Sparkles, ArrowRight, ShieldCheck } from "lucide-react";
 import "./LoginPage.css";
 
 export default function LoginPage({ onLoginSuccess }) {
@@ -51,6 +52,21 @@ export default function LoginPage({ onLoginSuccess }) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGuestLogin = () => {
+    localStorage.setItem("isGuest", "true");
+    localStorage.setItem("userRole", "owner");
+    localStorage.setItem("userBranch", "Kabul Branch");
+    showToast("Welcome to Guest Sandbox Demo!", { severity: "info" });
+    onLoginSuccess({
+      id: "guest-user",
+      username: "guest",
+      name: "Guest Demo User",
+      role: "owner",
+      branch: "Kabul Branch",
+      isGuest: true
+    });
   };
 
   return (
@@ -144,6 +160,27 @@ export default function LoginPage({ onLoginSuccess }) {
             {loading ? "Processing..." : isRegister ? "Register" : "Sign In"}
           </button>
         </form>
+
+        <div className="login-divider">
+          <span>OR</span>
+        </div>
+
+        <button
+          type="button"
+          className="guest-login-btn"
+          onClick={handleGuestLogin}
+        >
+          <div className="guest-btn-content">
+            <div className="guest-icon-badge">
+              <Sparkles size={18} />
+            </div>
+            <div className="guest-text-group">
+              <span className="guest-title">Continue as Guest</span>
+              <span className="guest-subtitle">Try instant demo without server connection</span>
+            </div>
+          </div>
+          <ArrowRight size={18} className="guest-arrow" />
+        </button>
       </div>
     </div>
   );

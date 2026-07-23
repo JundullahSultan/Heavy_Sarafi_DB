@@ -636,10 +636,27 @@
     padding: 0 !important;
   }
 
-  html, body {
+  html, body, .dark-mode {
     height: auto !important;
     overflow: visible !important;
-    background: #fff !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  /* Force white background and black text on all cards and tables in dark mode when printing */
+  .dark-mode,
+  .dark-mode .modal-content,
+  .dark-mode .period-report-body,
+  .dark-mode table,
+  .dark-mode th,
+  .dark-mode td,
+  .dark-mode tr,
+  .dark-mode .period-total-card {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    border-color: #cccccc !important;
   }
 
   /* Reset the modal overlay and content so they don't center or restrict */

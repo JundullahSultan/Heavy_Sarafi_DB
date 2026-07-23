@@ -340,3 +340,119 @@
     right: 0.85rem;
   }
 }
+
+/* Custom layout for recent customers table */
+.recent-customers-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.recent-customers-table th {
+  text-align: left;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: var(--text-light, rgba(255, 255, 255, 0.6));
+  background: rgba(255, 255, 255, 0.03);
+  font-weight: 600;
+  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+}
+
+.recent-customers-table td {
+  padding: 0.6rem 0.8rem;
+  font-size: 0.8rem;
+  color: var(--text-main, #ffffff);
+  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.04));
+  vertical-align: middle;
+}
+
+.recent-customers-table tr {
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.recent-customers-table tr:hover {
+  background: var(--hover-bg, rgba(255, 255, 255, 0.04));
+}
+
+.recent-customers-table tr:last-child td {
+  border-bottom: none;
+}
+
+.recent-customers-table .link-action {
+  color: var(--primary, #3b82f6);
+  font-weight: 600;
+  font-size: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.recent-customers-table tr:hover .link-action {
+  color: #60a5fa;
+  padding-left: 4px;
+}
+
+/* Mobile responsive card layouts for recent customers list inside modal */
+@media screen and (max-width: 600px) {
+  .recent-customers-table thead {
+    display: none !important;
+  }
+
+  .recent-customers-table tbody {
+    display: block !important;
+    width: 100% !important;
+  }
+
+  .recent-customers-table .responsive-table-row {
+    display: grid !important;
+    grid-template-columns: 1fr auto !important;
+    grid-template-areas:
+      "name action"
+      "father phone" !important;
+    gap: 0.4rem 1rem !important;
+    background: var(--white) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 8px !important;
+    padding: 0.85rem !important;
+    margin-bottom: 0.75rem !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.01) !important;
+  }
+
+  .recent-customers-table .responsive-table-row td {
+    display: block !important;
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
+    width: auto !important;
+    min-width: 0 !important;
+  }
+
+  .recent-customers-table .responsive-table-row .cell-name {
+    grid-area: name !important;
+    font-size: 0.95rem !important;
+    font-weight: 750 !important;
+    color: var(--text-main) !important;
+  }
+
+  .recent-customers-table .responsive-table-row .cell-action {
+    grid-area: action !important;
+    text-align: right !important;
+  }
+
+  .recent-customers-table .responsive-table-row .cell-father {
+    grid-area: father !important;
+    font-size: 0.8rem !important;
+    color: var(--text-light) !important;
+  }
+
+  .recent-customers-table .responsive-table-row .cell-phone {
+    grid-area: phone !important;
+    font-size: 0.8rem !important;
+    color: var(--text-light) !important;
+    text-align: right !important;
+  }
+}

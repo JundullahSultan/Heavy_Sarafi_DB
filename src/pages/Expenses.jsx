@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import { usePopup } from "../context/PopupContext";
 import API, { resolveFileUrl } from "../utils/api";
+import CustomCalendar from "../components/CustomCalendar";
 import "./Expenses.css";
 
 const CURRENCIES = ["AFN", "USD", "PKR", "EUR", "CNY", "IRR", "GBP"];
@@ -10,7 +11,7 @@ const CURRENCIES = ["AFN", "USD", "PKR", "EUR", "CNY", "IRR", "GBP"];
 const todayStr = () => new Date().toISOString().split("T")[0];
 
 const Expenses = () => {
-  const { t } = useLanguage();
+  const { t, formatDate } = useLanguage();
   const { showAlert, showToast } = usePopup();
   const { id } = useParams();
   const navigate = useNavigate();
@@ -167,7 +168,7 @@ const Expenses = () => {
   };
 
   const uniqueCategoryIds = [
-    ...new Set(expenses.map((e) => e.categoryId)),
+    ...new Set(expenses.map((e) => e.categoryId || e.category || "general").filter(Boolean)),
   ].sort();
 
   const totalsByCurrency = expenses.reduce((acc, exp) => {
@@ -310,8 +311,8 @@ const Expenses = () => {
           <option value="all">
             {t("allCategories")}
           </option>
-          {uniqueCategoryIds.map((catId) => (
-            <option key={catId} value={catId}>
+          {uniqueCategoryIds.map((catId, idx) => (
+            <option key={catId || `cat-${idx}`} value={catId}>
               {getCategoryLabel(catId)}
             </option>
           ))}
@@ -353,10 +354,10 @@ const Expenses = () => {
                     <td>
                       <span className="expense-id-badge">{exp.id}</span>
                     </td>
-                    <td>{exp.date}</td>
+                    <td>{formatDate(exp.date)}</td>
                     <td>
-                      <span className={`category-badge cat-${exp.categoryId.replace(/[^a-z]/g, "")}`}>
-                        {getCategoryLabel(exp.categoryId)}
+                      <span className={`category-badge cat-${(exp.categoryId || exp.category || "general").toString().toLowerCase().replace(/[^a-z]/g, "")}`}>
+                        {getCategoryLabel(exp.categoryId || exp.category)}
                       </span>
                     </td>
                     <td className="amount-cell">
@@ -418,7 +419,7 @@ const Expenses = () => {
                 <h4>{t("metadataTracking")}</h4>
                 <div className="detail-row">
                   <span className="detail-label">{t("date")}</span>
-                  <span className="detail-value">{viewingExpense.date}</span>
+                  <span className="detail-value">{formatDate(viewingExpense.date)}</span>
                 </div>
                 <div className="detail-row">
                   <span className="detail-label">{t("description")}</span>
@@ -538,10 +539,10 @@ const Expenses = () => {
                 <div className="form-grid-2">
                   <div className="form-input-group">
                     <label>{t("date")}</label>
-                    <input
-                      type="date"
+                    <CustomCalendar
                       value={form.date}
-                      onChange={(e) => handleFormChange("date", e.target.value)}
+                      onChange={(val) => handleFormChange("date", val)}
+                      label={t("date")}
                     />
                   </div>
                 </div>
@@ -682,7 +683,7 @@ const Expenses = () => {
                           <td>
                             <span className="expense-id-badge">{exp.id}</span>
                           </td>
-                          <td>{exp.date}</td>
+                          <td>{formatDate(exp.date)}</td>
                           <td>
                             <span
                               className={`category-badge cat-${exp.categoryId.replace(

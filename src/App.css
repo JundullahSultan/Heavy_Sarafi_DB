@@ -347,17 +347,21 @@ body {
   }
 
   .main-content {
-    padding-bottom: 70px; /* Space for bottom nav */
+    padding-bottom: 0;
   }
 
   /* 2. Compact the top header text further if needed */
   .top-header {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.75rem; /* Reduced gap slightly */
-    padding: 0.75rem 1rem; /* Slightly tighter padding */
-    background: var(--white);
-    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    z-index: 99;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    background: transparent;
+    border-bottom: none;
+    pointer-events: none;
   }
 
   .user-info h2 {
@@ -388,6 +392,49 @@ body {
     width: 34px;
     height: 34px;
     font-size: 1rem;
+  }
+}
+
+/* --- Hamburger Menu Button --- */
+.mobile-menu-btn {
+  display: none;
+}
+
+@media screen and (max-width: 768px) {
+  .mobile-menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-main);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    transition: background-color 0.2s, transform 0.1s;
+    box-shadow: 0 4px 12px var(--shadow-color);
+    pointer-events: auto;
+  }
+
+  .dark-mode .mobile-menu-btn {
+    background: rgba(45, 45, 45, 0.85) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  }
+
+  .mobile-menu-btn:hover {
+    background: var(--hover-bg) !important;
+  }
+
+  .mobile-menu-btn:active {
+    transform: scale(0.92);
+  }
+
+  .top-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
   }
 }
 

@@ -40,6 +40,7 @@ const KahataSchema = new mongoose.Schema(
       required: true, // Merchant vs Partner Sarafi
     },
     phone: String,
+    whatsapp: String,
     address: String,
     currency: {
       type: String,

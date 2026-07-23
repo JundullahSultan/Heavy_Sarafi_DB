@@ -19,12 +19,16 @@ router.get("/", checkAuth, async (req, res) => {
     }
 
     if (search) {
-      query.$or = [
-        { name: { $regex: search, $options: "i" } },
-        { idNumber: { $regex: search, $options: "i" } },
-        { phone: { $regex: search, $options: "i" } },
-        { id: { $regex: search, $options: "i" } },
-      ];
+      if (req.query.searchField === "name") {
+        query.name = { $regex: search, $options: "i" };
+      } else {
+        query.$or = [
+          { name: { $regex: search, $options: "i" } },
+          { idNumber: { $regex: search, $options: "i" } },
+          { phone: { $regex: search, $options: "i" } },
+          { id: { $regex: search, $options: "i" } },
+        ];
+      }
     }
     const customers = await Customer.find(query).sort({ createdAt: -1 });
     res.json(customers);

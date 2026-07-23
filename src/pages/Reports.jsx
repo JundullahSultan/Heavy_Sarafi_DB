@@ -1,6 +1,8 @@
 import React, { useMemo, useState, useEffect } from "react";
 import "./Reports.css";
 import { getRole, ROLES } from "../utils/auth";
+import CustomCalendar from "../components/CustomCalendar";
+import CustomDropdown from "../components/CustomDropdown";
 import { useLanguage } from "../context/LanguageContext";
 import API from "../utils/api";
 
@@ -192,44 +194,40 @@ export default function Reports({ user }) {
     <div className="list-container">
       {/* --- HEADER --- */}
       <div className="list-header">
-        <div>
-          <span className="role-badge">
-            {t("accessLevel")}: {currentUserRole}
-          </span>
-        </div>
-
         <div className="filters no-print">
           <div className="filter-group">
             <label>{t("startDate")}</label>
-            <input
-              type="date"
+            <CustomCalendar
               value={fromDate}
-              onChange={(e) => setFromDate(e.target.value)}
+              onChange={setFromDate}
+              label={t("startDate")}
             />
           </div>
           <div className="filter-group">
             <label>{t("endDate")}</label>
-            <input
-              type="date"
+            <CustomCalendar
               value={toDate}
-              onChange={(e) => setToDate(e.target.value)}
+              onChange={setToDate}
+              label={t("endDate")}
             />
           </div>
           <div className="filter-group">
             <label>{t("currency")}</label>
-            <select
+            <CustomDropdown
+              options={[
+                { value: "", label: t("allCurrencies") },
+                { value: "AFN", label: t("currency_AFN") },
+                { value: "USD", label: t("currency_USD") },
+                { value: "PKR", label: t("currency_PKR") },
+                { value: "EUR", label: t("currency_EUR") },
+                { value: "CNY", label: t("currency_CNY") },
+                { value: "IRR", label: t("currency_IRR") },
+                { value: "GBP", label: t("currency_GBP") }
+              ]}
               value={currencyFilter}
-              onChange={(e) => setCurrencyFilter(e.target.value)}
-            >
-              <option value="">{t("allCurrencies")}</option>
-              <option value="AFN">Afghani (AFN)</option>
-              <option value="USD">US Dollar (USD)</option>
-              <option value="PKR">Pakistani Rupee (PKR)</option>
-              <option value="EUR">Euro (EUR)</option>
-              <option value="CNY">Chinese Yuan (CNY)</option>
-              <option value="IRR">Iranian Rial (IRR)</option>
-              <option value="GBP">British Pound (GBP)</option>
-            </select>
+              onChange={setCurrencyFilter}
+              variant="6"
+            />
           </div>
           <div className="filter-actions">
             <button
@@ -301,7 +299,7 @@ export default function Reports({ user }) {
                         </td>
                         <td className="text-capitalize">
                           <span className="mobile-label">{t("type")}: </span>
-                          {tx.type}
+                          {t(tx.type)}
                         </td>
                         <td className="fw-bold">
                           <span className="mobile-label">{t("amount")}: </span>

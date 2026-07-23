@@ -6,7 +6,7 @@ import API, { resolveFileUrl } from "../utils/api";
 import "./ReceivedHawalaList.css";
 
 export default function ReceivedHawalaList() {
-  const { t } = useLanguage();
+  const { t, formatDate } = useLanguage();
   const { showAlert, showToast } = usePopup();
   const { id } = useParams();
   const navigate = useNavigate();
@@ -18,6 +18,7 @@ export default function ReceivedHawalaList() {
   
   const [searchQuery, setSearchQuery] = useState("");
   const [foundCustomer, setFoundCustomer] = useState(null);
+  const [searchResults, setSearchResults] = useState([]);
 
   const purgeLegacyCacheKeys = (prefix, branch) => {
     const branchPrefix = `${prefix}_${branch}_`;
@@ -62,6 +63,11 @@ export default function ReceivedHawalaList() {
 
   const selectedHawala = id ? hawalas.find((h) => h.id === id) : null;
 
+  const isCustomerMatching = foundCustomer && selectedHawala &&
+    foundCustomer.name.trim().toLowerCase() === selectedHawala.receiverName.trim().toLowerCase() &&
+    foundCustomer.phone.trim() === (selectedHawala.receiverPhone || "").trim() &&
+    foundCustomer.idNumber.trim() === (selectedHawala.receiverIdNum || "").trim();
+
   const handleRowClick = (hawala) => {
     navigate(`/receive-hawala/${hawala.id}`);
   };
@@ -70,6 +76,7 @@ export default function ReceivedHawalaList() {
     navigate("/receive-hawala");
     setSearchQuery("");
     setFoundCustomer(null);
+    setSearchResults([]);
     setIsNewCustomer(false);
     setIsImageZoomed(false);
   };
@@ -128,17 +135,12 @@ export default function ReceivedHawalaList() {
 
   // Handles client-side Tazkira search
   const handleVerifyCustomer = async () => {
+    if (!searchQuery.trim()) return;
     try {
-      const res = await API.get(`/customers?search=${searchQuery}`);
+      const res = await API.get(`/customers?search=${searchQuery}&searchField=name`);
+      setSearchResults(res.data);
       if (res.data && res.data.length > 0) {
-        // Grab first match
-        const c = res.data[0];
-        setFoundCustomer({
-          name: c.name,
-          father: c.fatherName,
-          phone: c.phone,
-          address: c.address,
-        });
+        setFoundCustomer(null);
         setIsNewCustomer(false);
       } else {
         setFoundCustomer(null);
@@ -146,9 +148,20 @@ export default function ReceivedHawalaList() {
       }
     } catch (err) {
       console.error("Verification error:", err);
-      // Fallback in case of network issue
+      setSearchResults([]);
       setIsNewCustomer(true);
     }
+  };
+
+  const handleSelectCustomer = (c) => {
+    setFoundCustomer({
+      name: c.name,
+      father: c.fatherName,
+      phone: c.phone,
+      address: c.address,
+      idNumber: c.idNumber,
+    });
+    setSearchResults([]);
   };
 
   return (
@@ -199,13 +212,13 @@ export default function ReceivedHawalaList() {
                     <td data-label={t("hawalaId")} className="fw-bold">
                       {hawala.id}
                     </td>
-                    <td data-label={t("date")}>{hawala.date.split(" ")[0]}</td>
+                    <td data-label={t("date")}>{formatDate(hawala.date.split(" ")[0])}</td>
                     <td data-label={t("fromBranch")}>{hawala.senderBranch}</td>
                     <td data-label={t("receiverName")} className="fw-bold">
                       {hawala.receiverName}
                     </td>
                     <td data-label={t("amount")} className="amount-col">
-                      {hawala.amount.toLocaleString()} {hawala.currency}
+                      {hawala.amount.toLocaleString()} {t("currency_" + hawala.currency)}
                     </td>
                     <td data-label={t("status")}>
                       <span
@@ -273,7 +286,7 @@ export default function ReceivedHawalaList() {
                   <div className="detail-row">
                     <span className="label">{t("idTazkira")}</span>
                     <span className="value">
-                      {selectedHawala.receiverIdNum || "—"}
+                      {selectedHawala.receiverExpectedId || selectedHawala.receiverIdNum || "—"}
                     </span>
                   </div>
                 </div>
@@ -311,18 +324,65 @@ export default function ReceivedHawalaList() {
                 <div className="verification-search">
                   <input
                     type="text"
-                    placeholder={t("searchPhoneOrId")}
+                    placeholder={t("searchByNameOnly")}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                   <button onClick={handleVerifyCustomer}>{t("search")}</button>
                 </div>
 
+                {searchResults.length > 0 && !foundCustomer && (
+                  <div className="search-results-list" style={{ marginTop: "1rem", maxHeight: "200px", overflowY: "auto", border: "1px solid var(--border)", borderRadius: "6px", padding: "0.5rem" }}>
+                    <h5 style={{ marginBottom: "0.5rem", fontSize: "0.9rem" }}>{t("selectMatchingProfile")}</h5>
+                    {searchResults.map((c) => (
+                      <div 
+                        key={c.id || c._id} 
+                        className="search-result-item" 
+                        onClick={() => handleSelectCustomer(c)}
+                        style={{
+                          padding: "0.5rem",
+                          borderBottom: "1px solid var(--border)",
+                          cursor: "pointer",
+                          transition: "background 0.2s",
+                          borderRadius: "4px",
+                          marginBottom: "0.25rem"
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = "var(--hover-bg, rgba(255,255,255,0.05))"}
+                        onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+                      >
+                        <div style={{ fontWeight: "bold", fontSize: "0.85rem" }}>{c.name}</div>
+                        <div style={{ fontSize: "0.75rem", color: "var(--text-light)" }}>
+                          {t("father")}: {c.fatherName} | {t("phoneNumber")}: {c.phone}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
                 {foundCustomer && (
                   <div className="customer-found">
-                    <h5>
-                      <span>✅</span> {t("profileFound")}
-                    </h5>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
+                      <h5 style={{ margin: 0 }}>
+                        <span>✅</span> {t("profileFound")}
+                      </h5>
+                      <button 
+                        onClick={() => {
+                          setFoundCustomer(null);
+                          setSearchQuery("");
+                          setSearchResults([]);
+                        }}
+                        style={{ 
+                          background: "none", 
+                          border: "none", 
+                          color: "var(--danger)", 
+                          cursor: "pointer", 
+                          fontSize: "0.8rem",
+                          padding: 0
+                        }}
+                      >
+                        {t("change")}
+                      </button>
+                    </div>
                     <div className="detail-row">
                       <span className="label">{t("fullName")}</span>
                       <span className="value">{foundCustomer.name}</span>
@@ -339,6 +399,26 @@ export default function ReceivedHawalaList() {
                       <span className="label">{t("homeAddress")}</span>
                       <span className="value">{foundCustomer.address}</span>
                     </div>
+                  </div>
+                )}
+
+                {foundCustomer && !isCustomerMatching && (
+                  <div className="customer-mismatch-warning" style={{ marginTop: "1rem", color: "var(--danger)", background: "rgba(239, 68, 68, 0.1)", border: "1px solid var(--danger)", borderRadius: "6px", padding: "0.75rem" }}>
+                    <h5 style={{ margin: "0 0 0.5rem 0", fontWeight: "bold" }}>⚠️ {t("mismatchErrorTitle")}</h5>
+                    <p style={{ fontSize: "0.8rem", margin: 0 }}>
+                      {t("mismatchDetailsText")}
+                    </p>
+                    <ul style={{ fontSize: "0.75rem", margin: "0.5rem 0 0 0", paddingLeft: "1.25rem", listStyleType: "disc" }}>
+                      {foundCustomer.name.trim().toLowerCase() !== selectedHawala.receiverName.trim().toLowerCase() && (
+                        <li>{t("expectedName")}: "{selectedHawala.receiverName}" vs "{foundCustomer.name}"</li>
+                      )}
+                      {foundCustomer.phone.trim() !== (selectedHawala.receiverPhone || "").trim() && (
+                        <li>{t("expectedPhone")}: "{selectedHawala.receiverPhone || "—"}" vs "{foundCustomer.phone}"</li>
+                      )}
+                      {foundCustomer.idNumber.trim() !== (selectedHawala.receiverIdNum || "").trim() && (
+                        <li>{t("expectedId")}: "{selectedHawala.receiverIdNum || "—"}" vs "{foundCustomer.idNumber}"</li>
+                      )}
+                    </ul>
                   </div>
                 )}
 
@@ -370,7 +450,7 @@ export default function ReceivedHawalaList() {
                         <label>{t("idTazkira")}</label>
                         <input
                           type="text"
-                          defaultValue={selectedHawala.receiverIdNum}
+                          defaultValue={selectedHawala.receiverExpectedId || selectedHawala.receiverIdNum}
                           readOnly
                         />
                       </div>
@@ -390,7 +470,7 @@ export default function ReceivedHawalaList() {
               <button
                 className="action-btn submit-btn"
                 onClick={handlePayout}
-                disabled={selectedHawala.status === "Paid Out" || (!foundCustomer && !isNewCustomer)}
+                disabled={selectedHawala.status === "Paid Out" || !foundCustomer || !isCustomerMatching}
               >
                 {selectedHawala.status === "Paid Out"
                   ? "Already Paid Out"

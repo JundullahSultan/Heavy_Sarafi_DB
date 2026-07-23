@@ -4,10 +4,13 @@ import { getRole, ROLES } from "../utils/auth";
 import { useLanguage } from "../context/LanguageContext";
 import { usePopup } from "../context/PopupContext";
 import API from "../utils/api";
+import CustomDropdown from "../components/CustomDropdown";
 import "./SendHawalaList.css";
 
+const BRANCHES = ["Herat Main", "Mazar Branch", "Dubai Branch", "Kabul Branch"];
+
 export default function SendHawalaList() {
-  const { t } = useLanguage();
+  const { t, formatDate } = useLanguage();
   const { showAlert, showConfirm, showToast } = usePopup();
   const { id } = useParams();
   const navigate = useNavigate();
@@ -22,12 +25,68 @@ export default function SendHawalaList() {
 
   const currentUserRole = getRole() || ROLES.EMPLOYEE;
 
+  // Kabul-only: external hawala registration
+  const userBranchStored = localStorage.getItem("userBranch") || "Kabul Branch";
+  const isKabulBranch = userBranchStored === "Kabul Branch";
+
   // New Hawala Form Fields
-  const [destinationBranch, setDestinationBranch] = useState("Herat Main");
+  const [fromBranch, setFromBranch] = useState(userBranchStored);
+  const [customFromBranch, setCustomFromBranch] = useState("");
+  const isExternalHawala = isKabulBranch && fromBranch !== "Kabul Branch";
+
+  const [destinationBranch, setDestinationBranch] = useState(() => {
+    const userBranch = localStorage.getItem("userBranch") || "Kabul Branch";
+    const available = BRANCHES.filter(b => b !== userBranch);
+    return available[0] || "Herat Main";
+  });
   const [senderName, setSenderName] = useState("");
   const [senderFather, setSenderFather] = useState("");
   const [senderPhone, setSenderPhone] = useState("");
   const [senderIdNum, setSenderIdNum] = useState("");
+
+  const [senderSearchQuery, setSenderSearchQuery] = useState("");
+  const [senderSearchResults, setSenderSearchResults] = useState([]);
+  const [selectedSenderProfile, setSelectedSenderProfile] = useState(null);
+  const [recentCustomers, setRecentCustomers] = useState([]);
+
+  useEffect(() => {
+    if (isSendModalOpen) {
+      const fetchRecent = async () => {
+        try {
+          const res = await API.get("/customers");
+          setRecentCustomers(res.data.slice(0, 5));
+        } catch (err) {
+          console.error("Error fetching recent customers:", err);
+        }
+      };
+      fetchRecent();
+    } else {
+      setRecentCustomers([]);
+      setSelectedSenderProfile(null);
+      setSenderSearchQuery("");
+      setSenderSearchResults([]);
+    }
+  }, [isSendModalOpen]);
+
+  const handleSearchSender = async () => {
+    if (!senderSearchQuery.trim()) return;
+    try {
+      const res = await API.get(`/customers?search=${senderSearchQuery}&searchField=name`);
+      setSenderSearchResults(res.data);
+    } catch (err) {
+      console.error("Error searching sender:", err);
+    }
+  };
+
+  const handleSelectSender = (c) => {
+    setSelectedSenderProfile(c);
+    setSenderName(c.name);
+    setSenderFather(c.fatherName);
+    setSenderPhone(c.phone);
+    setSenderIdNum(c.idNumber);
+    setSenderSearchQuery("");
+    setSenderSearchResults([]);
+  };
   
   const [receiverName, setReceiverName] = useState("");
   const [receiverFather, setReceiverFather] = useState("");
@@ -126,11 +185,38 @@ export default function SendHawalaList() {
     setFee("");
     setFundingSource("sarafi");
     setSelectedKahataId("");
+    setFromBranch(userBranchStored);
+    setCustomFromBranch("");
+    const userBranch = localStorage.getItem("userBranch") || "Kabul Branch";
+    const available = BRANCHES.filter(b => b !== userBranch);
+    setDestinationBranch(available[0] || "Herat Main");
+    setSelectedSenderProfile(null);
+    setSenderSearchQuery("");
+    setSenderSearchResults([]);
   };
 
   const handleSendHawala = async (e) => {
     e.preventDefault();
-    if (fundingSource === "kahata" && !selectedKahataId) {
+    const userBranch = localStorage.getItem("userBranch") || "Kabul Branch";
+
+    // Determine the actual sender branch and destination for this hawala
+    const actualFromBranch = isExternalHawala
+      ? (fromBranch === "__custom__" ? customFromBranch.trim() : fromBranch)
+      : userBranch;
+    const actualDestination = isExternalHawala ? "Kabul Branch" : destinationBranch;
+
+    // Validate: custom branch name must not be empty
+    if (isExternalHawala && fromBranch === "__custom__" && !customFromBranch.trim()) {
+      showAlert("Please enter a branch name.");
+      return;
+    }
+
+    // Only check same-branch for non-external hawalas
+    if (!isExternalHawala && actualDestination === userBranch) {
+      showAlert(t("sameBranchError"));
+      return;
+    }
+    if (!isExternalHawala && fundingSource === "kahata" && !selectedKahataId) {
       showAlert(t("selectKahataError"));
       return;
     }
@@ -139,9 +225,9 @@ export default function SendHawalaList() {
     const tempHawala = {
       id: tempId,
       type: "sent",
-      date: new Date().toLocaleString(),
-      senderBranch: "",
-      destinationBranch,
+      date: new Date().toISOString().split("T")[0],
+      senderBranch: actualFromBranch,
+      destinationBranch: actualDestination,
       senderName,
       senderFather,
       senderPhone,
@@ -154,8 +240,9 @@ export default function SendHawalaList() {
       amount: parseFloat(amount),
       currency,
       fee: parseFloat(fee) || 0,
-      fundingSource,
-      kahataAccountId: selectedKahataId || undefined,
+      fundingSource: isExternalHawala ? "sarafi" : fundingSource,
+      kahataAccountId: isExternalHawala ? undefined : (selectedKahataId || undefined),
+      skipVaultCredit: isExternalHawala,
       status: "Sent - Pending Payout",
       createdAt: new Date().toISOString(),
     };
@@ -166,7 +253,11 @@ export default function SendHawalaList() {
 
     // Save inputs for recovery
     const savedInputs = {
-      destinationBranch,
+      fromBranch,
+      customFromBranch,
+      destinationBranch: actualDestination,
+      actualFromBranch,
+      isExternalHawala,
       senderName,
       senderFather,
       senderPhone,
@@ -178,8 +269,8 @@ export default function SendHawalaList() {
       amount,
       currency,
       fee,
-      fundingSource,
-      selectedKahataId,
+      fundingSource: isExternalHawala ? "sarafi" : fundingSource,
+      selectedKahataId: isExternalHawala ? "" : selectedKahataId,
       receiverIdImage
     };
 
@@ -190,6 +281,7 @@ export default function SendHawalaList() {
       formData.append("type", "sent");
       formData.append("date", tempHawala.date);
       formData.append("destinationBranch", savedInputs.destinationBranch);
+      formData.append("senderBranch", savedInputs.actualFromBranch);
       formData.append("senderName", savedInputs.senderName);
       formData.append("senderFather", savedInputs.senderFather);
       formData.append("senderPhone", savedInputs.senderPhone);
@@ -202,6 +294,9 @@ export default function SendHawalaList() {
       formData.append("currency", savedInputs.currency);
       formData.append("fee", savedInputs.fee || "0");
       formData.append("fundingSource", savedInputs.fundingSource);
+      if (savedInputs.isExternalHawala) {
+        formData.append("skipVaultCredit", "true");
+      }
       if (savedInputs.selectedKahataId) {
         formData.append("kahataAccountId", savedInputs.selectedKahataId);
       }
@@ -254,6 +349,8 @@ export default function SendHawalaList() {
         return reverted;
       });
       // Re-populate modal inputs and re-open modal
+      setFromBranch(savedInputs.fromBranch);
+      setCustomFromBranch(savedInputs.customFromBranch);
       setDestinationBranch(savedInputs.destinationBranch);
       setSenderName(savedInputs.senderName);
       setSenderFather(savedInputs.senderFather);
@@ -315,7 +412,7 @@ export default function SendHawalaList() {
             <button type="submit" className="search-btn">{t("search")}</button>
           </form>
           <button className="add-btn" onClick={() => setIsSendModalOpen(true)}>
-            + Send Hawala
+            {t("draftNewHawalaButton")}
           </button>
         </div>
       </div>
@@ -352,11 +449,11 @@ export default function SendHawalaList() {
                     className="clickable-row"
                   >
                     <td className="fw-bold">{hawala.id}</td>
-                    <td>{hawala.date.split(" ")[0]}</td>
+                    <td>{formatDate(hawala.date.split(" ")[0])}</td>
                     <td>{hawala.destinationBranch}</td>
                     <td className="fw-bold">{hawala.receiverName}</td>
                     <td className="amount-col">
-                      {hawala.amount.toLocaleString()} {hawala.currency}
+                      {hawala.amount.toLocaleString()} {t("currency_" + hawala.currency)}
                     </td>
                     <td>
                       <span
@@ -496,57 +593,218 @@ export default function SendHawalaList() {
 
             <form onSubmit={handleSendHawala}>
               <div className="modal-body">
-                <div className="form-grid-3">
-                  <div className="form-group">
-                    <label>Destination Branch</label>
-                    <select
-                      value={destinationBranch}
-                      onChange={(e) => setDestinationBranch(e.target.value)}
-                    >
-                      <option value="Herat Main">Herat Main</option>
-                      <option value="Mazar Branch">Mazar Branch</option>
-                      <option value="Dubai Branch">Dubai Branch</option>
-                      <option value="Kabul Branch">Kabul Branch</option>
-                    </select>
+                {/* Branch Selection */}
+                {isKabulBranch ? (
+                  /* Kabul branch: From/To branch selectors */
+                  <div className="form-grid-2">
+                    <div className="form-group">
+                      <label>{t("fromBranch") || "From Branch"}</label>
+                      <CustomDropdown
+                        options={[
+                          ...BRANCHES.map(b => ({ value: b, label: b })),
+                          { value: "__custom__", label: "✏️ " + (t("enterCustomBranch") || "Enter custom branch...") }
+                        ]}
+                        value={fromBranch}
+                        onChange={(val) => {
+                          setFromBranch(val);
+                          if (val !== "__custom__") setCustomFromBranch("");
+                        }}
+                        variant="6"
+                      />
+                      {fromBranch === "__custom__" && (
+                        <input
+                          type="text"
+                          placeholder={t("customBranchName") || "Branch name..."}
+                          value={customFromBranch}
+                          onChange={(e) => setCustomFromBranch(e.target.value)}
+                          style={{ marginTop: "0.5rem" }}
+                          required
+                        />
+                      )}
+                    </div>
+                    <div className="form-group">
+                      <label>{t("toBranch") || "To Branch"}</label>
+                      {isExternalHawala || fromBranch === "__custom__" ? (
+                        <div style={{
+                          padding: "0.6rem 1rem",
+                          background: "rgba(16, 185, 129, 0.08)",
+                          border: "1px solid rgba(16, 185, 129, 0.3)",
+                          borderRadius: "8px",
+                          color: "var(--success)",
+                          fontWeight: 600,
+                          fontSize: "0.85rem"
+                        }}>
+                          📍 Kabul Branch
+                        </div>
+                      ) : (
+                        <CustomDropdown
+                          options={BRANCHES.filter(b => b !== "Kabul Branch").map(b => ({ value: b, label: b }))}
+                          value={destinationBranch}
+                          onChange={setDestinationBranch}
+                          variant="6"
+                        />
+                      )}
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  /* Non-Kabul branches: original destination-only selector */
+                  <div className="form-grid-3">
+                    <div className="form-group">
+                      <label>Destination Branch</label>
+                      <CustomDropdown
+                        options={BRANCHES.filter(b => b !== userBranchStored).map(b => ({ value: b, label: b }))}
+                        value={destinationBranch}
+                        onChange={setDestinationBranch}
+                        variant="6"
+                      />
+                    </div>
+                  </div>
+                )}
 
                 <h5 className="form-subtitle">Sender Profile</h5>
+                
+                {!selectedSenderProfile ? (
+                  <div className="sender-selection-panel" style={{ background: "rgba(255,255,255,0.02)", border: "1px dashed var(--border)", borderRadius: "10px", padding: "1rem", marginBottom: "1rem" }}>
+                    <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem", flexWrap: "wrap" }}>
+                      <input
+                        type="text"
+                        placeholder={t("searchSenderByName")}
+                        value={senderSearchQuery}
+                        onChange={(e) => setSenderSearchQuery(e.target.value)}
+                        style={{ flex: 1 }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            handleSearchSender();
+                          }
+                        }}
+                      />
+                      <button type="button" className="action-btn" onClick={handleSearchSender} style={{ padding: "0.5rem 1rem", fontSize: "0.85rem" }}>
+                        {t("search")}
+                      </button>
+                    </div>
+
+                    {senderSearchResults.length > 0 ? (
+                      <div className="search-results" style={{ maxHeight: "200px", overflowY: "auto", marginBottom: "0.5rem" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
+                          <h6 style={{ margin: 0, fontSize: "0.8rem", color: "var(--text-light)" }}>{t("searchResults")}</h6>
+                          <button type="button" onClick={() => setSenderSearchResults([])} style={{ background: "none", border: "none", color: "var(--danger)", cursor: "pointer", fontSize: "0.75rem" }}>{t("clearResults")}</button>
+                        </div>
+                        <table className="recent-customers-table">
+                          <thead>
+                            <tr>
+                              <th>{t("fullName")}</th>
+                              <th>{t("fathersName")}</th>
+                              <th>{t("phoneNumber")}</th>
+                              <th>{t("action")}</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {senderSearchResults.map(c => (
+                              <tr key={c.id || c._id} onClick={() => handleSelectSender(c)} className="responsive-table-row">
+                                <td className="cell-name bold">{c.name}</td>
+                                <td className="cell-father">{c.fatherName}</td>
+                                <td className="cell-phone">{c.phone}</td>
+                                <td className="cell-action link-action">{t("link")} &rarr;</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    ) : (
+                      <div className="recent-list">
+                        <h6 style={{ margin: "0 0 0.5rem 0", fontSize: "0.8rem", color: "var(--text-light)" }}>{t("recentCustomersLink")}</h6>
+                        {recentCustomers.length === 0 ? (
+                          <div style={{ fontSize: "0.8rem", color: "var(--text-light)", padding: "0.5rem", textAlign: "center" }}>{t("noRecentCustomers")}</div>
+                        ) : (
+                          <table className="recent-customers-table">
+                            <thead>
+                              <tr>
+                                <th>{t("fullName")}</th>
+                                <th>{t("fathersName")}</th>
+                                <th>{t("phoneNumber")}</th>
+                                <th>{t("action")}</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {recentCustomers.map(c => (
+                                <tr key={c.id || c._id} onClick={() => handleSelectSender(c)} className="responsive-table-row">
+                                  <td className="cell-name bold">{c.name}</td>
+                                  <td className="cell-father">{c.fatherName}</td>
+                                  <td className="cell-phone">{c.phone}</td>
+                                  <td className="cell-action link-action">{t("link")} &rarr;</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "rgba(16, 185, 129, 0.05)", border: "1px solid var(--success)", borderRadius: "10px", padding: "0.75rem 1rem", marginBottom: "1rem" }}>
+                    <div style={{ fontSize: "0.85rem" }}>
+                      <strong>✅ {t("senderSelected")}</strong> {selectedSenderProfile.name} ({selectedSenderProfile.phone})
+                    </div>
+                    <button 
+                      type="button" 
+                      onClick={() => {
+                        setSelectedSenderProfile(null);
+                        setSenderName("");
+                        setSenderFather("");
+                        setSenderPhone("");
+                        setSenderIdNum("");
+                      }}
+                      style={{ background: "none", border: "none", color: "var(--danger)", cursor: "pointer", fontSize: "0.8rem", padding: 0 }}
+                    >
+                      {t("change")}
+                    </button>
+                  </div>
+                )}
+
                 <div className="form-grid-2">
                   <div className="form-group">
-                    <label>Sender Full Name</label>
+                    <label>{t("fullName")}</label>
                     <input
                       type="text"
                       required
                       value={senderName}
-                      onChange={(e) => setSenderName(e.target.value)}
+                      readOnly
+                      placeholder={t("selectRegisteredCustomer")}
+                      style={{ background: "rgba(255,255,255,0.03)" }}
                     />
                   </div>
                   <div className="form-group">
-                    <label>Father Name</label>
+                    <label>{t("fathersName")}</label>
                     <input
                       type="text"
                       required
                       value={senderFather}
-                      onChange={(e) => setSenderFather(e.target.value)}
+                      readOnly
+                      placeholder={t("selectRegisteredCustomer")}
+                      style={{ background: "rgba(255,255,255,0.03)" }}
                     />
                   </div>
                   <div className="form-group">
-                    <label>Phone Number</label>
+                    <label>{t("phoneNumber")}</label>
                     <input
                       type="tel"
                       required
                       value={senderPhone}
-                      onChange={(e) => setSenderPhone(e.target.value)}
+                      readOnly
+                      placeholder={t("selectRegisteredCustomer")}
+                      style={{ background: "rgba(255,255,255,0.03)" }}
                     />
                   </div>
                   <div className="form-group">
-                    <label>Tazkira / Passport Number</label>
+                    <label>{t("idTazkira")}</label>
                     <input
                       type="text"
                       required
                       value={senderIdNum}
-                      onChange={(e) => setSenderIdNum(e.target.value)}
+                      readOnly
+                      placeholder={t("selectRegisteredCustomer")}
+                      style={{ background: "rgba(255,255,255,0.03)" }}
                     />
                   </div>
                 </div>
@@ -610,18 +868,12 @@ export default function SendHawalaList() {
                   </div>
                   <div className="form-group">
                     <label>Currency</label>
-                    <select
+                    <CustomDropdown
+                      options={["AFN", "USD", "PKR", "EUR", "CNY", "IRR", "GBP"].map(c => ({ value: c, label: t("currency_" + c) }))}
                       value={currency}
-                      onChange={(e) => setCurrency(e.target.value)}
-                    >
-                      <option value="AFN">AFN</option>
-                      <option value="USD">USD</option>
-                      <option value="PKR">PKR</option>
-                      <option value="EUR">EUR</option>
-                      <option value="CNY">CNY</option>
-                      <option value="IRR">IRR</option>
-                      <option value="GBP">GBP</option>
-                    </select>
+                      onChange={setCurrency}
+                      variant="6"
+                    />
                   </div>
                   <div className="form-group">
                     <label>Commission Fee (Ujrat)</label>
@@ -634,38 +886,40 @@ export default function SendHawalaList() {
                   </div>
                 </div>
 
-                <div className="form-grid-2" style={{ marginTop: "1rem" }}>
-                  <div className="form-group">
-                    <label>Funding Source</label>
-                    <select
-                      value={fundingSource}
-                      onChange={(e) => setFundingSource(e.target.value)}
-                    >
-                      <option value="sarafi">Physical Cash (Khazana)</option>
-                      <option value="kahata">Kahata Ledger Account</option>
-                    </select>
-                  </div>
-
-                  {fundingSource === "kahata" && (
+                {/* Funding Source — hidden for external hawalas (no vault/kahata needed on creation) */}
+                {!isExternalHawala && (
+                  <div className="form-grid-2" style={{ marginTop: "1rem" }}>
                     <div className="form-group">
-                      <label>Deduct from Ledger Account</label>
-                      <select
-                        value={selectedKahataId}
-                        onChange={(e) => setSelectedKahataId(e.target.value)}
-                        required
-                      >
-                        <option value="">-- Choose Account --</option>
-                        {kahataAccounts
-                          .filter((acc) => acc.currency === currency)
-                          .map((acc) => (
-                            <option key={acc.id} value={acc.id}>
-                              {acc.name} (Balance: {acc.netBalance})
-                            </option>
-                          ))}
-                      </select>
+                      <label>Funding Source</label>
+                      <CustomDropdown
+                        options={[
+                          { value: "sarafi", label: "Physical Cash (Khazana)" },
+                          { value: "kahata", label: "Kahata Ledger Account" }
+                        ]}
+                        value={fundingSource}
+                        onChange={setFundingSource}
+                        variant="6"
+                      />
                     </div>
-                  )}
-                </div>
+
+                    {fundingSource === "kahata" && (
+                      <div className="form-group">
+                        <label>Deduct from Ledger Account</label>
+                        <CustomDropdown
+                          options={[
+                            { value: "", label: "-- Choose Account --" },
+                            ...kahataAccounts
+                              .filter((acc) => acc.currency === currency)
+                              .map((acc) => ({ value: acc.id, label: `${acc.name} (Balance: ${acc.netBalance})` }))
+                          ]}
+                          value={selectedKahataId}
+                          onChange={setSelectedKahataId}
+                          variant="6"
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div className="modal-footer">
@@ -674,10 +928,10 @@ export default function SendHawalaList() {
                   className="action-btn secondary"
                   onClick={closeSendModal}
                 >
-                  Cancel
+                  {t("cancel")}
                 </button>
                 <button type="submit" className="action-btn submit-btn">
-                  Draft & Record Transfer
+                  {t("sendHawalaOfficially")}
                 </button>
               </div>
             </form>

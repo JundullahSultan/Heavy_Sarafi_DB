@@ -1,0 +1,291 @@
+/* CustomCalendar Container */
+.custom-calendar-container {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  min-width: 160px;
+}
+
+/* Button Trigger */
+.calendar-trigger-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  min-height: 44px;
+  padding: 0.6rem 0.95rem;
+  background: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  color: var(--text-main);
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.calendar-trigger-btn:hover {
+  background-color: var(--hover-bg);
+  border-color: var(--primary-color);
+}
+
+.calendar-trigger-btn:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.12);
+}
+
+/* Dropdown Calendar Modal */
+.calendar-dropdown-modal {
+  position: absolute;
+  top: 110%;
+  left: 0;
+  z-index: 1000;
+  width: 310px;
+  background: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  box-shadow: 0 12px 36px rgba(15, 23, 42, 0.12),
+              0 4px 12px rgba(15, 23, 42, 0.04);
+  overflow: hidden;
+  padding: 0;
+  margin-top: 0.5rem;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Theme variables per season */
+.calendar-dropdown-modal.winter {
+  --season-theme: #0ea5e9;
+  --season-bg: rgba(14, 165, 233, 0.08);
+}
+.calendar-dropdown-modal.spring {
+  --season-theme: #10b981;
+  --season-bg: rgba(16, 185, 129, 0.08);
+}
+.calendar-dropdown-modal.summer {
+  --season-theme: #eab308;
+  --season-bg: rgba(234, 179, 8, 0.08);
+}
+.calendar-dropdown-modal.fall {
+  --season-theme: #f97316;
+  --season-bg: rgba(249, 115, 22, 0.08);
+}
+
+/* Season SVG Header Container */
+.calendar-header-svg {
+  width: 100%;
+  height: 82px;
+  background-color: var(--season-theme);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.4s ease;
+}
+
+.seasons-illustrator {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+/* Winter Snow Animation */
+.snow-flake {
+  opacity: 0.8;
+  animation: snowfall 4s linear infinite;
+}
+.snow-flake.delay-1 { animation-delay: 0.8s; animation-duration: 3.5s; }
+.snow-flake.delay-2 { animation-delay: 1.5s; animation-duration: 4.5s; }
+.snow-flake.delay-3 { animation-delay: 2.2s; animation-duration: 3.8s; }
+.snow-flake.delay-4 { animation-delay: 2.8s; animation-duration: 4.2s; }
+
+@keyframes snowfall {
+  0% {
+    transform: translateY(-10px) translateX(0);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translateY(40px) translateX(10px);
+    opacity: 0.4;
+  }
+  100% {
+    transform: translateY(90px) translateX(-10px);
+    opacity: 0;
+  }
+}
+
+/* Summer Sun Ray Pulse */
+.sun-group {
+  transform-origin: center;
+  animation: sunRotate 20s linear infinite;
+}
+.ray {
+  animation: rayPulse 1.5s ease-in-out infinite alternate;
+}
+@keyframes sunRotate {
+  to { transform: translate(175px, 40px) rotate(360deg); }
+}
+@keyframes rayPulse {
+  to { opacity: 0.4; transform: scale(1.1); }
+}
+
+/* Fall Leaves Falling Animation */
+.leaf {
+  animation: leafFall 6s linear infinite;
+  transform-origin: center;
+}
+.fall-anim-1 { animation-delay: 0.2s; animation-duration: 5.5s; }
+.fall-anim-2 { animation-delay: 1.5s; animation-duration: 7s; }
+.fall-anim-3 { animation-delay: 3s; animation-duration: 6s; }
+
+@keyframes leafFall {
+  0% {
+    transform: translateY(-20px) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.9;
+  }
+  90% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(90px) rotate(180deg) translateX(15px);
+    opacity: 0;
+  }
+}
+
+/* Calendar controls (Month & Year navigation) */
+.calendar-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--hover-bg);
+}
+
+.calendar-month-year {
+  display: flex;
+  gap: 0.35rem;
+  font-weight: 700;
+  color: var(--text-main);
+  font-size: 0.95rem;
+}
+
+.calendar-month-year .month {
+  text-transform: capitalize;
+}
+
+.nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  color: var(--text-light);
+  transition: all 0.2s ease;
+}
+
+.nav-btn:hover {
+  background-color: var(--white);
+  color: var(--season-theme);
+  border-color: var(--season-theme);
+}
+
+/* Weekday column labels */
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  padding: 0.6rem 0.5rem 0.25rem;
+  background-color: var(--hover-bg);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.weekday-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-light);
+}
+
+/* Day grid cell elements */
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  padding: 0.5rem;
+  gap: 2px;
+}
+
+.day-cell {
+  position: relative;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-main);
+  border-radius: 50%;
+  cursor: pointer;
+  box-sizing: border-box;
+  padding: 0;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.day-cell.empty {
+  cursor: default;
+  pointer-events: none;
+}
+
+.day-cell.day-num:hover {
+  background-color: var(--hover-bg);
+  color: var(--text-main);
+}
+
+.day-cell.day-num.selected {
+  color: var(--season-theme);
+  font-weight: 700;
+}
+
+/* SVG circle outline drawing animation around selected day */
+.circle-draw-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  transform: rotate(-90deg); /* Start draw at top center */
+}
+
+.draw-circle-path {
+  fill: none;
+  stroke: var(--season-theme);
+  stroke-width: 2.2px;
+  stroke-linecap: round;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: drawCircleAnimation 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes drawCircleAnimation {
+  to {
+    stroke-dashoffset: 0;
+  }
+}

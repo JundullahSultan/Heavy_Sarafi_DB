@@ -1,0 +1,16 @@
+{
+  "short_name": "Heavy Sarafi",
+  "name": "Heavy Sarafi Database",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#f7f7f8",
+  "theme_color": "#10a37f",
+  "display": "standalone",
+  "orientation": "portrait"
+}

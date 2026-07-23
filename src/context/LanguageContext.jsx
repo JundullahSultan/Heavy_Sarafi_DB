@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
+import { formatToShamsiStr, toPashtoNumerals } from "../utils/date";
 
 const translations = {
   en: {
@@ -49,6 +50,30 @@ const translations = {
     settings: "Settings",
     expenses: "Expenses",
     welcome: "Welcome",
+    currencyExchange: "Currency Exchange",
+    exchangeBenefit: "Profit / Benefit",
+    currencyExchangeDesc: "Manage currency exchanges and track business benefits",
+    newExchange: "New Exchange",
+    totalTransactions: "Total Transactions",
+    totalBenefits: "Total Benefits (Profit)",
+    searchExchangePlaceholder: "Search by client, ID or currency...",
+    noExchangeFound: "No exchange records found",
+    recordFirstExchange: "Record your first currency exchange transaction to start tracking profits.",
+    clientNameLabel: "Client / Customer Name",
+    exchangeDetails: "Exchange Details",
+    rate: "Rate",
+    operator: "Operator",
+    recordCurrencyExchange: "Record Currency Exchange",
+    giveFromCurrency: "Give (From Currency)",
+    amountDelivered: "Amount Delivered",
+    receiveToCurrency: "Receive (To Currency)",
+    amountReceived: "Amount Received",
+    exchangeRate: "Exchange Rate",
+    benefitNetProfit: "Benefit (Net Profit)",
+    profitCurrency: "Profit Currency",
+    recordTransaction: "Record Transaction",
+    deleteExchangeRecord: "Delete Exchange Record?",
+    deleteExchangeConfirm: "Are you sure you want to permanently delete this exchange transaction? This will reverse the primary vault balances too.",
     kabulBranch: "Kabul Branch",
     pendingPayouts: "Pending Payouts",
     quickActions: "Quick Actions",
@@ -100,6 +125,19 @@ const translations = {
     payoutAmount: "Payout Amount",
     linkCustomerProfile: "Step 1: Link Customer Profile",
     searchPhoneOrId: "Search Phone or ID Number...",
+    searchByNameOnly: "Search by Name only...",
+    sameBranchError: "A branch cannot send a Hawala to itself.",
+    fromBranch: "From Branch",
+    toBranch: "To Branch",
+    enterCustomBranch: "Enter custom branch...",
+    customBranchName: "Branch name...",
+    selectMatchingProfile: "Select Matching Profile:",
+    mismatchErrorTitle: "Customer Verification Mismatch",
+    mismatchDetailsText: "The linked customer profile details do not match the expected receiver details on this Hawala. Payout is blocked.",
+    expectedName: "Expected Name",
+    expectedPhone: "Expected Phone",
+    expectedId: "Expected ID Number",
+    change: "Change",
     profileFound: "✓ Profile Found",
     newCustomerRegistration: "New Customer Registration",
     saveCustomer: "Save Customer",
@@ -283,6 +321,7 @@ const translations = {
     positiveBalance: "Positive balance: We owe them or hold their funds.",
     negativeBalance: "Negative balance: They owe us (Credit Line).",
     transactionHistory: "Transaction History",
+    sentFromTo: "Sent From / To",
     addTransaction: "+ Add Transaction",
     recordTransaction: "Record Transaction",
     addingRecordTo: "Adding a record to",
@@ -421,6 +460,12 @@ const translations = {
     withdrawalSuccess: "Withdrawal recorded successfully!",
     noKahataAccountsFound: "No ledger accounts found.",
     ledgerAccountStatement: "Ledger Account Statement:",
+    sendWhatsapp: "Send WhatsApp",
+    noWhatsAppSaved: "No WhatsApp number saved for this account.",
+    whatsappNumber: "WhatsApp Number",
+    calendarSystem: "Calendar System / Date Format",
+    calendarGregorian: "Gregorian Calendar (Outside Afghanistan)",
+    calendarShamsi: "Solar Hijri Calendar (Afghanistan)",
     accountClassification: "Account Classification",
     accountCurrency: "Account Currency",
     openingNetBalance: "Opening Net Balance",
@@ -434,6 +479,24 @@ const translations = {
     loggingTransaction: "Logging transaction to ledger...",
     transactionLogged: "Transaction successfully logged to ledger.",
     confirmDeleteAccount: "Are you sure you want to permanently delete account:",
+    searchSenderByName: "Search sender by name...",
+    searchResults: "Search Results:",
+    clearResults: "Clear Results",
+    recentCustomersLink: "Recent Customers (Choose to Link):",
+    noRecentCustomers: "No recent customers found.",
+    senderSelected: "Sender Selected:",
+    selectRegisteredCustomer: "Select a registered customer...",
+    link: "Link",
+    currency_AFN: "Afghani (AFN)",
+    currency_USD: "US Dollar (USD)",
+    currency_PKR: "Pakistani Rupee (PKR)",
+    currency_EUR: "Euro (EUR)",
+    currency_CNY: "Chinese Yuan (CNY)",
+    currency_IRR: "Iranian Rial (IRR)",
+    currency_GBP: "British Pound (GBP)",
+    action: "Action",
+    sent: "Sent",
+    received: "Received",
   },
   ps: {
     dashboard: "داشبورډ",
@@ -482,6 +545,30 @@ const translations = {
     settings: "تنظیمات",
     expenses: "مصارف",
     welcome: "ښه راغلاست",
+    currencyExchange: "اسعارو تبادله",
+    exchangeBenefit: "ګټه / منفعت",
+    currencyExchangeDesc: "د اسعارو تبادله مدیریت کړئ او د سوداګرۍ ګټې وڅارئ",
+    newExchange: "نوې تبادله",
+    totalTransactions: "ټولې معاملې",
+    totalBenefits: "ټولې ګټې",
+    searchExchangePlaceholder: "د مشتري، آی ډي یا اسعارو په اساس ولټوئ...",
+    noExchangeFound: "د اسعارو د تبادلې هیڅ ریکارډ ونه موندل شو",
+    recordFirstExchange: "د ګټو تعقیب پیلولو لپاره خپله لومړۍ تبادله ثبت کړئ.",
+    clientNameLabel: "د مشتري / پیرودونکي نوم",
+    exchangeDetails: "د تبادلې جزئیات",
+    rate: "نرخ",
+    operator: "کاروونکی",
+    recordCurrencyExchange: "د اسعارو تبادله ثبت کړئ",
+    giveFromCurrency: "ورکول (له کومو اسعارو)",
+    amountDelivered: "سپارل شوی مقدار",
+    receiveToCurrency: "ترلاسه کول (کوم اسعار)",
+    amountReceived: "ترلاسه شوی مقدار",
+    exchangeRate: "د تبادلې نرخ",
+    benefitNetProfit: "ګټه (خالصه ګټه)",
+    profitCurrency: "د ګټې اسعار",
+    recordTransaction: "معامله ثبت کړئ",
+    deleteExchangeRecord: "د تبادلې ریکارډ ړنګ کړئ؟",
+    deleteExchangeConfirm: "ایا تاسو باوري یاست چې غواړئ د تبادلې دا معامله د تل لپاره ړنګه کړئ؟ دا به اصلي صندوق هم معکوس کړي.",
     kabulBranch: "د کابل څانګه",
     pendingPayouts: "پاتې تادیات",
     quickActions: "چټک اقدامات",
@@ -533,6 +620,19 @@ const translations = {
     payoutAmount: "د ورکړې مقدار",
     linkCustomerProfile: "لومړی ګام: د مشتري پروفایل نښلول",
     searchPhoneOrId: "د تلیفون شمېره یا آی ډي ولټوئ...",
+    searchByNameOnly: "یوازې په نوم لټول...",
+    sameBranchError: "یو نمایندګي نشي کولی ځان ته حواله ولیږي.",
+    fromBranch: "د کومې نمایندګۍ نه",
+    toBranch: "کومې نمایندګۍ ته",
+    enterCustomBranch: "نوې نمایندګي دننه کړئ...",
+    customBranchName: "د نمایندګۍ نوم...",
+    selectMatchingProfile: "د غبرګ شوي پروفایل غوره کول:",
+    mismatchErrorTitle: "د مشتري د هویت نه سمون",
+    mismatchDetailsText: "تړل شوی مشتري د دې حوالې د متوقع اخیستونکي د معلوماتو سره سمون نه خوري. ورکړه بنده شوه.",
+    expectedName: "متوقع نوم",
+    expectedPhone: "متوقع تلیفون",
+    expectedId: "متوقع تذکره/آی‌ډي شمېره",
+    change: "بدلول",
     profileFound: "✓ پروفایل پیدا شو",
     newCustomerRegistration: "د نوي مشتري ثبتول",
     saveCustomer: "مشتري خوندي کول",
@@ -718,6 +818,7 @@ const translations = {
       "مثبت بیلانس: موږ د دوی پوروړي یو یا د دوی پیسې له موږ سره دي.",
     negativeBalance: "منفي بیلانس: دوی زموږ پوروړي دي (باقي دي).",
     transactionHistory: "د معاملو تاریخچه",
+    sentFromTo: "له چا څخه لیږل شوی / چا ته",
     addTransaction: "+ معامله زیاتول",
     recordTransaction: "معامله ثبتول",
     addingRecordTo: "دې ته ریکارډ زیاتول کیږي:",
@@ -853,6 +954,12 @@ const translations = {
     withdrawalSuccess: "د ورکړې ریکارډ په بریالیتوب سره خوندي شو!",
     noKahataAccountsFound: "هیڅ کاته حساب پیدا نشو.",
     ledgerAccountStatement: "د کاته حساب تفصیل:",
+    sendWhatsapp: "واټساپ ته لېږل",
+    noWhatsAppSaved: "د دې حساب لپاره د واټساپ شمیره نه ده خوندي شوې.",
+    whatsappNumber: "د واټساپ شمیره",
+    calendarSystem: "تقویم / د نېټې ډول",
+    calendarGregorian: "میلادي تقویم (له افغانستان څخه بهر)",
+    calendarShamsi: "شمسي هجري تقویم (افغانستان)",
     accountClassification: "د حساب کټګورۍ",
     accountCurrency: "د حساب اسعار",
     openingNetBalance: "لومړنی خالص بیلانس",
@@ -866,6 +973,24 @@ const translations = {
     loggingTransaction: "کاته ته د معاملې ثبتول...",
     transactionLogged: "معامله په بریالیتوب سره کاته ته ثبت شوه.",
     confirmDeleteAccount: "ایا تاسو ډاډه یاست چې غواړئ دا حساب د تل لپاره ړنګ کړئ:",
+    searchSenderByName: "لېږونکی په نوم ولټوئ...",
+    searchResults: "د لټون پایلې:",
+    clearResults: "پایلې پاک کړئ",
+    recentCustomersLink: "وروستي پیرودونکي (د نښلولو لپاره غوره کړئ):",
+    noRecentCustomers: "هیڅ وروستي پیرودونکي ونه موندل شول.",
+    senderSelected: "لېږونکی وټاکل شو:",
+    selectRegisteredCustomer: "یو ثبت شوی پیرودونکی وټاکئ...",
+    link: "وصل کول",
+    currency_AFN: "افغانۍ (AFN)",
+    currency_USD: "امریکایي ډالر (USD)",
+    currency_PKR: "پاکستانۍ کلداره (PKR)",
+    currency_EUR: "یورو (EUR)",
+    currency_CNY: "چینایي یوان (CNY)",
+    currency_IRR: "ایراني ریال (IRR)",
+    currency_GBP: "برتانوي پونډ (GBP)",
+    action: "کړنه",
+    sent: "لېږل شوي",
+    received: "ترلاسه شوي",
   },
   da: {
     dashboard: "داشبورد",
@@ -914,6 +1039,30 @@ const translations = {
     settings: "تنظیمات",
     expenses: "مصارف",
     welcome: "خوش آمدید",
+    currencyExchange: "تبادله اسعار",
+    exchangeBenefit: "سود / فایده",
+    currencyExchangeDesc: "تبادلات اسعار را مدیریت کنید و عواید تجارت را نظارت نمایید",
+    newExchange: "تبادله جدید",
+    totalTransactions: "مجموع معاملات",
+    totalBenefits: "مجموع سود",
+    searchExchangePlaceholder: "جستجو بر اساس مشتری، آی‌دی یا اسعار...",
+    noExchangeFound: "هیچ ثبت تبادله اسعار یافت نشد",
+    recordFirstExchange: "برای شروع نظارت بر سود، اولین معامله تبادله اسعار خود را ثبت کنید.",
+    clientNameLabel: "نام مشتری / خریدار",
+    exchangeDetails: "جزئیات تبادله",
+    rate: "نرخ",
+    operator: "اپراتور",
+    recordCurrencyExchange: "ثبت تبادله اسعار",
+    giveFromCurrency: "پرداخت (از اسعار)",
+    amountDelivered: "مقدار پرداخت شده",
+    receiveToCurrency: "دریافت (به اسعار)",
+    amountReceived: "مقدار دریافت شده",
+    exchangeRate: "نرخ تبادله",
+    benefitNetProfit: "سود (سود خالص)",
+    profitCurrency: "اسعار سود",
+    recordTransaction: "ثبت معامله",
+    deleteExchangeRecord: "حذف ثبت تبادله؟",
+    deleteExchangeConfirm: "آیا مطمئن هستید که می‌خواهید این معامله تبادله را برای همیشه حذف کنید؟ این عمل موجودی صندوق اصلی را نیز معکوس خواهد کرد.",
     kabulBranch: "شعبه کابل",
     pendingPayouts: "پرداخت‌های در انتظار",
     quickActions: "اقدامات سریع",
@@ -965,6 +1114,19 @@ const translations = {
     payoutAmount: "مبلغ قابل پرداخت",
     linkCustomerProfile: "مرحله ۱: اتصال پروفایل مشتری",
     searchPhoneOrId: "جستجو با تلفن یا شناسه...",
+    searchByNameOnly: "جستجو فقط بر اساس نام...",
+    sameBranchError: "یک نمایندگی نمی‌تواند به خودش حواله ارسال کند.",
+    fromBranch: "از نمایندگی",
+    toBranch: "به نمایندگی",
+    enterCustomBranch: "نمایندگی جدید وارد کنید...",
+    customBranchName: "نام نمایندگی...",
+    selectMatchingProfile: "انتخاب پروفایل مطابقت‌دار:",
+    mismatchErrorTitle: "مغایرت هویت مشتری",
+    mismatchDetailsText: "مشخصات مشتری متصل با مشخصات گیرنده مورد انتظار در این حواله مطابقت ندارد. پرداخت مسدود گردید.",
+    expectedName: "نام مورد انتظار",
+    expectedPhone: "تلفن مورد انتظار",
+    expectedId: "شماره شناسه مورد انتظار",
+    change: "تغییر",
     profileFound: "✓ پروفایل یافت شد",
     newCustomerRegistration: "ثبت مشتری جدید",
     saveCustomer: "ذخیره مشتری",
@@ -1142,6 +1304,7 @@ const translations = {
     positiveBalance: "بیلانس مثبت: ما به آنها بدهکاریم یا وجوهشان نزد ماست.",
     negativeBalance: "بیلانس منفی: آنها به ما بدهکارند (اعتباری).",
     transactionHistory: "تاریخچه معاملات",
+    sentFromTo: "ارسال شده از طرف / به",
     addTransaction: "+ ثبت معامله",
     recordTransaction: "ثبت معامله",
     addingRecordTo: "در حال ثبت رکورد برای",
@@ -1276,6 +1439,12 @@ const translations = {
     withdrawalSuccess: "برداشت با موفقیت ثبت شد!",
     noKahataAccountsFound: "هیچ حساب کاته‌ای یافت نشد.",
     ledgerAccountStatement: "صورت‌حساب کاته:",
+    sendWhatsapp: "ارسال به واتساپ",
+    noWhatsAppSaved: "هیچ شماره واتساپی برای این حساب ذخیره نشده است.",
+    whatsappNumber: "شماره واتساپ",
+    calendarSystem: "سیستم تقویم / تاریخ",
+    calendarGregorian: "تقویم میلادی (خارج از افغانستان)",
+    calendarShamsi: "تقویم هجری شمسی (افغانستان)",
     accountClassification: "دسته‌بندی حساب",
     accountCurrency: "ارز حساب",
     openingNetBalance: "موجودی خالص اولیه",
@@ -1289,6 +1458,24 @@ const translations = {
     loggingTransaction: "در حال ثبت تراکنش در کاته...",
     transactionLogged: "تراکنش با موفقیت در کاته ثبت شد.",
     confirmDeleteAccount: "آیا مطمئن هستید که می‌خواهید این حساب را برای همیشه حذف کنید:",
+    searchSenderByName: "جستجوی فرستنده بر اساس نام...",
+    searchResults: "نتایج جستجو:",
+    clearResults: "پاک کردن نتایج",
+    recentCustomersLink: "مشتریان اخیر (جهت اتصال انتخاب کنید):",
+    noRecentCustomers: "هیچ مشتری اخیری یافت نشد.",
+    senderSelected: "فرستنده انتخاب شد:",
+    selectRegisteredCustomer: "یک مشتری ثبت شده را انتخاب کنید...",
+    link: "اتصال",
+    currency_AFN: "افغانی (AFN)",
+    currency_USD: "دالر آمریکا (USD)",
+    currency_PKR: "روپیه پاکستان (PKR)",
+    currency_EUR: "یورو (EUR)",
+    currency_CNY: "یوان چین (CNY)",
+    currency_IRR: "ریال ایران (IRR)",
+    currency_GBP: "پوند انگلیس (GBP)",
+    action: "عملیات",
+    sent: "ارسال شده",
+    received: "دریافت شده",
   },
 };
 
@@ -1300,6 +1487,13 @@ export const LanguageProvider = ({ children }) => {
       return localStorage.getItem("appLanguage") || "en";
     }
     return "en";
+  });
+
+  const [calendarType, setCalendarType] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("appCalendarType") || "shamsi";
+    }
+    return "shamsi";
   });
 
   useEffect(() => {
@@ -1317,12 +1511,27 @@ export const LanguageProvider = ({ children }) => {
     localStorage.setItem("appLanguage", language);
   }, [language]);
 
+  useEffect(() => {
+    localStorage.setItem("appCalendarType", calendarType);
+  }, [calendarType]);
+
   const t = (key) => {
     return translations[language]?.[key] || translations.en[key] || key;
   };
 
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "";
+    if (dateStr.includes("/")) {
+      return calendarType === "shamsi" ? toPashtoNumerals(dateStr) : dateStr;
+    }
+    if (calendarType === "shamsi") {
+      return toPashtoNumerals(formatToShamsiStr(dateStr));
+    }
+    return dateStr;
+  };
+
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+    <LanguageContext.Provider value={{ language, setLanguage, calendarType, setCalendarType, formatDate, t }}>
       {children}
     </LanguageContext.Provider>
   );

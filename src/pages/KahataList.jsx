@@ -4,10 +4,11 @@ import { getRole } from "../utils/auth";
 import { useLanguage } from "../context/LanguageContext";
 import { usePopup } from "../context/PopupContext";
 import API from "../utils/api";
+import CustomCalendar from "../components/CustomCalendar";
 import "./KahataList.css";
 
 export default function KahataList() {
-  const { t } = useLanguage();
+  const { t, language, formatDate } = useLanguage();
   const { showAlert, showConfirm, showToast } = usePopup();
   const { id } = useParams();
   const navigate = useNavigate();
@@ -26,6 +27,7 @@ export default function KahataList() {
   const [newAccName, setNewAccName] = useState("");
   const [newAccType, setNewAccType] = useState("Merchant / Regular Customer");
   const [newAccPhone, setNewAccPhone] = useState("");
+  const [newAccWhatsapp, setNewAccWhatsapp] = useState("");
   const [newAccAddress, setNewAccAddress] = useState("");
   const [newAccCurrency, setNewAccCurrency] = useState("AFN");
   const [newAccInitBalance, setNewAccInitBalance] = useState("0");
@@ -66,6 +68,64 @@ export default function KahataList() {
   const handleRowClick = (account) => navigate(`/kahata/${account.id}`);
   const closeViewModal = () => navigate("/kahata");
 
+  const handleWhatsAppSend = () => {
+    if (!selectedAccount) return;
+    if (!selectedAccount.whatsapp) {
+      showToast(t("noWhatsAppSaved"), { severity: "warning" });
+      return;
+    }
+
+    let cleanNumber = selectedAccount.whatsapp.replace(/\D/g, "");
+    
+    // Format local numbers to international format (default country code 93 for Afghanistan)
+    if (cleanNumber.startsWith("0") && !cleanNumber.startsWith("00")) {
+      cleanNumber = "93" + cleanNumber.substring(1);
+    } else if (cleanNumber.startsWith("00")) {
+      cleanNumber = cleanNumber.substring(2);
+    }
+    
+    if (cleanNumber.length === 9 && !cleanNumber.startsWith("93")) {
+      cleanNumber = "93" + cleanNumber;
+    }
+
+    let message = "";
+
+    if (language === "ps") {
+      message = `📋 *د حساب راپور:* ${selectedAccount.name}\n`;
+      message += `🆔 *حساب آی ډي:* ${selectedAccount.id}\n`;
+      message += `💰 *باقي بیلانس:* ${selectedAccount.netBalance.toLocaleString()} ${selectedAccount.currency}\n\n`;
+      message += `🔄 *وروستۍ معاملې:*\n`;
+      selectedAccount.transactions.slice(-15).forEach((tx) => {
+        const typeEmoji = tx.type === "Credit" ? "🟢" : "🔴";
+        const typeLabel = tx.type === "Credit" ? "جمع" : "خارج";
+        message += `${typeEmoji} ${formatDate(tx.date)} | ${typeLabel} | ${tx.amount.toLocaleString()} | ${tx.description || ""}\n`;
+      });
+    } else if (language === "fa") {
+      message = `📋 *صورتحساب:* ${selectedAccount.name}\n`;
+      message += `🆔 *آی‌دی حساب:* ${selectedAccount.id}\n`;
+      message += `💰 *باقی‌مانده:* ${selectedAccount.netBalance.toLocaleString()} ${selectedAccount.currency}\n\n`;
+      message += `🔄 *تراکنش‌های اخیر:*\n`;
+      selectedAccount.transactions.slice(-15).forEach((tx) => {
+        const typeEmoji = tx.type === "Credit" ? "🟢" : "🔴";
+        const typeLabel = tx.type === "Credit" ? "رسید" : "برد";
+        message += `${typeEmoji} ${formatDate(tx.date)} | ${typeLabel} | ${tx.amount.toLocaleString()} | ${tx.description || ""}\n`;
+      });
+    } else {
+      message = `📋 *Statement for:* ${selectedAccount.name}\n`;
+      message += `🆔 *Account ID:* ${selectedAccount.id}\n`;
+      message += `💰 *Net Balance:* ${selectedAccount.netBalance.toLocaleString()} ${selectedAccount.currency}\n\n`;
+      message += `🔄 *Recent Transactions:*\n`;
+      selectedAccount.transactions.slice(-15).forEach((tx) => {
+        const typeEmoji = tx.type === "Credit" ? "🟢" : "🔴";
+        message += `${typeEmoji} ${formatDate(tx.date)} | ${tx.type} | ${tx.amount.toLocaleString()} | ${tx.description || ""}\n`;
+      });
+    }
+
+    const encodedText = encodeURIComponent(message);
+    const whatsappUrl = `https://api.whatsapp.com/send?phone=${cleanNumber}&text=${encodedText}`;
+    window.open(whatsappUrl, "_blank");
+  };
+
   const handleCreateAccount = async (e) => {
     e.preventDefault();
     if (!newAccName.trim()) return;
@@ -88,6 +148,7 @@ export default function KahataList() {
       name: newAccName.trim(),
       type: newAccType,
       phone: newAccPhone.trim(),
+      whatsapp: newAccWhatsapp.trim(),
       address: newAccAddress.trim(),
       currency: newAccCurrency,
       netBalance: initialBal,
@@ -105,6 +166,7 @@ export default function KahataList() {
       name: newAccName,
       type: newAccType,
       phone: newAccPhone,
+      whatsapp: newAccWhatsapp,
       address: newAccAddress,
       currency: newAccCurrency,
       initialBalance: newAccInitBalance,
@@ -113,6 +175,7 @@ export default function KahataList() {
     // Reset inputs immediately
     setNewAccName("");
     setNewAccPhone("");
+    setNewAccWhatsapp("");
     setNewAccAddress("");
     setNewAccInitBalance("0");
 
@@ -123,6 +186,7 @@ export default function KahataList() {
         name: savedInputs.name,
         type: savedInputs.type,
         phone: savedInputs.phone,
+        whatsapp: savedInputs.whatsapp,
         address: savedInputs.address,
         currency: savedInputs.currency,
         initialBalance: parseFloat(savedInputs.initialBalance) || 0
@@ -150,6 +214,7 @@ export default function KahataList() {
       setNewAccName(savedInputs.name);
       setNewAccType(savedInputs.type);
       setNewAccPhone(savedInputs.phone);
+      setNewAccWhatsapp(savedInputs.whatsapp);
       setNewAccAddress(savedInputs.address);
       setNewAccCurrency(savedInputs.currency);
       setNewAccInitBalance(savedInputs.initialBalance);
@@ -303,7 +368,7 @@ export default function KahataList() {
             <div className="loader"></div>
           </div>
         ) : (
-          <table className="data-table">
+          <table className="data-table main-kahata-table">
             <thead>
               <tr>
                 <th>{t("kahataId")}</th>
@@ -364,7 +429,7 @@ export default function KahataList() {
             </div>
 
             <div className="modal-body">
-              <div className="account-summary-row" style={{ display: "flex", gap: "1rem", marginBottom: "1rem" }}>
+              <div className="account-summary-row">
                 <div className="detail-card" style={{ flex: 1 }}>
                   <h4>{t("accountClassification")}</h4>
                   <p>{selectedAccount.type}</p>
@@ -395,10 +460,10 @@ export default function KahataList() {
               </div>
 
               <h4>{t("transactionHistory")}</h4>
-              <div className="table-wrapper" style={{ maxHeight: "250px", overflowY: "auto" }}>
-                <table className="data-table">
+              <div className="table-wrapper" style={{ minHeight: "250px", overflowY: "auto" }}>
+                <table className="data-table ledger-tx-table">
                   <thead>
-                    <tr>
+                    <tr style={{minWidth: "100px"}}>
                       <th>{t("txId")}</th>
                       <th>{t("date")}</th>
                       <th>{t("type")}</th>
@@ -417,7 +482,7 @@ export default function KahataList() {
                       selectedAccount.transactions.map((txn) => (
                         <tr key={txn.id}>
                           <td className="text-light">{txn.id}</td>
-                          <td>{txn.date}</td>
+                          <td>{formatDate(txn.date)}</td>
                           <td
                             className="fw-bold"
                             style={{
@@ -454,8 +519,8 @@ export default function KahataList() {
               >
                 {t("addTransaction")}
               </button>
-              <button className="action-btn secondary" onClick={closeViewModal}>
-                {t("closeLedger")}
+              <button className="action-btn secondary" onClick={handleWhatsAppSend}>
+                {t("sendWhatsapp")}
               </button>
             </div>
           </div>
@@ -520,13 +585,22 @@ export default function KahataList() {
                     />
                   </div>
                   <div className="form-group">
-                    <label>{t("address")}</label>
+                    <label>{t("whatsappNumber")}</label>
                     <input
                       type="text"
-                      value={newAccAddress}
-                      onChange={(e) => setNewAccAddress(e.target.value)}
+                      value={newAccWhatsapp}
+                      onChange={(e) => setNewAccWhatsapp(e.target.value)}
                     />
                   </div>
+                </div>
+
+                <div className="form-group">
+                  <label>{t("address")}</label>
+                  <input
+                    type="text"
+                    value={newAccAddress}
+                    onChange={(e) => setNewAccAddress(e.target.value)}
+                  />
                 </div>
 
                 <div className="form-grid-2">
@@ -621,11 +695,10 @@ export default function KahataList() {
 
                 <div className="form-group">
                   <label>{t("date")}</label>
-                  <input
-                    type="date"
-                    required
+                  <CustomCalendar
                     value={txnDate}
-                    onChange={(e) => setTxnDate(e.target.value)}
+                    onChange={setTxnDate}
+                    label={t("date")}
                   />
                 </div>
 

@@ -133,3 +133,208 @@ textarea {
   color: var(--warning-label);
   font-size: 0.8rem;
 }
+
+/* Responsive account details summary cards list */
+.account-summary-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.account-summary-row .detail-card {
+  flex: 1 1 200px;
+  min-width: 180px;
+  margin: 0;
+}
+
+/* Mobile Table-to-Card layout for ledger account transactions */
+@media screen and (max-width: 600px) {
+  /* Remove wrapper borders and backgrounds to stack clean cards */
+  .modal-body .table-wrapper {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+
+  .ledger-tx-table {
+    min-width: 0 !important;
+  }
+
+  .ledger-tx-table thead {
+    display: none !important; /* Hide columns headers */
+  }
+
+  .ledger-tx-table tbody {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+    background: transparent !important;
+  }
+
+  .ledger-tx-table tbody tr {
+    display: grid !important;
+    grid-template-columns: 1fr auto !important;
+    grid-template-areas:
+      "id type"
+      "amount date"
+      "desc desc" !important;
+    gap: 0.5rem 1rem !important;
+    background: var(--white) !important;
+    border-radius: 12px !important;
+    padding: 1rem !important;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: 0 2px 6px var(--shadow-color) !important;
+    cursor: default !important;
+  }
+
+  .ledger-tx-table tbody tr:hover {
+    background: var(--white) !important;
+  }
+
+  .ledger-tx-table tbody td {
+    padding: 0 !important;
+    border-bottom: none !important;
+    display: flex !important;
+    align-items: center !important;
+    font-size: 0.85rem !important;
+    background: transparent !important;
+  }
+
+  /* TD 1: Transaction ID */
+  .ledger-tx-table tbody td:nth-child(1) {
+    grid-area: id !important;
+    font-size: 0.75rem !important;
+    color: var(--text-light) !important;
+  }
+
+  /* TD 2: Transaction Date */
+  .ledger-tx-table tbody td:nth-child(2) {
+    grid-area: date !important;
+    font-size: 0.75rem !important;
+    color: var(--text-light) !important;
+    justify-content: flex-end !important;
+  }
+
+  .ledger-tx-table tbody td:nth-child(2)::before {
+    content: "📅 " !important;
+    opacity: 0.6 !important;
+  }
+
+  /* TD 3: Transaction Type (Credit/Debit) */
+  .ledger-tx-table tbody td:nth-child(3) {
+    grid-area: type !important;
+    justify-content: flex-end !important;
+    font-size: 0.8rem !important;
+    font-weight: 700 !important;
+  }
+
+  /* TD 4: Amount & Currency */
+  .ledger-tx-table tbody td:nth-child(4) {
+    grid-area: amount !important;
+    font-size: 1.15rem !important;
+    font-weight: 700 !important;
+    color: var(--text-main) !important;
+  }
+
+  /* TD 5: Description details */
+  .ledger-tx-table tbody td:nth-child(5) {
+    grid-area: desc !important;
+    font-size: 0.85rem !important;
+    color: var(--text-main) !important;
+    border-top: 1px dashed var(--border-color) !important;
+    padding-top: 0.5rem !important;
+    margin-top: 0.25rem !important;
+  }
+}
+
+/* Mobile Table-to-Card layout for main Kahata accounts list */
+@media screen and (max-width: 600px) {
+  /* Remove list container table wrapper borders on mobile */
+  .list-container > .table-wrapper {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+
+  .main-kahata-table {
+    min-width: 0 !important;
+  }
+
+  .main-kahata-table thead {
+    display: none !important; /* Hide column headers */
+  }
+
+  .main-kahata-table tbody {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+    background: transparent !important;
+  }
+
+  .main-kahata-table tbody tr {
+    display: grid !important;
+    grid-template-columns: 1fr auto !important;
+    grid-template-areas:
+      "id type"
+      "name balance" !important;
+    gap: 0.5rem 1rem !important;
+    background: var(--white) !important;
+    border-radius: 12px !important;
+    padding: 1.1rem !important;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: 0 2px 6px var(--shadow-color) !important;
+    cursor: pointer !important;
+  }
+
+  .main-kahata-table tbody td {
+    padding: 0 !important;
+    border-bottom: none !important;
+    display: flex !important;
+    align-items: center !important;
+    font-size: 0.85rem !important;
+    background: transparent !important;
+  }
+
+  /* TD 1: Kahata ID */
+  .main-kahata-table tbody td:nth-child(1) {
+    grid-area: id !important;
+    font-size: 0.75rem !important;
+    color: var(--text-light) !important;
+  }
+
+  /* TD 2: Account Name */
+  .main-kahata-table tbody td:nth-child(2) {
+    grid-area: name !important;
+    font-size: 1.15rem !important;
+    font-weight: 700 !important;
+    color: var(--text-main) !important;
+  }
+
+  /* TD 3: Account Type */
+  .main-kahata-table tbody td:nth-child(3) {
+    grid-area: type !important;
+    justify-content: flex-end !important;
+    font-size: 0.75rem !important;
+    background: rgba(0, 0, 0, 0.05) !important;
+    padding: 2px 8px !important;
+    border-radius: 6px !important;
+    color: var(--text-light) !important;
+    border: 1px solid var(--border-color) !important;
+  }
+
+  /* TD 4: Currency (Hidden on card view, since balance includes symbol) */
+  .main-kahata-table tbody td:nth-child(4) {
+    display: none !important;
+  }
+
+  /* TD 5: Net Balance */
+  .main-kahata-table tbody td:nth-child(5) {
+    grid-area: balance !important;
+    font-size: 1.15rem !important;
+    font-weight: 700 !important;
+    justify-content: flex-end !important;
+  }
+}

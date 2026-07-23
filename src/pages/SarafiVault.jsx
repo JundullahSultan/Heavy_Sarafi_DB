@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useLanguage } from "../context/LanguageContext";
 import { usePopup } from "../context/PopupContext";
 import API from "../utils/api";
+import CustomCalendar from "../components/CustomCalendar";
 import "./SarafiVault.css";
 
 const LOCATIONS = [
@@ -11,7 +12,7 @@ const LOCATIONS = [
 const CURRENCIES = ["AFN", "USD", "PKR", "EUR", "CNY", "IRR", "GBP"];
 
 export default function SarafiVault() {
-  const { t } = useLanguage();
+  const { t, formatDate } = useLanguage();
   const { showAlert, showConfirm, showToast } = usePopup();
 
   const [transactions, setTransactions] = useState([]);
@@ -246,7 +247,8 @@ export default function SarafiVault() {
       });
     });
 
-    balances.forEach((bal) => {
+    const safeBals = Array.isArray(balances) ? balances : [];
+    safeBals.forEach((bal) => {
       if (locMap[bal.location]) {
         locMap[bal.location][bal.currency] = bal.balance;
       }
@@ -258,7 +260,8 @@ export default function SarafiVault() {
   // Group balances by global currency
   const getGlobalBalances = () => {
     const global = { AFN: 0, USD: 0, EUR: 0 };
-    balances.forEach((bal) => {
+    const safeBals = Array.isArray(balances) ? balances : [];
+    safeBals.forEach((bal) => {
       if (global[bal.currency] !== undefined) {
         global[bal.currency] += bal.balance;
       }
@@ -301,11 +304,10 @@ export default function SarafiVault() {
       <div className="grid stats-grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))" }}>
         {Object.entries(globalBalances).map(([cur, bal]) => (
           <div key={cur} className="card metric-card">
-            <h3>{t("totalSafeCash")} ({cur})</h3>
-            <div className={`value ${bal >= 0 ? "text-success" : "text-danger"}`}>
+            <h3>{t(`currency_${cur}`)}</h3>
+            <div className={`value ${bal >= 0 ? "text-success" : "text-danger"}`} style={{ fontSize: "1.8rem" }}>
               {bal.toLocaleString()} {cur}
             </div>
-            <p className="trend neutral">{t("netNetworkAssets")}</p>
           </div>
         ))}
       </div>
@@ -342,7 +344,7 @@ export default function SarafiVault() {
             <div className="loader"></div>
           </div>
         ) : (
-          <table className="data-table">
+          <table className="data-table vault-table">
             <thead>
               <tr>
                 <th>{t("txId")}</th>
@@ -364,22 +366,22 @@ export default function SarafiVault() {
                 </tr>
               ) : (
                 transactions.map((tx) => (
-                  <tr key={tx.id}>
-                    <td className="text-light">{tx.id}</td>
-                    <td>{tx.date}</td>
-                    <td className="fw-bold">{getTranslatedLocation(tx.location)}</td>
-                    <td>
+                  <tr key={tx.id} className="responsive-table-row">
+                    <td className="cell-id text-light">{tx.id}</td>
+                    <td className="cell-date">{formatDate(tx.date)}</td>
+                    <td className="cell-location fw-bold">{getTranslatedLocation(tx.location)}</td>
+                    <td className="cell-type">
                       <span className={`status-badge ${tx.type === "Credit" ? "paid" : "pending"}`}>
                         {tx.type === "Credit" ? t("deposit") : t("withdrawal")}
                       </span>
                     </td>
-                    <td className="fw-bold" style={{ color: tx.type === "Credit" ? "var(--success)" : "var(--danger)" }}>
+                    <td className="cell-amount fw-bold" style={{ color: tx.type === "Credit" ? "var(--success)" : "var(--danger)" }}>
                       {tx.type === "Credit" ? "+" : "-"}
                       {tx.amount.toLocaleString()} {tx.currency}
                     </td>
-                    <td>{tx.description}</td>
-                    <td>{tx.recordedBy}</td>
-                    <td style={{ textAlign: "right" }}>
+                    <td className="cell-desc">{tx.description}</td>
+                    <td className="cell-recorded-by">{tx.recordedBy}</td>
+                    <td className="cell-actions" style={{ textAlign: "right" }}>
                       <button
                         className="action-btn danger small-btn"
                         onClick={() => handleDelete(tx.id)}
@@ -416,11 +418,10 @@ export default function SarafiVault() {
               <div className="modal-body">
                 <div className="form-group">
                   <label>{t("date")}</label>
-                  <input
-                    type="date"
-                    required
+                  <CustomCalendar
                     value={dateField}
-                    onChange={(e) => setDateField(e.target.value)}
+                    onChange={setDateField}
+                    label={t("date")}
                   />
                 </div>
 

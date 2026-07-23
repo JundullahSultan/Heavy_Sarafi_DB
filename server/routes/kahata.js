@@ -90,7 +90,7 @@ router.get("/", checkAuth, async (req, res) => {
 // POST create account
 router.post("/", checkAuth, async (req, res) => {
   try {
-    const { name, type, phone, address, currency, initialBalance } = req.body;
+    const { name, type, phone, whatsapp, address, currency, initialBalance } = req.body;
     const count = await Kahata.countDocuments();
     const accountId = `KHT-${8003 + count}`;
 
@@ -112,6 +112,7 @@ router.post("/", checkAuth, async (req, res) => {
       name,
       type,
       phone,
+      whatsapp,
       address,
       currency,
       netBalance: parsedBalance,
