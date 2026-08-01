@@ -61,15 +61,10 @@ export default function Sidebar({ navItems, routeMap, onLogout, user, isMobileOp
       />
 
       <nav className={`sidebar ${isMobileOpen ? "mobile-open" : ""}`}>
-        {/* Brand area */}
-        <div className="brand" aria-hidden="true">
-          <span className="logo-icon">💼</span>
-          <span className="brand-text">HEAVY SARAFI</span>
-          {/* Close button visible only on mobile */}
-          <button className="sidebar-close-btn" onClick={onMobileClose} aria-label="Close menu">
-            <X size={22} />
-          </button>
-        </div>
+        {/* Close button visible only on mobile */}
+        <button className="sidebar-close-btn" onClick={onMobileClose} aria-label="Close menu">
+          <X size={22} />
+        </button>
 
         {user && (
           <div className="sidebar-profile">

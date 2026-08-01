@@ -1,24 +1,23 @@
 import axios from "axios";
 import { handleGuestRequest } from "./guestMockData";
 
-export const SERVER_BASE = "http://localhost:5001";
+export const SERVER_BASE = import.meta.env.VITE_API_URL
+  ? import.meta.env.VITE_API_URL.replace(/\/$/, "")
+  : "http://localhost:5001";
 
 const API = axios.create({
-  baseURL: `${SERVER_BASE}/api`,
+  baseURL: SERVER_BASE.endsWith("/api") ? SERVER_BASE : `${SERVER_BASE}/api`,
   withCredentials: true,
 });
 
 // Intercept all HTTP requests if in Guest Demo mode
-const defaultAdapter = axios.defaults.adapter;
+// Resolve the real XHR adapter once at init time (Axios 1.x returns an array from defaults.adapter, not a function)
+const xhrAdapter = axios.getAdapter("xhr");
 API.defaults.adapter = async (config) => {
   if (typeof window !== "undefined" && localStorage.getItem("isGuest") === "true") {
     return handleGuestRequest(config);
   }
-  if (typeof defaultAdapter === "function") {
-    return defaultAdapter(config);
-  }
-  // Axios 1.x fallback adapter resolution
-  return axios.getAdapter(config.adapter || "xhr")(config);
+  return xhrAdapter(config);
 };
 
 /**

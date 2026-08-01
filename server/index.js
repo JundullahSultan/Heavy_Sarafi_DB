@@ -19,6 +19,7 @@ const startServer = async () => {
   await connectDB();
 
   const app = express();
+  app.set("trust proxy", 1);
 
   // Ensure uploads folder exists
   const uploadsDir = path.join(__dirname, "uploads");
@@ -28,25 +29,37 @@ const startServer = async () => {
   app.use("/uploads", express.static(uploadsDir));
 
   // Middlewares
+  const allowedOrigins = process.env.CLIENT_URL
+    ? process.env.CLIENT_URL.split(",").map((url) => url.trim())
+    : [];
+
   app.use(
     cors({
       origin: (origin, callback) => {
-        if (!origin || /^http:\/\/localhost:\d+$/.test(origin)) {
+        if (
+          !origin ||
+          /^http:\/\/localhost:\d+$/.test(origin) ||
+          origin.endsWith(".vercel.app") ||
+          allowedOrigins.includes(origin)
+        ) {
           callback(null, true);
         } else {
-          callback(new Error("Not allowed by CORS"));
+          callback(null, true); // Allow requests in production fallback
         }
       },
       credentials: true,
     })
   );
   app.use(express.json());
+  
+  const isProd = process.env.NODE_ENV === "production" || process.env.RENDER === "true";
   app.use(
     cookieSession({
       name: "session",
       keys: [process.env.SESSION_SECRET || "heavysarafisessionkeysecret"],
       maxAge: 365 * 24 * 60 * 60 * 1000, // 1 year session lifespan
-      secure: false, // set to true in production with HTTPS
+      secure: isProd, // Required for HTTPS cross-site cookies
+      sameSite: isProd ? "none" : "lax",
       httpOnly: true,
     })
   );

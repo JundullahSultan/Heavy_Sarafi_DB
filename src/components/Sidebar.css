@@ -16,36 +16,7 @@
     border-color 0.2s;
 }
 
-/* --- Brand area (no text) --- */
-.brand {
-  height: 2.5rem;
-  margin-bottom: 1.25rem;
-  border-bottom: 1px solid var(--border-color);
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  padding: 0 0.75rem;
-  position: relative;
-}
 
-.brand::after {
-  content: "";
-  position: absolute;
-  bottom: -1px;
-  left: 0;
-  width: 40px;
-  height: 2px;
-  background: var(--primary-color);
-  border-radius: 4px;
-  opacity: 0.6;
-}
-
-.brand::before {
-  content: "✦";
-  font-size: 1.2rem;
-  color: var(--primary-color);
-  opacity: 0.5;
-}
 
 /* --- Nav Links --- */
 .nav-links {
@@ -167,14 +138,11 @@
     transform: translateX(0);
   }
 
-  .brand {
-    display: flex; /* Show brand in drawer */
-    justify-content: space-between;
-    align-items: center;
-  }
-
   .sidebar-close-btn {
     display: flex;
+    position: absolute;
+    top: 1rem;
+    inset-inline-end: 1rem;
     align-items: center;
     justify-content: center;
     background: none;
@@ -184,6 +152,7 @@
     padding: 4px;
     border-radius: 6px;
     transition: background-color 0.2s, color 0.2s;
+    z-index: 10;
   }
 
   .sidebar-close-btn:hover {
