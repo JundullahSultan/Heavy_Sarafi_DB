@@ -44,18 +44,7 @@ export const connectDB = async () => {
       console.warn("Warning during stale index cleanup:", err.message);
     }
 
-    // Auto-seed all sections data if database is currently empty of customers
-    try {
-      const { Customer } = await import("../models/Customer.js");
-      const customerCount = await Customer.countDocuments();
-      if (customerCount === 0) {
-        console.log("No customers found in database. Automatically seeding all sections data...");
-        const { seedData } = await import("../seedAllData.js");
-        await seedData();
-      }
-    } catch (seedErr) {
-      console.error("Auto-seed error on startup:", seedErr.message);
-    }
+
   } catch (error) {
     console.log("───────────────────────────────────────");
     console.log("❌ MongoDB Connection FAILED!");
