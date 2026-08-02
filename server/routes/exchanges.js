@@ -24,41 +24,6 @@ router.get("/", checkAuth, async (req, res) => {
       ];
     }
 
-    // Auto-populate mock exchanges if database is empty
-    const count = await Exchange.countDocuments();
-    if (count === 0) {
-      const userBranch = req.dbUser.branch || "Kabul Branch";
-      await Exchange.insertMany([
-        {
-          id: "EXG-10001",
-          date: new Date().toISOString().split("T")[0],
-          clientName: "Walk-in Customer",
-          fromCurrency: "USD",
-          fromAmount: 1000,
-          toCurrency: "AFN",
-          toAmount: 72000,
-          rate: 72,
-          benefit: 1200,
-          benefitCurrency: "AFN",
-          recordedBy: req.dbUser.name || "System",
-          branch: userBranch,
-        },
-        {
-          id: "EXG-10002",
-          date: new Date().toISOString().split("T")[0],
-          clientName: "Khan Exchange Partner",
-          fromCurrency: "PKR",
-          fromAmount: 200000,
-          toCurrency: "AFN",
-          toAmount: 50000,
-          rate: 0.25,
-          benefit: 1500,
-          benefitCurrency: "AFN",
-          recordedBy: req.dbUser.name || "System",
-          branch: userBranch,
-        }
-      ]);
-    }
 
     const exchanges = await Exchange.find(query).sort({ date: -1, createdAt: -1 });
     res.json(exchanges);

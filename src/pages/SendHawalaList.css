@@ -315,6 +315,117 @@
   .modal-footer .submit-btn {
     width: 100%;
   }
+
+  /* --- Mobile Table-to-Card Conversion (matches Customers page) --- */
+
+  .table-wrapper {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+  }
+
+  .hawala-table {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .hawala-table thead {
+    display: none;
+  }
+
+  .hawala-table tbody {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  /* Each row becomes a grid card */
+  .hawala-table tbody tr {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "receiver status"
+      "branch   amount"
+      "date     id";
+    gap: 0.6rem 1rem;
+    background: var(--white) !important;
+    border-radius: 12px;
+    padding: 1.25rem;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 8px var(--shadow-color);
+  }
+
+  .hawala-table tbody tr:hover {
+    background: var(--white) !important;
+    box-shadow: 0 4px 14px var(--shadow-color);
+  }
+
+  .hawala-table tbody td {
+    padding: 0;
+    border-bottom: none;
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+  }
+
+  /* TD 1: Hawala ID */
+  .hawala-table tbody td:nth-child(1) {
+    grid-area: id;
+    font-size: 0.75rem;
+    justify-content: flex-end;
+    color: var(--text-light);
+    font-weight: 500;
+  }
+
+  /* TD 2: Date */
+  .hawala-table tbody td:nth-child(2) {
+    grid-area: date;
+    font-size: 0.78rem;
+    color: var(--text-light);
+  }
+
+  .hawala-table tbody td:nth-child(2)::before {
+    content: "📅";
+    margin-right: 6px;
+    opacity: 0.5;
+  }
+
+  /* TD 3: To Branch */
+  .hawala-table tbody td:nth-child(3) {
+    grid-area: branch;
+    color: var(--text-light);
+    font-size: 0.85rem;
+  }
+
+  .hawala-table tbody td:nth-child(3)::before {
+    content: "📍";
+    margin-right: 6px;
+    opacity: 0.5;
+  }
+
+  /* TD 4: Receiver Name */
+  .hawala-table tbody td:nth-child(4) {
+    grid-area: receiver;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-main);
+  }
+
+  /* TD 5: Amount */
+  .hawala-table tbody td:nth-child(5) {
+    grid-area: amount;
+    font-weight: 700;
+    justify-content: flex-end;
+    font-size: 0.95rem;
+    color: var(--text-main);
+  }
+
+  /* TD 6: Status */
+  .hawala-table tbody td:nth-child(6) {
+    grid-area: status;
+    justify-content: flex-end;
+  }
 }
 
 @media (max-width: 560px) {

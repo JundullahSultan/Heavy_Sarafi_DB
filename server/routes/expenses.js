@@ -30,42 +30,6 @@ router.get("/", checkAuth, async (req, res) => {
       ];
     }
 
-    // Auto-populate initial data if empty
-    const count = await Expense.countDocuments();
-    if (count === 0) {
-      await Expense.insertMany([
-        {
-          id: "EXP-1001",
-          date: "2026-07-01",
-          categoryId: "rent-utilities",
-          amount: 45000,
-          currency: "AFN",
-          description: "Office rent for July 2026",
-          recordedBy: "Manager",
-          branch: "Kabul Branch",
-        },
-        {
-          id: "EXP-1002",
-          date: "2026-07-01",
-          categoryId: "rent-utilities",
-          amount: 3500,
-          currency: "AFN",
-          description: "Electricity bill",
-          recordedBy: "Manager",
-          branch: "Kabul Branch",
-        },
-        {
-          id: "EXP-1003",
-          date: "2026-07-02",
-          categoryId: "staff",
-          amount: 1200,
-          currency: "AFN",
-          description: "Tea and refreshments",
-          recordedBy: "Employee",
-          branch: "Herat Main",
-        }
-      ]);
-    }
 
     const expenses = await Expense.find(query).sort({ date: -1 });
     res.json(expenses);

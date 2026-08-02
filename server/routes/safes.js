@@ -23,45 +23,6 @@ router.get("/", checkAuth, async (req, res) => {
       query.description = { $regex: search, $options: "i" };
     }
 
-    // Auto-populate initial records for this branch if none exist
-    const count = await SafeTransaction.countDocuments({ branch: userBranch });
-    if (count === 0) {
-      await SafeTransaction.insertMany([
-        {
-          id: `SF-${userBranch.replace(/\s+/g, "")}-1001`,
-          date: "2026-07-01",
-          type: "Credit",
-          location: "Primary Vault (Safe)",
-          amount: 2500000,
-          currency: "AFN",
-          description: `Initial opening balance for ${userBranch}`,
-          recordedBy: "System",
-          branch: userBranch,
-        },
-        {
-          id: `SF-${userBranch.replace(/\s+/g, "")}-1002`,
-          date: "2026-07-02",
-          type: "Debit",
-          location: "Primary Vault (Safe)",
-          amount: 150000,
-          currency: "AFN",
-          description: "Replenished Operator Cash Drawer",
-          recordedBy: "System",
-          branch: userBranch,
-        },
-        {
-          id: `SF-${userBranch.replace(/\s+/g, "")}-1003`,
-          date: "2026-07-02",
-          type: "Credit",
-          location: "Operator Cash Drawer (Till)",
-          amount: 150000,
-          currency: "AFN",
-          description: "Received from Primary Vault replenishment",
-          recordedBy: "System",
-          branch: userBranch,
-        },
-      ]);
-    }
 
     const transactions = await SafeTransaction.find(query).sort({ date: -1, createdAt: -1 });
     res.json(transactions);

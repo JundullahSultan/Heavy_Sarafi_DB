@@ -351,14 +351,25 @@ body {
   /* 1. This shrinks ALL text that uses 'rem' units by about 12.5% */
   html {
     font-size: 14px;
+    overflow: auto;
+    height: auto;
+  }
+
+  body {
+    overflow: auto;
+    height: auto;
   }
 
   .app-layout {
     flex-direction: column;
+    height: auto;
+    max-height: none;
+    overflow: visible;
   }
 
   .main-content {
     padding-bottom: 0;
+    overflow-y: visible;
   }
 
   /* 2. Compact the top header text further if needed */
@@ -404,6 +415,19 @@ body {
     height: 34px;
     font-size: 1rem;
   }
+
+  /* Ensure all modals are centered on mobile */
+  .modal-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    z-index: 1000;
+  }
 }
 
 /* --- Hamburger Menu Button --- */
@@ -413,7 +437,12 @@ body {
 
 @media screen and (max-width: 768px) {
   .mobile-menu-btn {
-    display: flex;
+    position: fixed !important;
+    top: 0.85rem !important;
+    left: 0.85rem !important;
+    right: auto !important;
+    z-index: 998 !important;
+    display: flex !important;
     align-items: center;
     justify-content: center;
     background: rgba(255, 255, 255, 0.85) !important;
@@ -427,6 +456,11 @@ body {
     transition: background-color 0.2s, transform 0.1s;
     box-shadow: 0 4px 12px var(--shadow-color);
     pointer-events: auto;
+  }
+
+  .rtl-app .mobile-menu-btn {
+    left: auto !important;
+    right: 0.85rem !important;
   }
 
   .dark-mode .mobile-menu-btn {
@@ -445,7 +479,8 @@ body {
   .top-header {
     flex-direction: row;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
+    padding-inline-start: 3.5rem;
   }
 }
 
